@@ -216,6 +216,28 @@ input.mono{font-family:var(--mono);letter-spacing:.04em}
 #fallback{margin-top:4px;min-height:150px;font-family:var(--mono);font-size:11px}
 .privacy{font-size:11.5px;line-height:1.65;color:var(--mute);padding:0 15px 14px}
 
+/* 预览层 */
+.ovl{position:fixed;inset:0;z-index:99;background:var(--paper);display:flex;flex-direction:column}
+.ovl-bar{display:flex;align-items:center;gap:8px;padding:11px 14px;background:var(--surface);
+  border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.ovl-t{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--ink);margin-right:auto}
+.ovl-b{appearance:none;border:1px solid var(--rule);background:var(--surface);color:var(--body);
+  font:600 13px/1 var(--sans);padding:9px 13px;border-radius:4px;cursor:pointer;white-space:nowrap}
+.ovl-b:hover{border-color:var(--indigo);color:var(--indigo)}
+.ovl-b.main{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.ovl-b.main:hover{filter:brightness(1.12);color:#fff}
+.ovl-tip{margin:0;padding:8px 14px;font-size:12px;line-height:1.6;color:var(--mute);
+  background:var(--sunk);border-bottom:1px solid var(--rule-soft)}
+.ovl-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;background:var(--paper);
+  display:flex;justify-content:center}
+.ovl-box{position:relative;overflow:hidden;background:#fff}
+.ovl-fr{display:block;border:0;background:#fff}
+@media print{body>*:not(.ovl){display:none!important}
+  .ovl{position:static}.ovl-bar,.ovl-tip{display:none!important}
+  .ovl-body{overflow:visible;display:block}
+  .ovl-box{width:auto!important;height:auto!important;overflow:visible}
+  .ovl-fr{transform:none!important;width:100%!important}}
+
 /* ── 结论表 ──────────────────────────────── */
 .report{margin-top:30px;background:var(--surface);border:1px solid var(--ink);border-radius:6px;
   overflow:hidden}
@@ -304,7 +326,7 @@ td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-to
         <p class="ptitle">导出</p>
         <div class="act">
           <button class="btn" type="button" id="dlJson">下载 profile.json</button>
-          <button class="btn ghost" type="button" id="dlReport">下载审查结论</button>
+          <button class="btn ghost" type="button" id="dlReport">查看自查结果</button>
           <button class="btn ghost" type="button" id="dlResume">生成简历</button>
           <p class="blocked" id="blocked" hidden></p>
           <textarea id="fallback" hidden aria-label="导出内容，手动复制"></textarea>
@@ -954,7 +976,7 @@ document.addEventListener("click",function(e){
   }
   if(b.id==="print"){ window.print(); return; }
   if(b.id==="dlJson") doExport(b,"profile.json",JSON.stringify(buildProfile(),null,2));
-  if(b.id==="dlReport") doExport(b,"资格审查结论.html",buildReportDoc());
+  if(b.id==="dlReport") showDoc(buildReportDoc(),"我的自查结果");
   if(b.id==="forceBtn"){ forceResume=true; resumeGate(); return; }
   if(b.id==="dlResume"){
     if(!resumeGate()) return;
@@ -966,7 +988,7 @@ document.addEventListener("click",function(e){
       if(f){ f.focus(); f.scrollIntoView({block:"center"}); }
       return;
     }
-    doExport(b,(S.me.name||"简历")+"_简历.html",buildResumeDoc());
+    showDoc(buildResumeDoc(),(S.me.name||"")+" 简历");
   }
 });
 
@@ -1016,7 +1038,8 @@ function buildProfile(){
 function buildReportDoc(){
   var D=DISC[S.discipline];
   return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">'+
-    '<title>资格审查结论 · '+esc(D.name)+'</title><style>'+
+    '<meta name="viewport" content="width=device-width,initial-scale=1">'+
+    '<title>我的自查结果 · '+esc(D.name)+'</title><style>'+
     'body{margin:0;background:#fff;color:#3A464D;font:14px/1.7 -apple-system,"PingFang SC",sans-serif}'+
     '.w{max-width:760px;margin:0 auto;padding:34px 24px 60px}'+
     'h1{font-size:22px;color:#111A1F;margin:0 0 4px;border-bottom:2px solid #111A1F;padding-bottom:12px}'+
@@ -1266,6 +1289,9 @@ function buildResumeDoc(){
   }
 
   return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">'+
+    // A4 宽 210mm≈794px。手机视口只有 375px，不声明就会被切掉右边；
+    // 按 794 声明后浏览器整页缩放显示，打印输出不受影响。
+    '<meta name="viewport" content="width=794">'+
     '<title>'+esc(m.name||"简历")+'　简历</title><style>'+
     /* 缺 print-color-adjust 时 Chrome 打印会丢掉所有底色，
        文字检查全过，只有数彩色像素才发现——所以它必须写在最前面 */
@@ -1324,6 +1350,62 @@ function resumeGate(){
   return false;
 }
 
+
+/* 安卓与微信内置浏览器普遍不支持 <a download>：点下去 blob 地址被交给外部
+   应用，而 blob 只在生成它的那个网页里有效，外部拿到就是一个打不开的链接。
+   实测安卓上会跳出「不支持转换的链接」。
+   而且下载 HTML 本来就是多余的一步——要的是 PDF，那就直接显示出来打印。 */
+function showDoc(html, title){
+  var ov=document.createElement("div");
+  ov.className="ovl";
+  ov.innerHTML=
+    '<div class="ovl-bar">'+
+      '<span class="ovl-t">'+esc(title)+'</span>'+
+      '<button type="button" class="ovl-b main" data-act="print">打印 / 存 PDF</button>'+
+      '<button type="button" class="ovl-b" data-act="dl">下载文件</button>'+
+      '<button type="button" class="ovl-b" data-act="close">关闭</button>'+
+    '</div>'+
+    '<p class="ovl-tip">手机上：点「打印 / 存 PDF」后在打印界面选「存储为 PDF」。'+
+      '若在微信里没反应，点右上角 ··· →「在浏览器打开」再试。</p>'+
+    '<div class="ovl-body"><div class="ovl-box">'+
+      '<iframe class="ovl-fr" title="'+esc(title)+'"></iframe></div></div>';
+  document.body.appendChild(ov);
+  document.body.style.overflow="hidden";
+
+  var fr=ov.querySelector(".ovl-fr"), box=ov.querySelector(".ovl-box"),
+      body=ov.querySelector(".ovl-body");
+
+  /* iframe 不理会内部文档的 viewport meta——它的布局视口就是元素自身宽度。
+     所以按 A4 的 794px 布局，再用 CSS 整体缩放到屏幕宽度。
+     transform 不改变占位尺寸，外框的高度要按缩放后的值单独给。 */
+  function fit(){
+    var doc=fr.contentDocument; if(!doc) return;
+    var h=Math.max(doc.documentElement.scrollHeight, doc.body?doc.body.scrollHeight:0);
+    var avail=body.clientWidth, k=Math.min(1, avail/794);
+    fr.style.width="794px"; fr.style.height=h+"px";
+    fr.style.transform="scale("+k+")"; fr.style.transformOrigin="top left";
+    box.style.width=(794*k)+"px"; box.style.height=(h*k)+"px";
+  }
+  fr.addEventListener("load",function(){ fit(); setTimeout(fit,250); });
+  window.addEventListener("resize",fit);
+  fr.srcdoc=html;
+
+  ov.addEventListener("click",function(e){
+    var b=e.target.closest("[data-act]"); if(!b) return;
+    var act=b.getAttribute("data-act");
+    if(act==="close"){ ov.remove(); document.body.style.overflow=""; return; }
+    if(act==="print"){
+      try{ fr.contentWindow.focus(); fr.contentWindow.print(); }
+      catch(err){ window.print(); }
+      return;
+    }
+    if(act==="dl"){
+      var fn=(title.indexOf("简历")>=0 ? (S.me.name||"简历")+"_简历.html" : "自查结果.html");
+      doExport(b,fn,html);
+    }
+  });
+}
+
 /* 导出有三条路，取决于这份页面跑在哪里：
    Artifact 沙箱里 blob 下载是静默失效的，必须走 downloads 能力；
    自己托管时没有 window.claude，普通 blob 下载反而是最顺的；
@@ -1334,7 +1416,16 @@ if(IN_ARTIFACT){
   window.claude.use("downloads").then(function(d){ DL=d; }).catch(function(){});
 }
 
+/* 安卓与各家内置浏览器对 <a download> 的支持很不一致：
+   属性存在不代表真能下载，实测点下去是把 blob 地址甩给外部应用，
+   而外部应用读不了 blob（它只在生成它的那个网页里有效）。
+   所以这些环境一律不赌下载，直接给文本框。 */
+var UA=navigator.userAgent||"";
+var CAN_DL = ("download" in document.createElement("a"))
+  && !/Android|MicroMessenger|QQ\/|Quark|UCBrowser|Baidu/i.test(UA);
+
 function blobSave(filename,data){
+  if(!CAN_DL) return false;
   try{
     var a=document.createElement("a");
     a.href=URL.createObjectURL(new Blob([data],{type:"text/plain;charset=utf-8"}));
@@ -1351,7 +1442,7 @@ function doExport(btn,filename,data){
   if(!DL){
     if(!IN_ARTIFACT && blobSave(filename,data)){ done("已下载"); return; }
     var t=el("fallback"); t.hidden=false; t.value=data; t.focus(); t.select();
-    done("已展开，手动复制"); return;
+    done(CAN_DL ? "已展开，手动复制" : "手机不支持下载，长按复制"); return;
   }
   btn.disabled=true; btn.textContent="等待确认…";
   DL.save({filename:filename,data:data}).then(function(){ done("已保存"); })
