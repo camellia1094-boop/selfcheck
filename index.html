@@ -320,6 +320,468 @@ td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-to
 .exbanner button:hover{background:var(--hold);color:var(--surface)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
+<style id="frontend-overrides">
+/* 前端视觉覆盖层：WorkBuddy 起草，经核对与实测后合入。只含样式，不改结构与脚本 */
+/* ═══════════════════════════════════════════════════════════════════════════
+   overrides.css ── 艺体美求职资格自查台 · 视觉与交互观感覆盖层
+   ───────────────────────────────────────────────────────────────────────────
+   约束（全部遵守，逐条见 changes.md）：
+     · 纯 CSS；不改 HTML 结构、不改 JS、不改 id / class / data-* 名
+     · 颜色只用原页面 :root 已有变量（深色模式随变量自动切换）
+     · 不引入任何外部资源；系统字体不动
+     · 375px 无横向滚动；可点元素命中高度 ≥ 40px
+     · 不隐藏文字；保留并统一键盘焦点样式；照顾 prefers-reduced-motion
+     · 不含任何 @media print 规则（原文件打印样式未被触碰）
+
+   两个工程约定：
+   1) 所有"修改已有规则"的选择器都加 :root 前缀（0,2,x 起）。
+      这样无论本文件被放在 <style> 之前还是之后加载，都能稳定生效，
+      且不需要 !important（把优先级还给使用者）。
+   2) 只新增数字型自定义属性做节奏刻度；不新增任何颜色变量。
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 节奏刻度（仅尺寸，无颜色）──────────────────────────────────────────────── */
+:root{
+  --oc-gap-field: 13px;   /* 字段与字段之间 */
+  --oc-gap-row:   18px;   /* 记录与记录之间（必须 > --oc-gap-field） */
+  --oc-gap-group: 30px;   /* 分组与分组之间（必须 > --oc-gap-row） */
+  --oc-tap:       40px;   /* 最小命中高度 */
+}
+
+/* ═══ 一、分组层次与留白节奏 ═════════════════════════════════════════════ */
+
+/* [1] 组间距 16 → 30px。原来 16px 只比组内 13px 大一点点，
+       十一个分组看上去是"一片"，不是"十一块"。 */
+:root .group{
+  margin-bottom: var(--oc-gap-group);
+}
+
+/* [2] 分组头给一条 3px 内嵌竖脊，并让 key 徽标与标题垂直居中；
+       组体上内距略小于下内距，内容看起来"挂"在标题下、末尾留出收尾空间。 */
+:root .ghead{
+  box-shadow: inset 3px 0 0 var(--indigo);
+  align-items: center;
+  padding: 14px 17px;
+}
+:root .gbody{
+  padding: 18px 17px 20px;
+}
+
+/* [3] 记录行间距 11 → 18px。原值 11px 比字段间距 13px 还小，
+       相邻两条记录比同一条记录内的两个字段更"紧"，就近原则被反过来用了。
+       行头下距同步 10 → 8px，抵消删除按钮抬高后带来的膨胀。 */
+:root .rows{ gap: var(--oc-gap-row) }
+:root .rowtop{ margin-bottom: 8px }
+
+/* [4] 记录卡片内距 12/13 → 14px，与字段间距形成 14(内) < 18(行) 的梯度。 */
+:root .row{ padding: 14px }
+
+/* [5] 结论区与表单区彻底断开：30 → 42px，"输入区 / 输出区"两个大块各归各。
+       结论区内部三节的内距、说明行下距、页脚上距同步放大。 */
+:root .report{ margin-top: 42px }
+:root .rsec{ padding: 18px 20px }
+:root .rsec .rnote{ margin-bottom: 13px }
+:root .foot{ margin-top: 34px }
+
+/* [6] 追问提示（这套工具的灵魂那一条）原竖线用 --indigo-bg——
+       浅色下是 #E2EDF2、深色下是 #10252F，两种主题里都几乎等于背景色，
+       等于这条线白写了。改用 --indigo 实体竖线，配合行高与内距。 */
+:root .probe{
+  border-left: 2px solid var(--indigo);
+  padding-left: 12px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  margin-top: 7px;
+}
+
+/* [7] 字段补充说明（.fh）12 → 12.5px，行高 1.6，与标签拉开 5px。 */
+:root .fh{
+  font-size: 12.5px;
+  line-height: 1.6;
+  margin-top: 5px;
+}
+
+/* ═══ 二、输入框与下拉框外观一致 ═════════════════════════════════════════ */
+
+/* [8] 下拉框去掉系统原生外观，用两条 45°/135° 渐变自绘一个 5px 的下折箭头
+       （不引外部图片、不用字体图标），右侧让出 36px；
+       同时给 option 显式配色，避免 Win/Linux 下弹层回到系统白底黑字。
+       颜色全部走 var(--mute) / var(--field) / var(--surface) / var(--ink)。 */
+:root select{
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--field);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--mute) 50%),
+    linear-gradient(135deg, var(--mute) 50%, transparent 50%);
+  background-position:
+    calc(100% - 19px) calc(50% - 1px),
+    calc(100% - 14px) calc(50% - 1px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding: 8px 36px 8px 10px;
+  color: var(--ink);
+  cursor: pointer;
+}
+:root select option{ background: var(--surface); color: var(--ink) }
+
+/* [9] 输入框与下拉框等高：min-height 40px 一起上，行高、内距、圆角全部对齐。
+       原 14px/1.55 + 8px 内距 ≈ 39.7px，两者差在哪一半像素上肉眼看不出来，
+       但在 iOS 上 40px 是点击舒适度门槛，在桌面端则是"看起来齐不齐"。 */
+:root input,
+:root select{
+  min-height: var(--oc-tap);
+  line-height: 1.55;
+}
+:root textarea{ min-height: 64px }
+
+/* [10] 交互状态分三档，全部只用现有变量：
+        静止 --rule → 悬停 --mute → 聚焦 --indigo。
+        顺带统一占位符颜色（Safari/Firefox 默认值不一致，会让两列输入框看起来"深浅不同"）。 */
+:root input:hover,
+:root select:hover,
+:root textarea:hover{ border-color: var(--mute) }
+:root input::placeholder,
+:root textarea::placeholder{ color: var(--mute); opacity: 1 }
+
+/* [11] ≤560px 时表单控件字号提到 16px。
+        低于 16px 的输入框会在 iOS Safari 聚焦时触发自动放大，
+        放大后页面必然左右晃动——这是移动端"横向滚动"最常见的来源。 */
+@media screen and (max-width:560px){
+  :root input,
+  :root select,
+  :root textarea{ font-size: 16px }
+}
+
+/* [12] 两列/三列字段轨道由 1fr 改 minmax(0,1fr)。
+        1fr 的最小宽度是 auto，会被内部最宽的不可断内容顶开；
+        外层 .grid 早就写了 minmax(0,1fr)（注释里也写了原因），
+        内层漏掉等于把同样的坑又留了一遍。 */
+:root .f2{ grid-template-columns: minmax(0,1fr) minmax(0,1fr) }
+:root .f3{ grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) }
+@media screen and (max-width:620px){
+  :root .f2,
+  :root .f3{ grid-template-columns: minmax(0,1fr) }
+  :root .kg{ grid-template-columns: minmax(0,1fr) }
+}
+
+/* ═══ 三、必填星号与「识别」标记 ═════════════════════════════════════════ */
+
+/* [13] 标签行改成 flex 基线对齐：标签文字、必填星号、识别徽标成为三个对齐元素，
+       间距统一 6px，不再依赖行内空格与 vertical-align 小补丁。 */
+:root .lb{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+/* [14] 必填星号统一：字号略放大、字重 700、颜色走 --fail、去掉行内多余外边距
+        （间距交给上面的 gap），轻微上移贴近中文视觉中线。
+       注意：原文件第 94 行的 `.lb .req{color:var(--fail)}` 是死规则——
+       实际渲染用的是 class="rq"，全页面没有任何元素带 req 类，
+       所以"必填"在标签里其实一直只吃到了全局 .rq 的样式。这里补上 .lb .rq。 */
+:root .rq{
+  font-weight: 700;
+  font-size: 1.05em;
+  line-height: 1;
+  vertical-align: .05em;
+  margin-left: 2px;
+}
+:root .lb .rq{ margin-left: 0 }
+:root .lb .rq,
+:root .lede .rq{ color: var(--fail) }
+
+/* [15] 「识别」徽标做成清晰的胶囊：10.5px、字距 .08em、内距 2px 6px，
+       并撤掉原来的 vertical-align:1px 补丁（flex 基线已接管）。 */
+:root .auto{
+  font-size: 10.5px;
+  line-height: 1;
+  letter-spacing: .08em;
+  padding: 2px 6px;
+  border-radius: 3px;
+  vertical-align: baseline;
+  margin-left: 0;
+}
+
+/* [16] 被自动识别、尚未核对的字段，在控件左侧加一条 3px 金色内嵌边：
+       徽标在标签上，金色边在控件上，一眼能看出"这个值是机器填的、要核对"。
+       用户一改，JS 会摘掉 .auto，:has() 随即失效、金色边自动消失——
+       纯 CSS 就能跟上原来的交互语义，不需要监听任何事件。
+       （:has() 在旧内核上不支持时只是不显示这条边，徽标仍然在，不影响可用性。） */
+:root label:has(> .lb .auto) > input,
+:root label:has(> .lb .auto) > select{
+  box-shadow: inset 3px 0 0 var(--hold);
+}
+
+/* ═══ 四、侧栏审查概览与手机可读性 ═══════════════════════════════════════ */
+
+/* [17] 侧栏每个面板给标题一条通栏分隔线，标题区从"浮在顶上"变成"面板表头"；
+       tally 紧贴表头，不再留 11px 悬空。 */
+:root .ptitle{
+  padding: 12px 15px 10px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+:root .tally{ margin-top: 0 }
+
+/* [18] 侧栏字号梯度整体上抬一档，手机上是主要阅读区，10.5–12px 偏小：
+       标题 10.5 → 11px、tally 说明 11 → 12px、必填清单 12.5 → 13px、
+       门槛说明 12 → 12.5px；清单圆点位置改 em 计（不再绑死 top:8px）。 */
+:root .ptitle{ font-size: 11px; letter-spacing: .12em }
+:root .t small{ font-size: 12px; line-height: 1.45; margin-top: 4px }
+:root .req-l{ gap: 6px }
+:root .req-l li{ font-size: 13px; line-height: 1.55; padding-left: 12px }
+:root .req-l li::before{ top: .6em }
+:root .req-body{ padding: 12px 15px 15px }
+:root .gate{ padding: 9px 0; gap: 9px 10px }
+:root .gate .gn{ font-size: 12.5px; line-height: 1.55 }
+:root .mark{ line-height: 1.35 }
+
+/* [19] "还差 N 项 / 必填项已齐 / 导出会不完整"三句状态话改成底色状态条。
+       原来它们和清单同色同字号，扫读时会被当成普通文字跳过去，
+       而这三句恰好是"要不要现在去补字段"的判断依据。 */
+:root .req-n{
+  display: block;
+  font-size: 13.5px;
+  padding: 7px 10px;
+  border-radius: 4px;
+  background: var(--fail-bg);
+  color: var(--fail);
+  margin: 0 0 10px;
+}
+:root .req-ok{
+  display: block;
+  font-size: 13.5px;
+  padding: 7px 10px;
+  border-radius: 4px;
+  background: var(--pass-bg);
+  color: var(--pass);
+  margin: 0;
+}
+:root .exp-note{
+  display: block;
+  padding: 7px 10px;
+  border-radius: 4px;
+  background: var(--hold-bg);
+  color: var(--hold);
+  margin: 0;
+}
+
+/* [20] 手机端：侧栏面板之间 13 → 16px；
+       页面左右内距 20 → 16px，给 375px 多让出 8px 内容宽度
+       （375 - 32 = 343px 内容宽，扣掉分组边框与内距仍有 305px 可用）。 */
+@media screen and (max-width:880px){
+  :root .side{ gap: 16px; margin-bottom: 22px }
+}
+@media screen and (max-width:560px){
+  :root .shell{ padding: 26px 16px 64px }
+}
+
+/* ═══ 五、主按钮与次按钮的层级 ═══════════════════════════════════════════ */
+
+/* [21] 次按钮从"描边也是靛蓝、文字也是靛蓝"降级为中性描边：
+       实心靛蓝（主）> 中性描边（次）> 虚线/幽灵（补充）。
+       原来两个按钮长得跟亲兄弟一样，看不出该先点哪个。 */
+:root .btn.ghost{
+  border-color: var(--rule);
+  color: var(--body);
+  background: var(--surface);
+}
+:root .btn.ghost:hover{
+  background: var(--sunk);
+  border-color: var(--mute);
+  color: var(--ink);
+  filter: none;
+}
+
+/* [22] 深色模式下的对比度修正：原文件把落在 --indigo 上的文字写死 #fff，
+       而深色模式的 --indigo 是浅蓝 #82B6D2 —— 白字压浅蓝，对比度约 1.9:1，
+       基本读不出来。改用 var(--paper)（浅色下近白、深色下近黑，
+       永远与强调色反向；浅色 7.5:1、深色 8.5:1）。
+       这一条同时修掉：主按钮、识别按钮、分组 key、学科选中态、
+       信息类警告标记、预览层主按钮。 */
+:root .btn,
+:root .btn-sm,
+:root .gkey,
+:root .discbar button[aria-pressed=true],
+:root .flag.info .mk,
+:root .ovl-b.main{ color: var(--paper) }
+:root .ovl-b.main:hover{ color: var(--paper) }
+
+/* [23] 所有可点元素统一最小命中高度 40px，并保证文字垂直居中。
+       清单：学科切换、输入框、下拉框、主/次按钮、识别按钮、
+       加一条/加一张、删除、上传校徽、上传证件照、清空示例、导出预览按钮。 */
+:root .discbar button,
+:root .btn,
+:root .btn-sm,
+:root .add,
+:root .del,
+:root .logo-btn,
+:root .exbanner button,
+:root .blocked button,
+:root .ovl-b{
+  min-height: var(--oc-tap);
+}
+:root .discbar button,
+:root .btn,
+:root .add{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+:root .btn-sm,
+:root .del,
+:root .logo-btn,
+:root .exbanner button,
+:root .blocked button,
+:root .ovl-b{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+:root .discbar button{ padding: 13px 8px }
+:root .btn{ padding: 12px }
+:root .paste-act .btn-sm{ padding: 0 16px }
+:root .del{ padding: 0 12px }
+:root .logo-btn{ padding: 0 14px }
+:root .exbanner button{ padding: 0 13px }
+:root .blocked button{ padding: 0 11px }
+:root .ovl-b{ padding: 0 14px }
+
+/* [24] 「加一条 / 加一张」是每组末尾的主操作，从 33px 抬到 40px，
+       字号 13 → 13.5px、字重 600，虚线框保持"可点但未填满"的语义。 */
+:root .add{
+  font-size: 13.5px;
+  font-weight: 600;
+  margin-top: 13px;
+}
+:root .act{ gap: 10px; padding: 15px }
+
+/* [25] 预览层里那枚行内文字按钮（"都核对过了"）不能撑高，否则会把
+       .src-h 那一段的行距顶开。用伪元素把命中区扩到 40px × 左右各 8px，
+       可见排版一个像素都不动。副作用：命中区会盖住同一段相邻文字的点击，
+       但那段文字本身不可点，代价远小于一个 12px 高的按钮。 */
+:root .src .link{ position: relative }
+:root .src .link::after{
+  content: "";
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  top: 50%;
+  height: var(--oc-tap);
+  transform: translateY(-50%);
+}
+
+/* [26] 统一键盘焦点环：2px var(--ink)（浅色下是近黑、深色下是近白，
+       两种主题都落在背景色上，永远可见）。原文件只给了 .btn 和 .discbar，
+       其余按钮靠浏览器默认环，粗细与颜色在各家浏览器里并不一致。
+       例外：.discbar button 保持原文件的 inset 靛蓝环——那个分段控件
+       外层 overflow:hidden，描边环会被裁掉，内嵌环才是对的。 */
+:root .add:focus-visible,
+:root .del:focus-visible,
+:root .logo-btn:focus-visible,
+:root .btn-sm:focus-visible,
+:root .exbanner button:focus-visible,
+:root .blocked button:focus-visible,
+:root .ovl-b:focus-visible,
+:root .src .link:focus-visible{
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+:root .src .link:focus-visible{ outline-offset: 3px }
+
+/* ═══ 六、粘贴公告识别区的引导感 ═════════════════════════════════════════ */
+
+/* [27] 把"粘贴区"做成明确的投放区：外框虚线 1px → 1px 但配 6px 圆角与更松的
+       内距（14/15px），内部 textarea 也改成虚线边、聚焦时转实线；
+       整个区域一旦有焦点（:focus-within）外框也转实线，
+       让"我现在就在这个区块里"这件事有连续反馈。 */
+:root .paste{
+  border-radius: 6px;
+  padding: 14px 15px 15px;
+  margin-bottom: 16px;
+}
+:root .paste:focus-within{
+  border-style: solid;
+}
+:root .paste textarea{
+  min-height: 108px;
+  border-style: dashed;
+  border-color: var(--indigo);
+  background: var(--surface);
+}
+:root .paste textarea:hover{ border-color: var(--indigo) }
+:root .paste textarea:focus{
+  border-style: solid;
+  border-color: var(--indigo);
+}
+:root .paste .lb{ font-size: 14px; font-weight: 700; color: var(--ink) }
+
+/* [28] 区内的说明句变成一条"指引条"：surface 底色 + 靛蓝左条，
+       与上方输入区、下方按钮分开，读起来是"这里告诉你怎么做"，
+       而不是又一截灰字。 */
+:root .paste .fh{
+  display: block;
+  margin-top: 8px;
+  padding: 8px 11px;
+  border-radius: 4px;
+  border-left: 2px solid var(--indigo);
+  background: var(--surface);
+  color: var(--indigo);
+  font-size: 12px;
+  line-height: 1.6;
+}
+:root .paste-act{ margin-top: 11px; gap: 12px }
+:root .parse-msg{ font-size: 12.5px; line-height: 1.5 }
+
+/* [29] 同一条规则在窄屏下：识别按钮占满一行，"识别并加为岗位"是这一区的
+       唯一动作，手机上不该挤在左边和别人抢宽度。 */
+@media screen and (max-width:560px){
+  :root .paste-act .btn-sm{ flex: 1 1 100%; width: 100% }
+}
+
+/* ═══ 七、375px 不横向滚动 ═══════════════════════════════════════════════ */
+
+/* [30] .gate / .vr / .finding 都是 auto 1fr 网格，而网格项默认 min-width:auto——
+       里面只要出现一段不可断的长串（长证书名、公告原文里的英文/代码），
+       轨道就会被顶开，整页横向滚动。补 min-width:0 并允许任意断行。 */
+:root .gate > span:last-child,
+:root .vr > span:last-child,
+:root .finding > span:last-child{
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* [31] 结论表 min-width:520px + th 不换行，在 375px 下必然要左右拖。
+       窄屏改为允许换行、内距收紧，三列表格整体收进屏宽；
+       .tw 的 overflow-x:auto 仍保留，作为极端长内容的兜底。 */
+@media screen and (max-width:560px){
+  :root table{ min-width: 0; font-size: 13px }
+  :root th,
+  :root td{ padding: 8px 9px; white-space: normal; overflow-wrap: anywhere }
+  :root .rhead{ padding: 14px 15px }
+  :root .rsec{ padding: 15px 15px }
+}
+
+/* [32] 新加的过渡统一放进 no-preference。原文件已有一条
+       prefers-reduced-motion:reduce 的 * 重置，但把新动画显式声明在
+       no-preference 里，可以让"减少动效"这件事不依赖外层的 !important。 */
+@media (prefers-reduced-motion: no-preference){
+  :root input,
+  :root select,
+  :root textarea,
+  :root .group,
+  :root .paste,
+  :root .paste textarea,
+  :root .btn,
+  :root .btn-sm,
+  :root .add,
+  :root .del,
+  :root .logo-btn{ transition: background-color .12s, border-color .12s, box-shadow .12s }
+}
+</style>
 
 <div class="shell">
   <div class="masthead">
