@@ -127,6 +127,23 @@ input.mono{font-family:var(--mono);letter-spacing:.04em}
 .logo-pv.empty{display:flex;align-items:center;justify-content:center;font-size:11px;
   color:var(--mute);border-style:dashed}
 .logo-pv.photo{width:48px;height:64px;object-fit:cover}
+/* 简历主题色 */
+.accent{display:grid;gap:8px}
+.accent-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.accent-pick{width:52px;flex:none;padding:3px;cursor:pointer}
+.accent-hex{width:7.5em;flex:none}
+.swatches{display:flex;flex-wrap:wrap;gap:6px}
+.sw{appearance:none;width:40px;height:40px;border-radius:50%;padding:0;cursor:pointer;
+  border:3px solid var(--surface);box-shadow:0 0 0 1px var(--rule)}
+.sw.on{box-shadow:0 0 0 2px var(--ink)}
+.sw:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.logo-btn:disabled{opacity:.5;cursor:default}
+/* 模拟简历纸面：简历总是印在白纸上，所以这里固定白底，不跟页面深浅模式走 */
+.accent-demo{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:10px 12px;border-radius:4px;
+  border:1px solid var(--rule-soft);background:#FFFFFF;color:#33414A}
+.accent-demo b{font-size:17px;letter-spacing:.04em}
+.demo-tag{font-size:11px;font-weight:700;border:1px solid;border-radius:2px;padding:1px 6px}
+.demo-line{flex:1;min-width:60px;height:3px;border-radius:2px}
 .kg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
 .kpair{display:grid;grid-template-columns:7.5em minmax(0,1fr);gap:8px}
 .kg-hint{margin-top:-4px}
@@ -909,7 +926,7 @@ var EXAMPLE = {
   me:{name:"李想",phone:"",email:"",target:"初中体育与健康教师 ｜ 篮球方向 · 一专多能",photo:"",
       badges:"二级运动员（篮球）、篮球三级裁判员、普通话二级甲等、教资笔试三科已过",
       kpis:[{v:"30+",l:"暑期带训学员"},{v:"4 项",l:"可任教运动项目"},{v:"12/96",l:"专业排名"},{v:"1 篇",l:"会议论文录用"}],
-      tools:"剪映（视频剪辑）、PowerPoint / Excel / Word", showcase:"https://example.com/li-xiang"},
+      tools:"剪映（视频剪辑）、PowerPoint / Excel / Word", showcase:"https://example.com/li-xiang", accent:"#1B4D6B"},
   edu:{school:"某某体育学院",major:"体育教育",code:"B040201",normal:"是",
        level:"本科",degree:"预计取得（应届）",party:"共青团员",
        gradYear:"2027",rank:"12/96",birthYear:"2005",logo:"",
@@ -974,6 +991,7 @@ if(S.me.photo==null) S.me.photo="";
 if(S.me.badges==null) S.me.badges="";
 if(S.me.tools==null) S.me.tools="";
 if(S.me.showcase==null) S.me.showcase="";
+if(S.me.accent==null) S.me.accent="#1B4D6B";
 if(!S.me.kpis) S.me.kpis=[{v:"",l:""},{v:"",l:""},{v:"",l:""},{v:"",l:""}];
 ["tier","span","gpa","avg","honors"].forEach(function(k){ if(S.edu[k]==null) S.edu[k]=""; });
 if(!S.projects) S.projects=[];
@@ -1304,6 +1322,52 @@ function sel(lb,path,list,hint){
 var RQ='<span class="rq">※</span>';
 var ROW_I=0;   // 同一组的第 2 行起不再重复显示注意事项
 var PARSE_MSG="";
+var ACCENT_MSG="";
+
+/* ═══ 简历主题色 ═══ */
+var ACCENT_DEFAULT="#1B4D6B";
+var ACCENT_PRESETS=[["靛蓝","#1B4D6B"],["华师绿","#00566D"],["藏青","#1E3A5F"],["墨黑","#2B2B2B"],
+                    ["砖红","#9E3B2E"],["松绿","#2F5D46"],["紫檀","#5B3A63"]];
+function normHex(h){
+  h=String(h||"").trim().replace(/^#/,"");
+  if(/^[0-9a-f]{3}$/i.test(h)) h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  return /^[0-9a-f]{6}$/i.test(h) ? "#"+h.toUpperCase() : "";
+}
+function hexRgb(h){ h=normHex(h)||ACCENT_DEFAULT; return [1,3,5].map(function(i){ return parseInt(h.substr(i,2),16); }); }
+function rgbHex(c){ return "#"+c.map(function(v){ v=Math.max(0,Math.min(255,Math.round(v))); return ("0"+v.toString(16)).slice(-2); }).join("").toUpperCase(); }
+function mixHex(h,other,t){ var a=hexRgb(h), b=hexRgb(other); return rgbHex(a.map(function(v,i){ return v+(b[i]-v)*t; })); }
+function relLum(h){ var w=[0.2126,0.7152,0.0722];
+  return hexRgb(h).reduce(function(s,v,i){ v/=255; return s+w[i]*(v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)); },0); }
+function contrast(a,b){ var x=relLum(a), y=relLum(b); return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05); }
+/* 主题色会用在简历文字上（标签、目标岗位、数字亮点），印出来必须看得清：
+   对白纸不足 4.5:1 就逐步加深；线条和边框仍用原色 */
+function textSafe(h){
+  var c=normHex(h)||ACCENT_DEFAULT, k=0;
+  while(contrast(c,"#FFFFFF")<4.5 && k<24){ c=mixHex(c,"#000000",0.08); k++; }
+  return c;
+}
+/* 从校徽里取主色：跳过透明、近白底和灰黑描边，按色块计数取最多的那一块。
+   校徽上的颜色就是学校标准色，比凭印象填准——「华师绿」凭印象会填成草绿，实际是 #00566D */
+function accentFromImage(src, cb){
+  var im=new Image();
+  im.onload=function(){
+    var n=72, cv=document.createElement("canvas"); cv.width=n; cv.height=n;
+    var cx=cv.getContext("2d"), d;   // d 必须在这里声明：写成逗号表达式不算声明，读到就报 ReferenceError
+    cx.drawImage(im,0,0,n,n);
+    try{ d=cx.getImageData(0,0,n,n).data; }catch(e){ cb(""); return; }
+    var buckets={}, best=null;
+    for(var i=0;i<d.length;i+=4){
+      var r=d[i], g=d[i+1], b=d[i+2], a=d[i+3], mx=Math.max(r,g,b), mn=Math.min(r,g,b);
+      if(a<128 || mn>225 || mx-mn<28) continue;
+      var key=(r>>4)+","+(g>>4)+","+(b>>4), o=buckets[key]||(buckets[key]={n:0,r:0,g:0,b:0});
+      o.n++; o.r+=r; o.g+=g; o.b+=b;
+      if(!best||o.n>best.n) best=o;
+    }
+    cb(best ? rgbHex([best.r/best.n, best.g/best.n, best.b/best.n]) : "");
+  };
+  im.onerror=function(){ cb(""); };
+  im.src=src;
+}
 /* 识别出来的字段，用户一改就算核对过，去掉「识别」标记 */
 function clearAuto(p){
   var m=String(p).match(/^jobs\.(\d+)\.(\w+)$/); if(!m) return false;
@@ -1765,8 +1829,29 @@ function renderForm(){
     kp+='<div class="kpair">'+field("数字 "+(i+1),"me.kpis."+i+".v","如 50+","mono")+
       field("说明","me.kpis."+i+".l","如 累计执教学员")+'</div>';
   });
+  var acRaw=String(S.me.accent||""), ac=normHex(acRaw)||ACCENT_DEFAULT, acT=textSafe(ac);
+  var acTip = !normHex(acRaw) && acRaw
+      ? '<b>色值格式不对。</b>写成 #00566D 这样的 6 位十六进制；简历暂用默认色'
+    : acT!==ac
+      ? '<b>这个颜色太浅，印出来文字看不清。</b>简历上的文字会自动加深到 '+acT+'，线条仍用原色'
+    : S.edu.logo
+      ? '想用学校标准色，点「从校徽取色」；也可以到学校官网的视觉识别（VI）页面查准确色值'
+      : '用学校标准色最稳：到学校官网的视觉识别（VI）页面查色值，或先在 A 组上传校徽再取色';
+  var accentRow='<div class="accent"><span class="lb">简历主题色</span>'+
+    '<div class="accent-row">'+
+      '<input type="color" class="accent-pick" data-p="me.accent" value="'+ac.toLowerCase()+'" aria-label="自选主题色">'+
+      '<input class="mono accent-hex" data-p="me.accent" value="'+esc(acRaw)+'" maxlength="7" placeholder="#1B4D6B" aria-label="主题色色值">'+
+      '<div class="swatches" role="group" aria-label="预设主题色">'+ACCENT_PRESETS.map(function(x){
+        return '<button type="button" class="sw'+(x[1]===ac?' on':'')+'" data-accent="'+x[1]+'" title="'+x[0]+' '+x[1]+'" '+
+          'aria-label="'+x[0]+'" aria-pressed="'+(x[1]===ac)+'" style="background:'+x[1]+'"></button>'; }).join("")+'</div>'+
+      '<button type="button" class="logo-btn" id="accentFromLogo"'+(S.edu.logo?'':' disabled')+'>从校徽取色</button>'+
+    '</div>'+
+    '<div class="accent-demo"><b style="color:'+acT+'">'+esc(S.me.name||"姓名")+'</b>'+
+      '<span class="demo-tag" style="color:'+acT+';border-color:'+ac+'">头衔标签</span>'+
+      '<span class="demo-line" style="background:'+ac+'"></span></div>'+
+    '<span class="fh accent-tip">'+acTip+(ACCENT_MSG ? '。'+esc(ACCENT_MSG) : '')+'</span></div>';
   ROW_I=0; h+=group("K","简历亮点","只用于生成简历，不参与资格判定",
-    '<div class="fields">'+
+    '<div class="fields">'+accentRow+
     field("头衔标签","me.badges","用顿号隔开，最多 5 个，如 体育单招综合分全国第 1、100m 国家一级","",
       "放在简历姓名下方。只写拿得出凭证的")+
     '<div class="kg">'+kp+'</div>'+
@@ -1880,6 +1965,12 @@ document.addEventListener("input",function(e){
   var p=e.target.getAttribute("data-p"); if(!p) return;
   put(p,e.target.value); S.isExample=false;
   if(clearAuto(p)){ var tg=e.target.closest("label"); tg=tg&&tg.querySelector(".auto"); if(tg) tg.remove(); }
+  if(p==="me.accent"){           // 拖动取色盘时就更新预览，不用等松手
+    var acv=normHex(e.target.value), dm=document.querySelector(".accent-demo");
+    if(acv && dm){ var tx=textSafe(acv); dm.querySelector("b").style.color=tx;
+      var dt=dm.querySelector(".demo-tag"); dt.style.color=tx; dt.style.borderColor=acv;
+      dm.querySelector(".demo-line").style.background=acv; }
+  }
   renderSide(); renderReport(); resumeGate(); el("exbanner").hidden=true; save();
 });
 document.addEventListener("change",function(e){
@@ -1938,9 +2029,19 @@ document.addEventListener("click",function(e){
   }
   if(b.id==="logoDel"){ S.edu.logo=""; renderAll(); return; }
   if(b.id==="photoDel"){ S.me.photo=""; renderAll(); return; }
+  if(b.getAttribute("data-accent")){ S.me.accent=b.getAttribute("data-accent"); ACCENT_MSG=""; S.isExample=false; renderAll(); return; }
+  if(b.id==="accentFromLogo"){
+    if(!S.edu.logo) return;
+    accentFromImage(S.edu.logo,function(hex){
+      if(hex){ S.me.accent=hex; ACCENT_MSG="已从校徽取色："+hex; }
+      else ACCENT_MSG="校徽里没有明显的颜色，保留原来的主题色";
+      S.isExample=false; renderAll();
+    });
+    return;
+  }
   if(b.id==="clearAll"){
     S={discipline:S.discipline,isExample:false,
-       me:{name:"",phone:"",email:"",target:"",photo:"",badges:"",tools:"",showcase:"",
+       me:{name:"",phone:"",email:"",target:"",photo:"",badges:"",tools:"",showcase:"",accent:"#1B4D6B",
            kpis:[{v:"",l:""},{v:"",l:""},{v:"",l:""},{v:"",l:""}]},
        edu:{school:"",major:"",code:"",normal:"不确定",level:"",degree:"",party:"",
             gradYear:"",rank:"",birthYear:"",logo:"",tier:"",span:"",gpa:"",avg:"",honors:""},
@@ -2022,7 +2123,8 @@ function buildProfile(){
       tools:list(M.tools).length?list(M.tools):undefined},
     presentation:{badges:list(M.badges),
       kpis:(M.kpis||[]).filter(function(k){return k&&tr(k.v);}).map(function(k){return {value:tr(k.v),label:tr(k.l)};}),
-      showcaseUrl:tr(M.showcase)||undefined, teachingNote:tr(S.teachMore)||undefined},
+      showcaseUrl:tr(M.showcase)||undefined, teachingNote:tr(S.teachMore)||undefined,
+      themeColor:normHex(M.accent)||undefined},
     targets:S.jobs.filter(function(j){return j.name;}).map(function(j){
       var r=matchJob(j), lim=j.hukouReq==="有限制";
       return {post:j.name,city:j.city,verdict:VERDICT[r.verdict][1],
@@ -2385,7 +2487,8 @@ function buildResumeDoc(){
   var qrBox=trim(m.showcase) ? '<div class="qr">'+(qr?'<img src="'+qr+'" alt="个人展示页二维码">':"")+
       '<small>'+(qr?"个人展示集 · 扫码查看":esc(trim(m.showcase)))+'</small></div>' : "";
 
-  var A="#1B4D6B";
+  // 主题色：线条与边框用原色，文字用加深到可读的版本，标签底色取主题色的浅调
+  var A=normHex(m.accent)||ACCENT_DEFAULT, AT=textSafe(A), ABG=mixHex(A,"#FFFFFF",0.9), ABD=mixHex(A,"#FFFFFF",0.72);
   return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">'+
     // A4 宽 210mm≈794px。手机视口只有 375px，不声明就会被切掉右边；
     // 按 794 声明后浏览器整页缩放显示，打印输出不受影响。
@@ -2402,15 +2505,15 @@ function buildResumeDoc(){
     '.who{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end}'+
     '.lg{height:30px;max-width:170px;object-fit:contain;object-position:left center;margin-bottom:6px}'+
     '.nm{font-size:25px;font-weight:700;color:#111A1F;letter-spacing:.06em;line-height:1.1}'+
-    '.tg{font-size:13px;color:'+A+';font-weight:600;margin-top:3px}'+
+    '.tg{font-size:13px;color:'+AT+';font-weight:600;margin-top:3px}'+
     '.mt{font-size:11.5px;color:#55656D;margin-top:3px}'+
     '.ct{font-size:11px;color:#74838B;margin-top:2px;font-family:ui-monospace,Menlo,monospace}'+
     '.ph{width:25mm;height:33mm;object-fit:cover;flex:none;border:1px solid #D5DDE1;border-radius:2px}'+
     '.bd{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}'+
-    '.bd span{font-size:11px;font-weight:700;color:'+A+';background:#E6EEF2;border:1px solid #C9D8E0;border-radius:3px;padding:2px 7px}'+
+    '.bd span{font-size:11px;font-weight:700;color:'+AT+';background:'+ABG+';border:1px solid '+ABD+';border-radius:3px;padding:2px 7px}'+
     '.kp{display:grid;gap:6px;margin-top:7px}'+
     '.kp div{border:1px solid #D5DDE1;border-radius:4px;padding:4px 6px;text-align:center}'+
-    '.kp b{display:block;font-size:16px;color:'+A+';line-height:1.25;font-variant-numeric:tabular-nums}'+
+    '.kp b{display:block;font-size:16px;color:'+AT+';line-height:1.25;font-variant-numeric:tabular-nums}'+
     '.kp small{display:block;font-size:10.5px;color:#74838B}'+
     'h2{font-size:12.5px;font-weight:700;color:#111A1F;margin:10px 0 5px;padding-bottom:3px;border-bottom:1px solid #C6D0D5;letter-spacing:.06em}'+
     '.cr{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;background:#FBF3E2;border:1px solid #E2C88E;border-radius:4px;padding:5px 9px;margin-bottom:5px}'+
@@ -2419,7 +2522,7 @@ function buildResumeDoc(){
     '.it{margin-bottom:4px}'+
     '.l{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 7px}'+
     '.k{font-size:12.5px;font-weight:700;color:#111A1F}'+
-    '.t{font-size:10.5px;font-weight:700;color:'+A+';border:1px solid '+A+';border-radius:2px;padding:0 4px;white-space:nowrap}'+
+    '.t{font-size:10.5px;font-weight:700;color:'+AT+';border:1px solid '+A+';border-radius:2px;padding:0 4px;white-space:nowrap}'+
     '.v{font-size:11px;color:#74838B}'+
     '.r{margin-left:auto;font-size:11px;color:#74838B;white-space:nowrap;font-variant-numeric:tabular-nums}'+
     '.b{font-size:11.5px;margin-top:1px}'+
