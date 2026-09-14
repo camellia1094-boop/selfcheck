@@ -126,6 +126,11 @@ input.mono{font-family:var(--mono);letter-spacing:.04em}
   border:1px solid var(--rule-soft);border-radius:4px}
 .logo-pv.empty{display:flex;align-items:center;justify-content:center;font-size:11px;
   color:var(--mute);border-style:dashed}
+.logo-pv.photo{width:48px;height:64px;object-fit:cover}
+.kg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
+.kpair{display:grid;grid-template-columns:7.5em minmax(0,1fr);gap:8px}
+.kg-hint{margin-top:-4px}
+@media(max-width:620px){.kg{grid-template-columns:1fr}}
 .logo-txt{min-width:0;flex:1}
 .logo-hint{margin:2px 0 8px;font-size:12px;line-height:1.6;color:var(--mute)}
 .logo-btns{display:flex;gap:7px;flex-wrap:wrap}
@@ -439,10 +444,14 @@ var EVIDENCE=["赛事名次","等级证书","课程修习","自述掌握"];
 /* ═══════════════ 状态 ═══════════════ */
 var EXAMPLE = {
   discipline:"sports", isExample:true, jobPaste:"",
-  me:{name:"李想",phone:"",email:"",target:"初中体育与健康教师 ｜ 篮球方向 · 一专多能"},
+  me:{name:"李想",phone:"",email:"",target:"初中体育与健康教师 ｜ 篮球方向 · 一专多能",photo:"",
+      badges:"二级运动员（篮球）、篮球三级裁判员、普通话二级甲等、教资笔试三科已过",
+      kpis:[{v:"30+",l:"暑期带训学员"},{v:"4 项",l:"可任教运动项目"},{v:"12/96",l:"专业排名"},{v:"1 篇",l:"会议论文录用"}],
+      tools:"剪映（视频剪辑）、PowerPoint / Excel / Word", showcase:"https://example.com/li-xiang"},
   edu:{school:"某某体育学院",major:"体育教育",code:"B040201",normal:"是",
        level:"本科",degree:"预计取得（应届）",party:"共青团员",
-       gradYear:"2027",rank:"12/96",birthYear:"2005",logo:""},
+       gradYear:"2027",rank:"12/96",birthYear:"2005",logo:"",
+       tier:"省属本科院校",span:"2023.09–2027.06",gpa:"3.5",avg:"85.2",honors:"校级一等奖学金（2025.12）"},
   jobs:[
     {name:"某区初中体育与健康教师",city:"城市A",edu:"本科及以上",degreeReq:"要求学位",normalReq:"不要求",
      partyReq:"不限",hukouReq:"不限",hukouOk:"",majors:"B0402 体育学类",tzSubject:"初中体育与健康",
@@ -471,17 +480,22 @@ var EXAMPLE = {
     {title:"市青少年体育展演（篮球操）",lv:"市级",rank:"一等奖",mark:"",nature:"展演展示",date:"2024-06",
      wind:"",timing:"",proof:"有照片/复印件"}],
   exps:[
-    {org:"某某中学",nature:"公办学校",role:"体育教育实习教师",span:"2025.09–2025.12",
+    {org:"某某中学",nature:"公办学校",desc:"市级体育特色学校",role:"体育教育实习教师",span:"2025.09–2025.12",
      duty:"带初二两个班体育与健康课，组织年级篮球联赛",canProof:"能开"},
-    {org:"某青少年篮球培训中心",nature:"商业培训机构",role:"助理教练",span:"2024.07–2024.08",
+    {org:"某青少年篮球培训中心",nature:"商业培训机构",desc:"暑期青少年篮球训练营",role:"助理教练",span:"2024.07–2024.08",
      duty:"暑期基础班 30 人，负责运球与传球分组训练",canProof:"不确定"}],
+  teachMore:"可协助组织课间操与校运会，有班主任助理经验",
+  projects:[
+    {name:"社区少儿周末篮球课",role:"发起人 / 主讲教练",scope:"8–12 岁社区儿童公益体育课",span:"2025.03–2025.06",
+     did:"设计 12 次课程、招募 3 名志愿者，累计服务 40 人次；因场地协调中断一个月，后改为每两周一次",proof:"有照片/复印件"}],
   papers:[
     {title:"初中篮球课分层教学的实践探索",venue:"某省体育科学学会年会",author:"第一作者",
-     form:"墙报",date:"2025-10",status:"已录用",attended:"未到场",proof:"有照片/复印件"}],
+     form:"墙报",date:"2025-10",status:"已录用",attended:"未到场",proof:"有照片/复印件",
+     method:"问卷调查与课堂观察",findings:"两个班分层教学后，运球达标率由 58% 提升至 81%"}],
   works:[{title:"篮球教学示范视频",kind:"视频",proves:"运球、传球、投篮的分解示范与常见错误纠正",proof:"有原件"}],
-  skills:[{d:"篮球",ev:"赛事名次",detail:"省大学生联赛团体第四"},
-          {d:"排球",ev:"课程修习",detail:"专项课 90 分"},
-          {d:"羽毛球",ev:"自述掌握",detail:""}],
+  skills:[{d:"篮球",ev:"赛事名次",detail:"省大学生联赛团体第四",cat:"球类项目",teach:"可承担篮球专项课与校队训练"},
+          {d:"排球",ev:"课程修习",detail:"专项课 90 分",cat:"球类项目",teach:""},
+          {d:"羽毛球",ev:"自述掌握",detail:"",cat:"普及项目",teach:""}],
   cons:{cities:"城市A、城市B",pay:"7000",press:"需自给",weekend:"尽量避免"}
 };
 var S = null;
@@ -494,6 +508,14 @@ if(S.edu.logo==null) S.edu.logo="";
 if(S.edu.degree==null) S.edu.degree="";
 if(S.edu.party==null) S.edu.party="";
 if(S.jobPaste==null) S.jobPaste="";
+if(S.me.photo==null) S.me.photo="";
+if(S.me.badges==null) S.me.badges="";
+if(S.me.tools==null) S.me.tools="";
+if(S.me.showcase==null) S.me.showcase="";
+if(!S.me.kpis) S.me.kpis=[{v:"",l:""},{v:"",l:""},{v:"",l:""},{v:"",l:""}];
+["tier","span","gpa","avg","honors"].forEach(function(k){ if(S.edu[k]==null) S.edu[k]=""; });
+if(!S.projects) S.projects=[];
+if(S.teachMore==null) S.teachMore="";
 if(!S.papers) S.papers=[];
 S.jobs.forEach(function(j){
   if(j.degreeReq==null) j.degreeReq="不要求";
@@ -578,6 +600,10 @@ function audit(){
       f.push({s:1,c:"措辞风险",t:"<b>简历里「"+esc(k.d)+"」写「可承担普及性教学」，不要暗示专业水平。</b>面试有专项模拟实训，当场要示范。"});
   });
 
+  // 简历亮点
+  if(/发表|已通过/.test((S.me&&S.me.badges)||""))
+    f.push({s:1,c:"措辞风险",t:"<b>简历亮点里有「发表」或「已通过」，确认是真实状态。</b>论文多半是录用，证书常常是部分通过。"});
+
   // 学位
   if(S.edu.degree==="无学位")
     f.push({s:2,c:"硬门槛",t:"<b>要求「学历学位双证」的岗位报不了。</b>今后每份公告都看清学位要求。"});
@@ -659,6 +685,50 @@ document.addEventListener("change",function(e){
   rd.readAsDataURL(f);
 });
 
+/* 证件照：压成 JPEG 存本机。只用于生成简历，不写进导出的档案 */
+var PHOTO_CAP = 140000;
+function fitPhoto(img, cb){
+  var hs=[420,360,300,240], best=null;
+  for(var i=0;i<hs.length;i++){
+    var k=Math.min(1, hs[i]/img.height), cv=document.createElement("canvas");
+    cv.width=Math.max(1,Math.round(img.width*k)); cv.height=Math.max(1,Math.round(img.height*k));
+    var cx=cv.getContext("2d"); cx.fillStyle="#fff"; cx.fillRect(0,0,cv.width,cv.height);
+    cx.imageSmoothingQuality="high"; cx.drawImage(img,0,0,cv.width,cv.height);
+    var url=cv.toDataURL("image/jpeg",0.86);
+    if(best===null||url.length<best.length) best=url;
+    if(url.length<=PHOTO_CAP){ cb(url); return; }
+  }
+  cb(best);
+}
+function photoStored(){
+  try{ var raw=localStorage.getItem("zgzc.v1"); return !!raw && JSON.parse(raw).me.photo===S.me.photo; }
+  catch(e){ return false; }
+}
+document.addEventListener("change",function(e){
+  if(e.target.id!=="photoFile") return;
+  var f=e.target.files&&e.target.files[0]; if(!f) return;
+  var rd=new FileReader();
+  rd.onload=function(){
+    var im=new Image();
+    im.onload=function(){
+      fitPhoto(im,function(url){
+        S.me.photo=url; S.isExample=false; renderAll();
+        if(!photoStored()){
+          S.me.photo=""; renderAll();
+          var h=document.querySelector(".photo-hint");
+          if(h) h.innerHTML='<b style="color:var(--fail)">这张照片太大，浏览器存不下。</b>换一张小一点的再试。';
+        }
+      });
+    };
+    im.onerror=function(){
+      var h=document.querySelector(".photo-hint");
+      if(h) h.innerHTML='<b style="color:var(--fail)">这个文件读不出来。</b>换 JPG 或 PNG 试试。';
+    };
+    im.src=rd.result;
+  };
+  rd.readAsDataURL(f);
+});
+
 /* save() 静默吞掉配额错误，这里单独确认一次真的写进去了 */
 function logoStored(){
   try{
@@ -701,16 +771,21 @@ function required(){
     if(!e.nature) need(n+"单位性质");
     if(!e.span) need(n+"起止时间",1);
   });
+  S.projects.forEach(function(x,i){
+    if(!x.name) return; var n="E 项目"+(i+1)+" ";
+    if(!x.role) need(n+"你的身份",1);
+    if(!x.span) need(n+"起止时间",1);
+  });
   S.papers.forEach(function(r,i){
-    if(!r.title) return; var n="E 论文"+(i+1)+" ";
+    if(!r.title) return; var n="F 论文"+(i+1)+" ";
     if(!r.status) need(n+"状态",1);
     if((r.form==="口头报告"||r.form==="墙报") && !r.attended) need(n+"是否到场");
     if(!r.proof) need(n+"凭证");
   });
-  S.works.forEach(function(w,i){ if(w.title&&!w.proof) need("F 作品"+(i+1)+" 凭证"); });
-  S.skills.forEach(function(k,i){ if(k.d&&!k.ev) need("G 技能"+(i+1)+" 证明",1); });
+  S.works.forEach(function(w,i){ if(w.title&&!w.proof) need("G 作品"+(i+1)+" 凭证"); });
+  S.skills.forEach(function(k,i){ if(k.d&&!k.ev) need("H 技能"+(i+1)+" 证明",1); });
   S.jobs.forEach(function(j,i){
-    if(!j.name) return; var n="I 岗位"+(i+1)+" ";
+    if(!j.name) return; var n="J 岗位"+(i+1)+" ";
     if(!j.majors) need(n+"专业范围");
     if(j.hukouReq==="有限制" && !j.hukouOk) need(n+"是否符合户籍 / 生源");
   });
@@ -983,7 +1058,7 @@ var NoticeParser=(function(){
 function renderForm(){
   var D=DISC[S.discipline], h="", P=[""].concat(PROOFS);
 
-  ROW_I=0; h+=group("A","身份与学历","学信网能查到的学籍信息，外加学位和政治面貌",
+  ROW_I=0; h+=group("A","身份与学历","学信网能查到的学籍信息，外加学位、政治面貌和简历上用的照片",
     '<div class="fields">'+
     '<div class="f2">'+field("姓名","me.name","生成简历时用")+
       field("目标岗位","me.target","如 初中体育与健康教师 ｜ 篮球方向")+'</div>'+
@@ -998,6 +1073,11 @@ function renderForm(){
       field("毕业年份"+RQ,"edu.gradYear","如 2027","mono")+'</div>'+
     '<div class="f2">'+field("出生年份"+RQ,"edu.birthYear","如 2005","mono","岗位常限 30 或 35 周岁以下")+
       field("专业排名","edu.rank","如 12/96","","选填，只用在简历上")+'</div>'+
+    '<div class="f3">'+field("学校层次","edu.tier","如 教育部直属师范院校（211 / 双一流）","","选填，只用在简历上")+
+      field("在校起止","edu.span","如 2023.09–2027.06","mono")+
+      field("GPA","edu.gpa","如 3.3","mono")+'</div>'+
+    '<div class="f2">'+field("均分","edu.avg","如 80.8","mono")+
+      field("奖学金与荣誉","edu.honors","用顿号隔开，如 少数民族奖学金（2024.12）","","选填，只写拿到手的")+'</div>'+
     '<div class="logo-row">'+
       (S.edu.logo ? '<img class="logo-pv" src="'+S.edu.logo+'" alt="校徽">'
                   : '<div class="logo-pv empty">校徽</div>')+
@@ -1008,6 +1088,17 @@ function renderForm(){
       '<div class="logo-btns">'+
         '<label class="logo-btn">选择图片<input type="file" accept="image/*" id="logoFile" hidden></label>'+
         (S.edu.logo ? '<button type="button" class="logo-btn ghost" id="logoDel">移除</button>' : "")+
+      '</div></div></div>'+
+    '<div class="logo-row">'+
+      (S.me.photo ? '<img class="logo-pv photo" src="'+S.me.photo+'" alt="证件照">'
+                  : '<div class="logo-pv photo empty">照片</div>')+
+      '<div class="logo-txt"><span class="lb">证件照（选填）</span>'+
+      '<p class="logo-hint photo-hint">放在生成的简历右上角。'+
+      (S.me.photo ? '已存本机，占 '+Math.round(S.me.photo.length/1024)+' KB；不上传，也不写进导出的档案。'
+                  : '用近半年的正面免冠照，蓝底或白底。只存在本机浏览器里，不上传。')+'</p>'+
+      '<div class="logo-btns">'+
+        '<label class="logo-btn">选择照片<input type="file" accept="image/*" id="photoFile" hidden></label>'+
+        (S.me.photo ? '<button type="button" class="logo-btn ghost" id="photoDel">移除</button>' : "")+
       '</div></div></div>'+
     '</div>');
 
@@ -1065,6 +1156,7 @@ function renderForm(){
       '<div class="fields">'+
       '<div class="f2">'+field("单位名称",p+"org","照合同或证明上的名称写")+
         sel("单位性质"+RQ,p+"nature",[""].concat(ORG_NATURES),D.probes.exp)+'</div>'+
+      field("单位简介",p+"desc","如 广东省知名短跑训练营","","选填；简历上代替「单位性质」显示，要属实")+
       '<div class="f3">'+field("职位 / 身份"+RQ,p+"role","如 实习教师、助理教练")+
         field("起止"+RQ,p+"span","如 2025.09–2025.12")+
         sel("能开经历证明吗",p+"canProof",["不确定","能开","开不出来"],"开不出证明的经历，资格复审时不算数")+'</div>'+
@@ -1073,7 +1165,28 @@ function renderForm(){
       '</div></div>';
   });
   ROW_I=0; h+=group("D","执教与实践","实习、执教、兼职、运动队训练，每段一条",
-    '<div class="rows">'+eh+'</div><button class="add" data-add="exps" type="button">+ 加一段</button>');
+    '<div class="rows">'+eh+'</div><button class="add" data-add="exps" type="button">+ 加一段</button>'+
+    '<div class="fields" style="margin-top:12px">'+
+      field("其他教学能力","teachMore","如 另承担化学、英语学科教学，可承担班主任工作","","选填；写在简历执教经历的末尾")+'</div>');
+
+  var xh="";
+  S.projects.forEach(function(x,i){
+    ROW_I=i; var p="projects."+i+".";
+    xh+='<div class="row"><div class="rowtop"><span class="n">项目 '+(i+1)+'</span>'+
+      '<button class="del" data-del="projects" data-i="'+i+'" type="button">删除</button></div>'+
+      '<div class="fields">'+
+      '<div class="f2">'+field("项目名称",p+"name","如 华师匠人")+
+        field("你的身份"+RQ,p+"role","如 发起人 / 总负责人")+'</div>'+
+      '<div class="f2">'+field("项目简介",p+"scope","如 5–18 岁青少年体适能服务项目")+
+        field("起止"+RQ,p+"span","如 2025.04–2025.11","mono")+'</div>'+
+      '<label><span class="lb">你具体做了什么、结果怎样</span>'+
+        '<textarea data-p="'+p+'did">'+esc(x.did)+'</textarea>'+
+        (ROW_I ? "" : '<span class="fh">写你实际承担的职能。没做成的写清复盘，比包装成成功更可信</span>')+'</label>'+
+      '<div class="f2">'+sel("凭证",p+"proof",P)+'<div></div></div>'+
+      '</div></div>';
+  });
+  ROW_I=0; h+=group("E","项目实践","自己发起或负责的项目、创业、组织的活动；没有可以跳过",
+    '<div class="rows">'+xh+'</div><button class="add" data-add="projects" type="button">+ 加一个项目</button>');
 
   var rh="";
   S.papers.forEach(function(r,i){
@@ -1089,9 +1202,11 @@ function renderForm(){
       '<div class="f3">'+sel("状态"+RQ,p+"status",["","投稿中","已录用","已收录","已宣讲","已见刊"],"简历照这里的状态写，不要写成「发表」")+
         sel("本人到场了吗"+(live?RQ:""),p+"attended",["","已到场","未到场","不适用"])+
         sel("凭证"+RQ,p+"proof",P,"录用通知、收录页或会议议程")+'</div>'+
+      '<div class="f2">'+field("研究方法",p+"method","如 混合研究：观察 18 人、访谈 10 人","","选填，写进简历")+
+        field("主要发现",p+"findings","如 补充率由 21% 提升至 68%","","选填；只写论文里真实报告的数字")+'</div>'+
       '</div></div>';
   });
-  ROW_I=0; h+=group("E","学术与论文","论文投稿、录用、会议报告；没有可以跳过",
+  ROW_I=0; h+=group("F","学术与论文","论文投稿、录用、会议报告；没有可以跳过",
     '<div class="rows">'+rh+'</div><button class="add" data-add="papers" type="button">+ 加一篇</button>');
 
   var wh="";
@@ -1106,7 +1221,7 @@ function renderForm(){
       field("它证明了你什么能力",p+"proves","如 运球、传球、投篮的分解示范与纠错")+
       '</div></div>';
   });
-  ROW_I=0; h+=group("F","作品与展示","视频、作品集、演出记录",
+  ROW_I=0; h+=group("G","作品与展示","视频、作品集、演出记录",
     '<div class="rows">'+wh+'</div><button class="add" data-add="works" type="button">+ 加一件</button>'+
     probe("本专业的作品属<b>"+esc(D.portfolio.gateRole)+"</b>："+esc(D.portfolio.format)+"。"));
 
@@ -1115,14 +1230,18 @@ function renderForm(){
     ROW_I=i; var p="skills."+i+".";
     kh+='<div class="row"><div class="rowtop"><span class="n">技能 '+(i+1)+'</span>'+
       '<button class="del" data-del="skills" data-i="'+i+'" type="button">删除</button></div>'+
+      '<div class="fields">'+
       '<div class="f3">'+field("项目",p+"d","如 排球")+
         sel("你能拿什么证明"+RQ,p+"ev",[""].concat(EVIDENCE),"只是会就选「自述掌握」")+
-        field("具体",p+"detail","如 专项课 90 分")+'</div></div>';
+        field("具体",p+"detail","如 专项课 90 分")+'</div>'+
+      '<div class="f2">'+field("归类",p+"cat","如 球类项目、径赛 · 跳跃、新兴项目","","简历按归类分组显示")+
+        field("能承担的教学",p+"teach","如 可承担校队训练","","选填；只写真能教的")+'</div>'+
+      '</div></div>';
   });
-  ROW_I=0; h+=group("G","一专多能","主项之外，你能教的项目",
+  ROW_I=0; h+=group("H","一专多能","主项之外，你能教的项目",
     '<div class="rows">'+kh+'</div><button class="add" data-add="skills" type="button">+ 加一项</button>');
 
-  ROW_I=0; h+=group("H","现实约束","目标城市与薪资底线；只存进档案，不参与资格判定",
+  ROW_I=0; h+=group("I","现实约束","目标城市会写进简历抬头；其余只存进档案，不参与资格判定",
     '<div class="fields"><div class="f2">'+field("目标城市","cons.cities","用顿号隔开")+
       field("月薪底线（元）","cons.pay","如 7000","mono","先查当地公告里的待遇条款再填")+'</div>'+
     '<div class="f2">'+sel("经济压力","cons.press",["","无","需自给","需补贴家庭","需还贷+补贴"])+
@@ -1171,13 +1290,28 @@ function renderForm(){
         }).join("")+'</div>'+
       '</div></div>';
   });
-  ROW_I=0; h+=group("I","岗位对照","粘贴公告自动识别，或逐项照抄原文",
+  ROW_I=0; h+=group("J","岗位对照","粘贴公告自动识别，或逐项照抄原文",
     '<div class="paste"><label><span class="lb">粘贴公告识别</span>'+
       '<textarea data-p="jobPaste" placeholder="把公告原文，或岗位表里复制出来的几行（连表头一起复制更准）粘贴到这里">'+esc(S.jobPaste||"")+'</textarea>'+
       '<span class="fh">识别结果会加成下面的新岗位。它只照原文抽取，每一项都要你核对，不替你认定。</span></label>'+
       '<div class="paste-act"><button type="button" class="btn-sm" id="jobParse">识别并加为岗位</button>'+
       (PARSE_MSG ? '<span class="parse-msg">'+esc(PARSE_MSG)+'</span>' : '')+'</div></div>'+
     '<div class="rows">'+jh+'</div><button class="add" data-add="jobs" type="button">+ 手动加一个岗位</button>');
+
+  var kp="";
+  (S.me.kpis||[]).forEach(function(k,i){
+    kp+='<div class="kpair">'+field("数字 "+(i+1),"me.kpis."+i+".v","如 50+","mono")+
+      field("说明","me.kpis."+i+".l","如 累计执教学员")+'</div>';
+  });
+  ROW_I=0; h+=group("K","简历亮点","只用于生成简历，不参与资格判定",
+    '<div class="fields">'+
+    field("头衔标签","me.badges","用顿号隔开，最多 5 个，如 体育单招综合分全国第 1、100m 国家一级","",
+      "放在简历姓名下方。只写拿得出凭证的")+
+    '<div class="kg">'+kp+'</div>'+
+    '<span class="fh kg-hint">数字亮点最多 4 个，每个都要拿得出凭证，比如成绩册、带训记录</span>'+
+    field("通用技能","me.tools","如 剪映（视频剪辑）、PowerPoint / Excel / Word")+
+    field("个人展示页链接","me.showcase","https://…","mono","填了会在简历上生成二维码。先用手机扫一次，确认能打开")+
+    '</div>');
 
   el("form").innerHTML=h;
 }
@@ -1300,10 +1434,11 @@ document.addEventListener("click",function(e){
   if(add){
     var blank={creds:{name:"",cat:"",disc:"",level:"",issuer:"",status:"",note:"",proof:"",qeName:"",qeMark:""},
                achs:{title:"",lv:"",rank:"",mark:"",nature:"",date:"",wind:"",timing:"",proof:""},
-               exps:{org:"",nature:"",role:"",span:"",duty:"",canProof:"不确定"},
-               papers:{title:"",venue:"",author:"",form:"",date:"",status:"",attended:"",proof:""},
+               exps:{org:"",nature:"",desc:"",role:"",span:"",duty:"",canProof:"不确定"},
+               projects:{name:"",role:"",scope:"",span:"",did:"",proof:""},
+               papers:{title:"",venue:"",author:"",form:"",date:"",status:"",attended:"",proof:"",method:"",findings:""},
                works:{title:"",kind:"视频",proves:"",proof:""},
-               skills:{d:"",ev:"",detail:""},
+               skills:{d:"",ev:"",detail:"",cat:"",teach:""},
                jobs:{name:"",city:"",edu:"",degreeReq:"不要求",normalReq:"不要求",partyReq:"不限",
                      hukouReq:"不限",hukouOk:"",majors:"",tzSubject:"",athLevel:"",athDisc:"",
                      mandarin:"",ageMax:"",other:""}}[add];
@@ -1340,12 +1475,14 @@ document.addEventListener("click",function(e){
     renderAll(); return;
   }
   if(b.id==="logoDel"){ S.edu.logo=""; renderAll(); return; }
+  if(b.id==="photoDel"){ S.me.photo=""; renderAll(); return; }
   if(b.id==="clearAll"){
     S={discipline:S.discipline,isExample:false,
-       me:{name:"",phone:"",email:"",target:""},
+       me:{name:"",phone:"",email:"",target:"",photo:"",badges:"",tools:"",showcase:"",
+           kpis:[{v:"",l:""},{v:"",l:""},{v:"",l:""},{v:"",l:""}]},
        edu:{school:"",major:"",code:"",normal:"不确定",level:"",degree:"",party:"",
-            gradYear:"",rank:"",birthYear:"",logo:""},
-       creds:[],achs:[],exps:[],papers:[],works:[],skills:[],jobs:[],jobPaste:"",
+            gradYear:"",rank:"",birthYear:"",logo:"",tier:"",span:"",gpa:"",avg:"",honors:""},
+       creds:[],achs:[],exps:[],projects:[],papers:[],works:[],skills:[],jobs:[],jobPaste:"",teachMore:"",
        cons:{cities:"",pay:"",press:"",weekend:""}};
     renderAll(); window.scrollTo({top:0,behavior:"smooth"}); return;
   }
@@ -1368,8 +1505,14 @@ document.addEventListener("click",function(e){
 });
 
 function buildProfile(){
-  var f=audit(), E=S.edu;
+  var f=audit(), E=S.edu, M=S.me||{};
+  var tr=function(x){ return String(x||"").trim(); };
+  var list=function(x){ return tr(x).split(/[、,，;；\n]/).map(tr).filter(Boolean); };
+  var esp=spanOf(E.span);
+  var tier=["985","211","双一流","部属师范","省属","民办","专科"].filter(function(t){
+    return t==="部属师范" ? (/部属|教育部直属/.test(E.tier||"") && /师范/.test(E.tier||"")) : String(E.tier||"").indexOf(t)>=0; });
   return {
+    // 证件照不导出：它只用于生成简历，留在本机
     identity:{name:"",gradYear:+E.gradYear||undefined,politicalStatus:E.party||undefined},
     constraints:{targetCities:S.cons.cities.split(/[、,，]/).filter(Boolean),
       minMonthlyPay:+S.cons.pay||undefined,economicPressure:S.cons.press||undefined,weekendWork:S.cons.weekend||undefined},
@@ -1377,7 +1520,9 @@ function buildProfile(){
       isNormalMajor:E.normal==="是"?true:E.normal==="否"?false:null,
       level:E.level||undefined,rank:E.rank,
       degree:E.degree==="已取得"?true:E.degree==="无学位"?false:E.degree?null:undefined,
-      degreeStatus:E.degree||undefined}],
+      degreeStatus:E.degree||undefined,
+      schoolTier:tier.length?tier:undefined, start:esp.start, end:esp.end,
+      gpa:E.gpa||undefined, avgScore:parseFloat(E.avg)||undefined, honors:list(E.honors).length?list(E.honors):undefined}],
     credentials:S.creds.filter(function(c){return c.name;}).map(function(c){
       return {name:c.name,category:c.cat||undefined,discipline:c.disc,level:c.level,issuer:c.issuer,
         status:c.status||undefined,progressNote:c.note||undefined,
@@ -1393,18 +1538,29 @@ function buildProfile(){
         proof:proofOf(a.proof)};}),
     experience:S.exps.filter(function(e){return e.org;}).map(function(e){
       var sp=spanOf(e.span);
-      return {org:e.org,orgNature:e.nature||undefined,role:e.role,start:sp.start,end:sp.end,duties:e.duty?[e.duty]:[],
+      return {org:e.org,orgNature:e.nature||undefined,orgDescription:e.desc||undefined,role:e.role,start:sp.start,end:sp.end,
+        duties:e.duty?[e.duty]:[],
         canIssueProof:e.canProof==="能开"?true:e.canProof==="开不出来"?false:null};}),
+    projects:S.projects.filter(function(x){return x.name;}).map(function(x){
+      var sp=spanOf(x.span);
+      return {name:x.name,role:x.role,summary:x.scope||undefined,start:sp.start,end:sp.end,
+        scope:x.did?[x.did]:[],proof:proofOf(x.proof)};}),
     research:S.papers.filter(function(r){return r.title;}).map(function(r){
       return {title:r.title,venue:r.venue,authorOrder:r.author,date:r.date,
         presentationType:r.form||undefined,status:r.status||undefined,
         attended:r.attended==="已到场"?true:r.attended==="未到场"?false:null,
+        method:r.method||undefined, findings:r.findings?[r.findings]:undefined,
         proof:proofOf(r.proof)};}),
     portfolio:S.works.filter(function(w){return w.title;}).map(function(w){
       return {type:KIND_MAP[w.kind]||w.kind||undefined,title:w.title,proves:w.proves,
         gateRole:DISC[S.discipline].portfolio.gateRole};}),
     skills:{secondary:S.skills.filter(function(k){return k.d;}).map(function(k){
-      return {discipline:k.d,evidenceStrength:k.ev||undefined,detail:k.detail,canTeach:true};})},
+      return {discipline:k.d,evidenceStrength:k.ev||undefined,detail:k.detail,canTeach:true,
+        category:k.cat||undefined,teachScope:k.teach||undefined};}),
+      tools:list(M.tools).length?list(M.tools):undefined},
+    presentation:{badges:list(M.badges),
+      kpis:(M.kpis||[]).filter(function(k){return k&&tr(k.v);}).map(function(k){return {value:tr(k.v),label:tr(k.l)};}),
+      showcaseUrl:tr(M.showcase)||undefined, teachingNote:tr(S.teachMore)||undefined},
     targets:S.jobs.filter(function(j){return j.name;}).map(function(j){
       var r=matchJob(j), lim=j.hukouReq==="有限制";
       return {post:j.name,city:j.city,verdict:VERDICT[r.verdict][1],
@@ -1667,78 +1823,107 @@ var VERDICT={ok:["p","★ 完全符合","按目前填写的信息，硬门槛都
    措辞规则与命令行版 render.py 同源。展示页、简历、自查结论
    必须说同一套话——否则三份材料摆在一起就是自相矛盾。 */
 function resumeSections(){
-  var out=[];
+  var trim=function(x){ return String(x||"").trim(); }, out={};
+  function windy(a){ var w=parseFloat(String(a.wind).replace("+","")); return !isNaN(w)&&w>2.0; }
 
-  // 资质：部分完成输出进度，绝不写成"已通过"；没选状态的不上简历
-  var cred=S.creds.filter(function(c){return c.name&&c.status;}).map(function(c){
-    if(c.status==="已取得")
-      return {k:c.name,v:[c.level,c.issuer].filter(Boolean).join("　"),t:""};
-    if(c.status==="部分完成")
-      return {k:c.name,v:c.note||"部分完成",t:"进行中"};
-    return {k:c.name,v:c.status==="备考中"?"备考中":"计划中",t:"进行中"};
+  // 头条金框：只给国家级、省级的第一名 / 冠军。校级第一不放大，展演不算
+  var crownIdx=-1;
+  S.achs.forEach(function(a,i){
+    if(crownIdx<0 && a.title && a.nature!=="展演展示" && /国家级|省级/.test(a.lv||"") &&
+       /第\s*[一1]\s*名?|冠军|状元/.test(a.rank||"")) crownIdx=i;
   });
-  if(cred.length) out.push({h:"资质证书",rows:cred});
+  if(crownIdx>=0){
+    var ca=S.achs[crownIdx];
+    out.crown={badge:ca.lv+" · "+ca.rank, title:ca.title, sub:[windy(ca)?"":ca.mark, ca.date].filter(Boolean).join(" · ")};
+  }
+  // 成绩：不可用于等级认定的，不与赛事绑定输出；展演不产生名次
+  out.achs=S.achs.filter(function(a,i){ return a.title && i!==crownIdx; }).map(function(a){
+    return {k:a.title, t:a.nature==="展演展示"?"参演":a.rank, r:[windy(a)?"":a.mark, a.lv].filter(Boolean).join(" · ")};
+  });
 
-  // 成绩：不可用于等级认定的，不与赛事绑定输出
-  var ach=S.achs.filter(function(a){return a.title;}).map(function(a){
-    var w=parseFloat(String(a.wind).replace("+",""));
-    var mark=(!isNaN(w)&&w>2.0)?"":a.mark;          // 超风速 → 只留名次
-    var rank=a.nature==="展演展示"?"参演":a.rank;    // 展演不产生名次
-    return {k:a.title,v:[a.lv,a.date].filter(Boolean).join("　"),
-            t:[rank,mark].filter(Boolean).join("　")};
+  // 一专多能：按证明强度排序后分组；自述掌握的降级措辞，不作专业水平主张
+  var order={"赛事名次":0,"等级证书":1,"课程修习":2,"自述掌握":3};
+  // 注意不能写 order[a.ev]||9 —— "赛事名次"的序号是 0，而 0||9 等于 9，
+  // 结果是把最弱的"只是会"排到最前面，正好放在简历最显眼的位置。
+  var rank=function(x){ return order[x.ev]==null ? 9 : order[x.ev]; };
+  var groups=[], idx={};
+  S.skills.filter(function(k){ return k.d&&k.ev; }).sort(function(a,b){ return rank(a)-rank(b); }).forEach(function(k){
+    var c=trim(k.cat)||"其他项目";
+    if(!(c in idx)){ idx[c]=groups.length; groups.push({cat:c, items:[], teach:[]}); }
+    var g=groups[idx[c]];
+    g.items.push(k.d+" "+(k.ev==="自述掌握" ? "可承担普及性教学" : (trim(k.detail)||k.ev)));
+    if(trim(k.teach) && g.teach.indexOf(trim(k.teach))<0) g.teach.push(trim(k.teach));
   });
-  if(ach.length) out.push({h:"赛事与奖项",rows:ach});
+  out.skills=groups;
 
-  var exp=S.exps.filter(function(e){return e.org&&String(e.role).indexOf("运动员")<0;}).map(function(e){
-    return {k:e.org+(e.role?"　"+e.role:""),v:[e.nature,e.span].filter(Boolean).join("　"),
-            t:"",body:e.duty};
+  out.exps=S.exps.filter(function(e){ return e.org&&String(e.role).indexOf("运动员")<0; }).map(function(e){
+    return {k:e.org, t:e.role, v:trim(e.desc)||e.nature, r:e.span, b:e.duty};
   });
-  if(exp.length) out.push({h:"执教与实践",rows:exp});
+  out.teachMore=trim(S.teachMore);
 
   // 学术：照实写状态，报告形式跟在后面，永远不写"发表"
-  var pap=S.papers.filter(function(r){return r.title&&r.status;}).map(function(r){
-    var form=(r.form==="口头报告"||r.form==="墙报")?"（"+r.form+"）":"";
-    return {k:r.title,v:[r.venue,r.author,r.date].filter(Boolean).join("　"),t:r.status+form};
+  out.papers=S.papers.filter(function(r){ return r.title&&r.status; }).map(function(r){
+    var form=(r.form==="口头报告"||r.form==="墙报")?"（"+r.form+"）":"", tt=trim(r.title);
+    return {k:/^《.*》$/.test(tt)?tt:"《"+tt+"》", t:r.status+form, v:[r.venue,r.author].filter(Boolean).join(" · "),
+            r:r.date, b:[trim(r.method), trim(r.findings)].filter(Boolean).join("：")};
   });
-  if(pap.length) out.push({h:"学术成果",rows:pap});
 
-  var work=S.works.filter(function(w){return w.title;}).map(function(w){
-    return {k:w.title,v:w.kind,t:"",body:w.proves};
+  out.projects=S.projects.filter(function(x){ return x.name&&x.role; }).map(function(x){
+    return {k:x.name, t:x.role, v:x.scope, r:x.span, b:x.did};
   });
-  if(work.length) out.push({h:"作品与展示",rows:work});
 
-  // 技能：自述掌握的降级措辞，不作专业水平主张；没选证明程度的不上简历
-  var sk=S.skills.filter(function(k){return k.d&&k.ev;});
-  if(sk.length){
-    var order={"赛事名次":0,"等级证书":1,"课程修习":2,"自述掌握":3};
-    // 注意不能写 order[a.ev]||9 —— "赛事名次"的序号是 0，而 0||9 等于 9，
-    // 结果是把最弱的"只是会"排到最前面，正好放在简历最显眼的位置。
-    var rank=function(x){ return order[x.ev]==null ? 9 : order[x.ev]; };
-    sk=sk.slice().sort(function(a,b){return rank(a)-rank(b);});
-    out.push({h:"一专多能",inline:sk.map(function(k){
-      return {d:k.d, s:k.ev==="自述掌握" ? "可承担普及性教学" : (k.detail||k.ev)};
-    })});
-  }
+  // 证书：部分完成输出进度，绝不写成"已通过"；没选状态的不上简历
+  out.certs=S.creds.filter(function(c){ return c.name&&c.status; }).map(function(c){
+    if(c.status==="已取得") return c.name+(c.level&&c.name.indexOf(c.level)<0?"（"+c.level+"）":"");
+    return c.name+"："+(c.status==="部分完成" ? (trim(c.note)||"部分完成") : c.status);
+  });
+  out.works=S.works.filter(function(w){ return w.title; }).map(function(w){ return w.title+(w.proves?"（"+w.proves+"）":""); });
   return out;
 }
 
 function buildResumeDoc(){
-  var m=S.me, e=S.edu, secs=resumeSections();
+  var m=S.me, e=S.edu, R=resumeSections(), trim=function(x){ return String(x||"").trim(); };
+  var cities=trim(S.cons&&S.cons.cities).split(/[、,，\/]/).map(trim).filter(Boolean);
+  var meta=[e.major ? e.major+(/专业$/.test(e.major)?"":"专业") : "", e.gradYear ? e.gradYear+" 届" : ""].filter(Boolean).join(" · ");
+  if(cities.length) meta+=(meta?"　|　":"")+"意向城市："+cities.join(" / ");
   var contact=[m.phone,m.email].filter(Boolean).join("　|　");
-  var eduLine=[e.school,e.major,e.level].filter(Boolean).join("　");
-  var eduMeta=[e.gradYear?e.gradYear+" 届":"",e.rank?"专业排名 "+e.rank:""].filter(Boolean).join("　");
+  var badges=trim(m.badges).split(/[、,，;；\n]/).map(trim).filter(Boolean).slice(0,5);
+  var kpis=(m.kpis||[]).filter(function(k){ return k&&trim(k.v); }).slice(0,4);
+  var qr=trim(m.showcase) ? qrDataURL(trim(m.showcase)) : "";
 
-  function rows(sec){
-    if(sec.inline) return '<p class="inl">'+sec.inline.map(function(x){
-      return '<span><b>'+esc(x.d)+'</b>　'+esc(x.s)+'</span>'; }).join("")+'</p>';
-    return sec.rows.map(function(r){
-      return '<div class="it"><div class="l"><span class="k">'+esc(r.k)+'</span>'+
-        (r.t?'<span class="t">'+esc(r.t)+'</span>':"")+'</div>'+
-        (r.v?'<div class="v">'+esc(r.v)+'</div>':"")+
-        (r.body?'<div class="b">'+esc(r.body)+'</div>':"")+'</div>';
-    }).join("");
+  function item(x){
+    return '<div class="it"><div class="l"><span class="k">'+esc(x.k)+'</span>'+
+      (x.t?'<span class="t">'+esc(x.t)+'</span>':"")+(x.v?'<span class="v">'+esc(x.v)+'</span>':"")+
+      (x.r?'<span class="r">'+esc(x.r)+'</span>':"")+'</div>'+(x.b?'<div class="b">'+esc(x.b)+'</div>':"")+'</div>';
   }
+  function sec(title, body){ return body ? '<section><h2>'+esc(title)+'</h2>'+body+'</section>' : ""; }
 
+  var head='<div class="hd"><div class="who">'+
+      (e.logo?'<img class="lg" src="'+e.logo+'" alt="">':"")+
+      '<div class="nm">'+esc(m.name||"　")+'</div>'+
+      (m.target?'<div class="tg">'+esc(m.target)+'</div>':"")+
+      (meta?'<div class="mt">'+esc(meta)+'</div>':"")+
+      (contact?'<div class="ct">'+esc(contact)+'</div>':"")+'</div>'+
+      (m.photo?'<img class="ph" src="'+m.photo+'" alt="证件照">':"")+'</div>'+
+    (badges.length?'<div class="bd">'+badges.map(function(b){ return '<span>'+esc(b)+'</span>'; }).join("")+'</div>':"")+
+    (kpis.length?'<div class="kp" style="grid-template-columns:repeat('+kpis.length+',1fr)">'+kpis.map(function(k){
+      return '<div><b>'+esc(trim(k.v))+'</b><small>'+esc(trim(k.l))+'</small></div>'; }).join("")+'</div>':"");
+
+  var honors=(R.crown ? '<div class="cr"><span class="bg">'+esc(R.crown.badge)+'</span><b>'+esc(R.crown.title)+'</b>'+
+      (R.crown.sub?'<span>'+esc(R.crown.sub)+'</span>':"")+'</div>' : "")+R.achs.map(item).join("");
+  var skillBody=R.skills.length ? '<dl class="sg">'+R.skills.map(function(g){
+      return '<dt>'+esc(g.cat)+'</dt><dd>'+esc(g.items.join(" · "))+(g.teach.length?' <em>— '+esc(g.teach.join("；"))+'</em>':"")+'</dd>';
+    }).join("")+'</dl>' : "";
+  var expBody=R.exps.map(item).join("")+(R.teachMore?'<div class="ln"><b>教学补充</b>'+esc(R.teachMore)+'</div>':"");
+  var eduBody=e.school ? item({k:e.school, v:[e.major?e.major+(/专业$/.test(e.major)?"":"专业"):"", e.level, trim(e.tier)].filter(Boolean).join(" · "),
+      r:trim(e.span), b:[e.gpa?"GPA "+e.gpa:"", e.avg?"均分 "+e.avg:"", e.rank?"专业排名 "+e.rank:"", trim(e.honors)].filter(Boolean).join("　｜　")}) : "";
+  var certBody=(R.certs.length?'<div class="ln"><b>证书</b>'+esc(R.certs.join(" · "))+'</div>':"")+
+      (trim(m.tools)?'<div class="ln"><b>技能</b>'+esc(trim(m.tools))+'</div>':"")+
+      (!trim(m.showcase)&&R.works.length?'<div class="ln"><b>作品</b>'+esc(R.works.join(" · "))+'</div>':"");
+  var qrBox=trim(m.showcase) ? '<div class="qr">'+(qr?'<img src="'+qr+'" alt="个人展示页二维码">':"")+
+      '<small>'+(qr?"个人展示集 · 扫码查看":esc(trim(m.showcase)))+'</small></div>' : "";
+
+  var A="#1B4D6B";
   return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">'+
     // A4 宽 210mm≈794px。手机视口只有 375px，不声明就会被切掉右边；
     // 按 794 声明后浏览器整页缩放显示，打印输出不受影响。
@@ -1748,40 +1933,49 @@ function buildResumeDoc(){
        文字检查全过，只有数彩色像素才发现——所以它必须写在最前面 */
     '*{-webkit-print-color-adjust:exact;print-color-adjust:exact;box-sizing:border-box}'+
     '@page{size:A4;margin:0}'+
-    'body{margin:0;background:#E8ECEE;font:13px/1.62 -apple-system,"PingFang SC",sans-serif;color:#33414A}'+
-    '.pg{width:210mm;min-height:297mm;margin:0 auto;background:#fff;padding:16mm 15mm}'+
+    'body{margin:0;background:#E8ECEE;font:12px/1.55 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#33414A}'+
+    '.pg{width:210mm;min-height:297mm;margin:0 auto;background:#fff;padding:12mm 13mm 10mm}'+
     '@media print{body{background:#fff}.pg{margin:0;min-height:auto}}'+
-    '.hd{border-bottom:2.5px solid #1B4D6B;padding-bottom:9px;margin-bottom:14px;'+
-      'display:flex;align-items:flex-end;gap:14px}'+
-    '.hd .who{flex:1;min-width:0}'+
-    '.hd .lg{width:52px;height:52px;object-fit:contain;flex:none}'+
-    '.nm{font-size:26px;font-weight:700;color:#111A1F;letter-spacing:.06em;line-height:1.15}'+
-    '.tg{font-size:13px;color:#1B4D6B;font-weight:600;margin-top:3px}'+
-    '.ct{font-size:11.5px;color:#74838B;margin-top:5px;font-family:ui-monospace,Menlo,monospace}'+
-    '.ed{display:flex;justify-content:space-between;gap:12px;font-size:13px;margin-bottom:15px;'+
-      'padding:8px 11px;background:#F2F5F6;border-left:3px solid #1B4D6B}'+
-    '.ed b{color:#111A1F}.ed span{color:#74838B;white-space:nowrap}'+
-    'h2{font-size:13px;font-weight:700;color:#111A1F;margin:0 0 7px;padding-bottom:4px;'+
-      'border-bottom:1px solid #C6D0D5;letter-spacing:.06em}'+
-    'section{margin-bottom:13px}'+
-    '.it{margin-bottom:7px}'+
-    '.l{display:flex;align-items:baseline;gap:8px}'+
-    '.k{font-size:13.5px;font-weight:700;color:#111A1F}'+
-    '.t{font-size:11px;font-weight:700;color:#1B4D6B;border:1px solid #1B4D6B;'+
-      'border-radius:2px;padding:0 5px;margin-left:auto;white-space:nowrap}'+
-    '.v{font-size:12px;color:#74838B;margin-top:1px}'+
-    '.b{font-size:12.5px;margin-top:2px}'+
-    '.inl{display:flex;flex-wrap:wrap;gap:5px 16px;margin:0;font-size:12.5px}'+
-    '.inl b{color:#111A1F}'+
-    '</style></head><body><div class="pg">'+
-    '<div class="hd"><div class="who"><div class="nm">'+esc(m.name||"　")+'</div>'+
-    (m.target?'<div class="tg">'+esc(m.target)+'</div>':"")+
-    (contact?'<div class="ct">'+esc(contact)+'</div>':"")+'</div>'+
-    (e.logo?'<img class="lg" src="'+e.logo+'" alt="">':"")+'</div>'+
-    (eduLine?'<div class="ed"><span style="color:#33414A"><b>'+esc(e.school)+'</b>　'+
-      esc([e.major,e.level].filter(Boolean).join("　"))+'</span><span>'+esc(eduMeta)+'</span></div>':"")+
-    secs.map(function(sec){
-      return '<section><h2>'+esc(sec.h)+'</h2>'+rows(sec)+'</section>'; }).join("")+
+    '.hd{display:flex;gap:14px;align-items:stretch;border-bottom:2.5px solid '+A+';padding-bottom:8px}'+
+    '.who{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end}'+
+    '.lg{height:30px;max-width:170px;object-fit:contain;object-position:left center;margin-bottom:6px}'+
+    '.nm{font-size:25px;font-weight:700;color:#111A1F;letter-spacing:.06em;line-height:1.1}'+
+    '.tg{font-size:13px;color:'+A+';font-weight:600;margin-top:3px}'+
+    '.mt{font-size:11.5px;color:#55656D;margin-top:3px}'+
+    '.ct{font-size:11px;color:#74838B;margin-top:2px;font-family:ui-monospace,Menlo,monospace}'+
+    '.ph{width:25mm;height:33mm;object-fit:cover;flex:none;border:1px solid #D5DDE1;border-radius:2px}'+
+    '.bd{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}'+
+    '.bd span{font-size:11px;font-weight:700;color:'+A+';background:#E6EEF2;border:1px solid #C9D8E0;border-radius:3px;padding:2px 7px}'+
+    '.kp{display:grid;gap:6px;margin-top:7px}'+
+    '.kp div{border:1px solid #D5DDE1;border-radius:4px;padding:4px 6px;text-align:center}'+
+    '.kp b{display:block;font-size:16px;color:'+A+';line-height:1.25;font-variant-numeric:tabular-nums}'+
+    '.kp small{display:block;font-size:10.5px;color:#74838B}'+
+    'h2{font-size:12.5px;font-weight:700;color:#111A1F;margin:10px 0 5px;padding-bottom:3px;border-bottom:1px solid #C6D0D5;letter-spacing:.06em}'+
+    '.cr{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;background:#FBF3E2;border:1px solid #E2C88E;border-radius:4px;padding:5px 9px;margin-bottom:5px}'+
+    '.cr .bg{font-size:10.5px;font-weight:700;color:#fff;background:#8A5E1A;border-radius:2px;padding:1px 6px;white-space:nowrap}'+
+    '.cr b{font-size:13px;color:#111A1F}.cr span{font-size:11px;color:#8A5E1A}'+
+    '.it{margin-bottom:4px}'+
+    '.l{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 7px}'+
+    '.k{font-size:12.5px;font-weight:700;color:#111A1F}'+
+    '.t{font-size:10.5px;font-weight:700;color:'+A+';border:1px solid '+A+';border-radius:2px;padding:0 4px;white-space:nowrap}'+
+    '.v{font-size:11px;color:#74838B}'+
+    '.r{margin-left:auto;font-size:11px;color:#74838B;white-space:nowrap;font-variant-numeric:tabular-nums}'+
+    '.b{font-size:11.5px;margin-top:1px}'+
+    '.sg{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:0;font-size:11.5px}'+
+    '.sg dt{font-weight:700;color:#111A1F;white-space:nowrap}.sg dd{margin:0}.sg em{font-style:normal;color:#55656D}'+
+    '.ln{font-size:11.5px;margin-bottom:3px}.ln b{color:#111A1F;margin-right:6px}'+
+    '.fx{display:flex;gap:12px;align-items:flex-start}.grow{flex:1;min-width:0}'+
+    '.qr{flex:none;text-align:center;font-size:10px;color:#74838B}'+
+    '.qr img{width:20mm;height:20mm;display:block;image-rendering:pixelated;margin:0 auto 2px}'+
+    '.qr small{display:block;max-width:26mm;word-break:break-all}'+
+    '</style></head><body><div class="pg">'+head+
+    sec("核心荣誉与竞赛成绩", honors)+
+    sec("一专多能 · 可任教项目", skillBody)+
+    sec("执教与教学经历", expBody)+
+    sec("教育科研", R.papers.map(item).join(""))+
+    sec("项目实践", R.projects.map(item).join(""))+
+    sec("教育背景", eduBody)+
+    ((certBody||qrBox) ? '<section><h2>证书与技能</h2><div class="fx"><div class="grow">'+certBody+'</div>'+qrBox+'</div></section>' : "")+
     '</div></body></html>';
 }
 
@@ -1963,6 +2157,28 @@ function openPrintPage(){
    自己托管时没有 window.claude，普通 blob 下载反而是最顺的；
    两条都走不通才退回文本框手动复制。 */
 var IN_ARTIFACT = !!(window.claude && window.claude.use);
+
+/* 展示页二维码：qrcode-generator 1.4.4，和页面同目录自托管（国内访问 cdnjs 不稳定）。
+   纠错级别用 M：H 级在 20mm 打印尺寸下模块太密，纸上扫不出来——这个坑踩过 */
+var QR_CDN="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js", QR_CBS=[], QR_STATE="idle";
+function loadQR(cb){
+  if(window.qrcode){ if(cb) cb(); return; }
+  if(cb) QR_CBS.push(cb);
+  if(QR_STATE!=="idle") return;
+  QR_STATE="loading";
+  var sc=document.createElement("script");
+  sc.src = IN_ARTIFACT ? QR_CDN : new URL("qrcode.min.js", location.href.split("?")[0]).href;
+  sc.onload=sc.onerror=function(){ QR_STATE="done"; QR_CBS.splice(0).forEach(function(fn){ try{ fn(); }catch(e){} }); };
+  document.head.appendChild(sc);
+}
+function qrDataURL(text){
+  if(!window.qrcode || !text) return "";
+  try{
+    if(qrcode.stringToBytesFuncs && qrcode.stringToBytesFuncs["UTF-8"]) qrcode.stringToBytes=qrcode.stringToBytesFuncs["UTF-8"];
+    var q=qrcode(0,"M"); q.addData(text); q.make(); return q.createDataURL(4,0);
+  }catch(e){ return ""; }
+}
+loadQR();
 var DL=null;
 if(IN_ARTIFACT){
   window.claude.use("downloads").then(function(d){ DL=d; }).catch(function(){});
@@ -2011,7 +2227,9 @@ function doExport(btn,filename,data){
 }
 
 var PRINT_MODE = !IN_ARTIFACT && /[?&]print=resume(&|$)/.test(location.search);
-if(PRINT_MODE) openPrintPage(); else renderAll();
+// 打印页一打开就要生成简历，展示页二维码得等库加载完
+if(PRINT_MODE){ if(S.me&&S.me.showcase&&!window.qrcode) loadQR(openPrintPage); else openPrintPage(); }
+else renderAll();
 </script>
 
 </body>
