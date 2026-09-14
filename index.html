@@ -232,6 +232,12 @@ input.mono{font-family:var(--mono);letter-spacing:.04em}
   display:flex;justify-content:center}
 .ovl-box{position:relative;overflow:hidden;background:#fff}
 .ovl-fr{display:block;border:0;background:#fff}
+.ovl-img{display:none;width:100%;max-width:794px;padding-bottom:28px}
+.ovl-img img{display:block;width:100%;height:auto;background:#fff;-webkit-touch-callout:default}
+.ovl.showimg .ovl-box{position:absolute;left:-10000px;top:0}
+.ovl.showimg .ovl-img{display:block}
+.ovl-bad{color:var(--fail)}
+.ovl-b:disabled{opacity:.6;cursor:default}
 @media print{body>*:not(.ovl){display:none!important}
   .ovl{position:static}.ovl-bar,.ovl-tip{display:none!important}
   .ovl-body{overflow:visible;display:block}
@@ -976,7 +982,7 @@ document.addEventListener("click",function(e){
   }
   if(b.id==="print"){ window.print(); return; }
   if(b.id==="dlJson") doExport(b,"profile.json",JSON.stringify(buildProfile(),null,2));
-  if(b.id==="dlReport") showDoc(buildReportDoc(),"我的自查结果");
+  if(b.id==="dlReport") showDoc(buildReportDoc(),"我的自查结果","report");
   if(b.id==="forceBtn"){ forceResume=true; resumeGate(); return; }
   if(b.id==="dlResume"){
     if(!resumeGate()) return;
@@ -988,7 +994,7 @@ document.addEventListener("click",function(e){
       if(f){ f.focus(); f.scrollIntoView({block:"center"}); }
       return;
     }
-    showDoc(buildResumeDoc(),(S.me.name||"")+" 简历");
+    showDoc(buildResumeDoc(),(S.me.name||"")+" 简历","resume");
   }
 });
 
@@ -1355,20 +1361,32 @@ function resumeGate(){
    应用，而 blob 只在生成它的那个网页里有效，外部拿到就是一个打不开的链接。
    实测安卓上会跳出「不支持转换的链接」。
    而且下载 HTML 本来就是多余的一步——要的是 PDF，那就直接显示出来打印。 */
-function showDoc(html, title){
+var H2C_CDN="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+
+function showDoc(html, title, kind){
   var ov=document.createElement("div");
   ov.className="ovl";
+  var btns, tip;
+  if(!IS_MOBILE){
+    btns='<button type="button" class="ovl-b main" data-act="print">打印 / 存 PDF</button>'+
+         '<button type="button" class="ovl-b" data-act="dl">下载文件</button>';
+    tip='在打印对话框里把打印机选成「另存为 PDF」。';
+  } else {
+    var pdfOK = kind==="resume" && !IN_APP && !IN_ARTIFACT;
+    btns='<button type="button" class="ovl-b main" data-act="img">存为图片</button>'+
+         (pdfOK ? '<button type="button" class="ovl-b" data-act="pdf">存 PDF</button>' : "");
+    tip = IN_APP
+      ? '点「存为图片」，生成后<b>长按图片保存</b>。要 PDF：点右上角 ··· →「在浏览器打开」，再回到这里。'
+      : '点「存为图片」后<b>长按图片保存</b>，最稳。'+(pdfOK ? '「存 PDF」会打开一个只有简历的打印页。' : '');
+  }
+  btns+='<button type="button" class="ovl-b" data-act="close">关闭</button>';
+
   ov.innerHTML=
-    '<div class="ovl-bar">'+
-      '<span class="ovl-t">'+esc(title)+'</span>'+
-      '<button type="button" class="ovl-b main" data-act="print">打印 / 存 PDF</button>'+
-      '<button type="button" class="ovl-b" data-act="dl">下载文件</button>'+
-      '<button type="button" class="ovl-b" data-act="close">关闭</button>'+
-    '</div>'+
-    '<p class="ovl-tip">手机上：点「打印 / 存 PDF」后在打印界面选「存储为 PDF」。'+
-      '若在微信里没反应，点右上角 ··· →「在浏览器打开」再试。</p>'+
+    '<div class="ovl-bar"><span class="ovl-t">'+esc(title)+'</span>'+btns+'</div>'+
+    '<p class="ovl-tip">'+tip+'</p>'+
     '<div class="ovl-body"><div class="ovl-box">'+
-      '<iframe class="ovl-fr" title="'+esc(title)+'"></iframe></div></div>';
+      '<iframe class="ovl-fr" title="'+esc(title)+'"></iframe></div>'+
+      '<div class="ovl-img"></div></div>';
   document.body.appendChild(ov);
   document.body.style.overflow="hidden";
 
@@ -1393,17 +1411,97 @@ function showDoc(html, title){
   ov.addEventListener("click",function(e){
     var b=e.target.closest("[data-act]"); if(!b) return;
     var act=b.getAttribute("data-act");
-    if(act==="close"){ ov.remove(); document.body.style.overflow=""; return; }
+    if(act==="close"){ window.removeEventListener("resize",fit); ov.remove(); document.body.style.overflow=""; return; }
     if(act==="print"){
       try{ fr.contentWindow.focus(); fr.contentWindow.print(); }
       catch(err){ window.print(); }
       return;
     }
-    if(act==="dl"){
-      var fn=(title.indexOf("简历")>=0 ? (S.me.name||"简历")+"_简历.html" : "自查结果.html");
-      doExport(b,fn,html);
-    }
+    if(act==="dl"){ doExport(b, kind==="resume" ? (S.me.name||"简历")+"_简历.html" : "自查结果.html", html); return; }
+    if(act==="pdf"){ location.href=location.pathname+"?print=resume"; return; }
+    if(act==="img"){ makeImage(ov,fr,kind,b); }
   });
+}
+
+/* 把预览里的版面画成一张图。库注入到预览 iframe 自己的窗口里再调用——
+   从父窗口去画另一个窗口里的元素，会碰到跨窗口的类型判断问题。 */
+function makeImage(ov,fr,kind,btn){
+  var tipEl=ov.querySelector(".ovl-tip"), old=btn.textContent;
+  if(ov.querySelector(".ovl-img img")){          // 已生成：在图片与预览之间切换
+    var on=ov.classList.toggle("showimg");
+    btn.textContent = on ? "看预览" : "看图片";
+    return;
+  }
+  var win=fr.contentWindow, doc=fr.contentDocument;
+  function fail(msg){ btn.disabled=false; btn.textContent=old; tipEl.innerHTML='<b class="ovl-bad">'+msg+'</b>'; }
+  if(!win||!doc||!doc.body){ fail("预览还没加载完，稍等再点。"); return; }
+  btn.disabled=true; btn.textContent="生成中…";
+
+  function render(){
+    var target=doc.querySelector(kind==="resume" ? ".pg" : ".w") || doc.body;
+    win.html2canvas(target,{scale:2, backgroundColor:"#ffffff", logging:false, useCORS:true})
+      .then(function(cv){
+        var img=new Image();
+        img.alt = kind==="resume" ? "简历图片，长按保存" : "自查结果图片，长按保存";
+        img.src = cv.toDataURL("image/png");
+        ov.querySelector(".ovl-img").appendChild(img);
+        ov.classList.add("showimg");
+        btn.disabled=false; btn.textContent="看预览";
+        tipEl.innerHTML='<b>长按图片</b> → 保存到手机，或直接发给别人。';
+      })
+      .catch(function(){ fail("图片生成失败。关掉重新打开再试一次。"); });
+  }
+  if(win.html2canvas){ render(); return; }
+  var sc=doc.createElement("script");
+  /* 库和页面放在同一目录自己托管：国内访问 cdnjs 时好时坏，而页面本身所在的域名一定是通的 */
+  sc.src = IN_ARTIFACT ? H2C_CDN : new URL("html2canvas.min.js", location.href.split("?")[0]).href;
+  sc.onload=render;
+  sc.onerror=function(){ fail("图片组件没加载出来，检查网络后再点一次。"); };
+  doc.head.appendChild(sc);
+}
+
+/* 手机系统浏览器里要 PDF：不从 iframe 打印，而是整页换成只有简历的独立页，
+   在顶层窗口调 print()——这是 Safari 和安卓 Chrome 都认的路。 */
+function openPrintPage(){
+  var d=new DOMParser().parseFromString(buildResumeDoc(),"text/html");
+  [].slice.call(document.querySelectorAll('style,link[rel="stylesheet"]'))
+    .forEach(function(n){ n.parentNode.removeChild(n); });
+  [].slice.call(d.querySelectorAll("style")).forEach(function(st){
+    var n=document.createElement("style"); n.textContent=st.textContent; document.head.appendChild(n);
+  });
+  var ex=document.createElement("style");
+  ex.textContent=
+    '.pp-bar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:10px;align-items:center;'+
+      'padding:12px 14px;background:#fff;border-bottom:1px solid #C6D0D5;'+
+      'font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}'+
+    '.pp-bar button{appearance:none;font:600 15px/1 inherit;padding:12px 18px;border-radius:5px;'+
+      'border:1px solid #1B4D6B;background:#fff;color:#1B4D6B;cursor:pointer}'+
+    '.pp-bar button.main{background:#1B4D6B;color:#fff}'+
+    '.pp-tip{flex-basis:100%;margin:2px 0 0;font-size:13px;line-height:1.7;color:#5B6B73}'+
+    '.pp-tip b{color:#111A1F}'+
+    '@media print{.pp-bar{display:none!important}.pg{zoom:1!important}}';
+  document.head.appendChild(ex);
+  document.title=d.title;
+  document.body.innerHTML=
+    '<div class="pp-bar">'+
+      '<button type="button" class="main" id="ppPrint">存 PDF</button>'+
+      '<button type="button" id="ppBack">返回填表</button>'+
+      '<p class="pp-tip"><b>安卓</b>：打印界面顶部把打印机选成「另存为 PDF」。<br>'+
+      '<b>iPhone</b>：在打印预览上两指张开，变成 PDF 后点右上角分享保存。<br>'+
+      '点了没反应，说明还在微信等 app 里，要先用系统浏览器打开。</p>'+
+    '</div>'+d.body.innerHTML;
+  var pg=document.querySelector(".pg");
+  /* 不能用 innerWidth：手机浏览器发现内容比屏幕宽会自动缩小整页，innerWidth 随之变大
+     （实测 375 宽的视口里读到 784），算出的缩放≈1，版面照样溢出，还自我强化。
+     documentElement.clientWidth 是布局视口宽度，不受这种自动缩放影响。 */
+  function zoomFit(){
+    if(!pg) return;
+    var w=document.documentElement.clientWidth||window.innerWidth;
+    pg.style.zoom=Math.min(1,(w-8)/794);
+  }
+  zoomFit(); window.addEventListener("resize",zoomFit);
+  document.getElementById("ppPrint").onclick=function(){ window.print(); };
+  document.getElementById("ppBack").onclick=function(){ location.href=location.pathname; };
 }
 
 /* 导出有三条路，取决于这份页面跑在哪里：
@@ -1416,13 +1514,16 @@ if(IN_ARTIFACT){
   window.claude.use("downloads").then(function(d){ DL=d; }).catch(function(){});
 }
 
-/* 安卓与各家内置浏览器对 <a download> 的支持很不一致：
-   属性存在不代表真能下载，实测点下去是把 blob 地址甩给外部应用，
-   而外部应用读不了 blob（它只在生成它的那个网页里有效）。
-   所以这些环境一律不赌下载，直接给文本框。 */
+/* 手机上这三件事都靠不住，只能按环境分流：
+   - <a download>：属性存在不代表能下载，安卓会把 blob 地址甩给外部应用
+   - print()：微信等内置浏览器里是空操作；系统浏览器里从 iframe 发起也不可靠
+   - 兜底文本框：在侧栏里，一开预览层就被整个盖住，点了等于没反应
+   所以手机上主推「存为图片 → 长按保存」，这是内置浏览器里唯一稳定的出文件方式。 */
 var UA=navigator.userAgent||"";
-var CAN_DL = ("download" in document.createElement("a"))
-  && !/Android|MicroMessenger|QQ\/|Quark|UCBrowser|Baidu/i.test(UA);
+var IS_MOBILE=/Android|iPhone|iPad|iPod|Mobile|HarmonyOS/i.test(UA)
+  || (/Macintosh/.test(UA) && navigator.maxTouchPoints>1);      // iPadOS 伪装成 Mac
+var IN_APP=/MicroMessenger|QQ\/|Weibo|DingTalk|Lark|Feishu|AlipayClient|baiduboxapp|Quark|UCBrowser|aweme|NewsArticle/i.test(UA);
+var CAN_DL=("download" in document.createElement("a")) && !IS_MOBILE;
 
 function blobSave(filename,data){
   if(!CAN_DL) return false;
@@ -1455,7 +1556,8 @@ function doExport(btn,filename,data){
     });
 }
 
-renderAll();
+var PRINT_MODE = !IN_ARTIFACT && /[?&]print=resume(&|$)/.test(location.search);
+if(PRINT_MODE) openPrintPage(); else renderAll();
 </script>
 
 </body>
