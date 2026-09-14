@@ -1,0 +1,1244 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="description" content="艺体美求职资格自查：填完一张表，看清自己哪些硬门槛过得了、还缺哪张凭证、手上的公告能不能报。">
+<style>
+:root{color-scheme:light dark}
+html,body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<title>资格自查台</title>
+<style>
+:root{
+  --paper:#E8ECEE; --surface:#FFFFFF; --sunk:#F2F5F6; --field:#FBFCFC;
+  --rule:#C6D0D5; --rule-soft:#E0E7EA;
+  --ink:#111A1F; --body:#3A464D; --mute:#74838B;
+  --indigo:#1B4D6B; --indigo-bg:#E2EDF2;
+  --pass:#1D6448; --pass-bg:#E2F0E9;
+  --fail:#A32F25; --fail-bg:#F8E6E3;
+  --hold:#835B12; --hold-bg:#F8EFDA;
+  --serif:"Songti SC","Source Han Serif SC","Noto Serif CJK SC","SimSun",STSong,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Courier New",monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1316; --surface:#161D21; --sunk:#12181B; --field:#1A2226;
+    --rule:#293439; --rule-soft:#1E272B;
+    --ink:#E7EDEF; --body:#B2BFC5; --mute:#7A8991;
+    --indigo:#82B6D2; --indigo-bg:#10252F;
+    --pass:#5CBE93; --pass-bg:#0E2620;
+    --fail:#E9857A; --fail-bg:#2A1513;
+    --hold:#D6AC57; --hold-bg:#281F0F;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1316; --surface:#161D21; --sunk:#12181B; --field:#1A2226;
+  --rule:#293439; --rule-soft:#1E272B;
+  --ink:#E7EDEF; --body:#B2BFC5; --mute:#7A8991;
+  --indigo:#82B6D2; --indigo-bg:#10252F;
+  --pass:#5CBE93; --pass-bg:#0E2620;
+  --fail:#E9857A; --fail-bg:#2A1513;
+  --hold:#D6AC57; --hold-bg:#281F0F;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--body);font-family:var(--sans);
+  font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.shell{max-width:1180px;margin:0 auto;padding:34px 20px 80px}
+
+/* ── 抬头 ───────────────────────────────── */
+.masthead{border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:8px}
+.stamp{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:var(--indigo);
+  text-transform:uppercase;margin:0 0 9px}
+h1{font-family:var(--serif);font-weight:700;font-size:clamp(27px,4.4vw,38px);
+  margin:0 0 10px;color:var(--ink);letter-spacing:.02em;line-height:1.2;text-wrap:balance}
+.lede{margin:0;font-size:15px;max-width:60ch}
+.lede b{color:var(--ink);font-weight:700}
+
+/* ── 主栅格 ──────────────────────────────── */
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 306px;gap:26px;align-items:start;margin-top:4px}
+/* 必须 minmax(0,1fr)：单纯写 1fr 时轨道最小宽度是 auto，
+   会被里面最宽的内容撑破，整页横向滚动 */
+@media(max-width:880px){.grid{grid-template-columns:minmax(0,1fr);gap:0}
+  .side{order:-1;margin:0 0 18px}}   /* 结论摆在表格前面，手机上才看得见 */
+
+/* ── 学科选择 ─────────────────────────────── */
+.discbar{display:flex;gap:0;border:1px solid var(--rule);border-radius:5px;overflow:hidden;
+  background:var(--surface);margin:20px 0 7px}
+.discbar button{flex:1 1 0;min-width:0;appearance:none;border:0;border-right:1px solid var(--rule);
+  background:transparent;font:500 14px/1 var(--sans);color:var(--body);padding:12px 6px;
+  cursor:pointer;transition:background .12s}
+.discbar button:last-child{border-right:0}
+.discbar button:hover{background:var(--sunk)}
+.discbar button[aria-pressed=true]{background:var(--indigo);color:#fff;font-weight:700}
+.discbar button:focus-visible{outline:2px solid var(--indigo);outline-offset:-3px}
+.verified{font-size:12.5px;color:var(--mute);margin:0 0 16px;display:flex;gap:7px;
+  align-items:baseline;flex-wrap:wrap}
+.verified .vb{font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:2px 6px;
+  border-radius:3px;flex:none;font-weight:600}
+.vb.real{background:var(--pass-bg);color:var(--pass)}
+.vb.desk{background:var(--hold-bg);color:var(--hold)}
+
+/* ── 表单分组 ─────────────────────────────── */
+.group{background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+  margin-bottom:16px;overflow:hidden}
+.ghead{display:flex;align-items:baseline;gap:11px;padding:13px 17px;background:var(--sunk);
+  border-bottom:1px solid var(--rule)}
+.gkey{font-family:var(--mono);font-size:12px;font-weight:600;color:#fff;background:var(--indigo);
+  border-radius:3px;padding:1px 7px;flex:none}
+.gname{font-family:var(--serif);font-size:16.5px;font-weight:600;color:var(--ink)}
+.gwhy{font-size:12.5px;color:var(--mute);margin-left:auto;text-align:right}
+@media(max-width:560px){.gwhy{display:none}}
+.gbody{padding:16px 17px}
+
+/* 字段 */
+.fields{display:grid;gap:13px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px}
+@media(max-width:620px){.f2,.f3{grid-template-columns:1fr}}
+label{display:block}
+.lb{display:block;font-size:12.5px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.lb .req{color:var(--fail);font-weight:700}
+input,select,textarea{width:100%;font:400 14px/1.55 var(--sans);color:var(--ink);
+  background:var(--field);border:1px solid var(--rule);border-radius:4px;padding:8px 10px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--indigo);outline-offset:-1px;
+  border-color:var(--indigo)}
+textarea{resize:vertical;min-height:58px}
+input.mono{font-family:var(--mono);letter-spacing:.04em}
+/* 追问提示 —— 这套工具的灵魂：字段旁边那一句 */
+.probe{font-size:12px;line-height:1.6;color:var(--indigo);margin:5px 0 0;
+  padding-left:11px;border-left:2px solid var(--indigo-bg)}
+.probe b{font-weight:600}
+
+/* 资产行 */
+.rows{display:grid;gap:11px}
+.row{border:1px solid var(--rule-soft);border-radius:5px;padding:12px 13px;background:var(--sunk)}
+.rowtop{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.rowtop .n{font-family:var(--mono);font-size:10.5px;color:var(--mute);flex:none}
+.del{margin-left:auto;appearance:none;border:1px solid var(--rule);background:var(--surface);
+  color:var(--mute);font:400 12px/1 var(--sans);padding:5px 9px;border-radius:4px;cursor:pointer}
+.del:hover{color:var(--fail);border-color:var(--fail)}
+.add{appearance:none;border:1px dashed var(--rule);background:transparent;color:var(--indigo);
+  font:500 13px/1 var(--sans);padding:10px;border-radius:5px;cursor:pointer;width:100%;margin-top:11px}
+.add:hover{background:var(--indigo-bg);border-style:solid}
+
+/* 岗位判定 */
+.verdict{margin-top:11px;padding:11px 13px;background:var(--surface);
+  border:1px solid var(--rule-soft);border-radius:5px}
+.verdict>b{display:block;font-size:12.5px;color:var(--ink);margin-bottom:7px}
+.vr{display:grid;grid-template-columns:auto 1fr;gap:8px;font-size:12.5px;line-height:1.6;
+  padding:3px 0;align-items:start}
+.vr .mark{font-size:10.5px;padding:1px 5px}
+
+/* 行内警告 */
+.flag{display:flex;gap:8px;font-size:12.5px;line-height:1.62;margin-top:9px;padding:9px 11px;
+  border-radius:4px;align-items:flex-start}
+.flag .mk{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.06em;
+  flex:none;padding:1px 5px;border-radius:2px;margin-top:2px}
+.flag.warn{background:var(--hold-bg);color:var(--hold)}
+.flag.warn .mk{background:var(--hold);color:var(--surface)}
+.flag.bad{background:var(--fail-bg);color:var(--fail)}
+.flag.bad .mk{background:var(--fail);color:var(--surface)}
+.flag.info{background:var(--indigo-bg);color:var(--indigo)}
+.flag.info .mk{background:var(--indigo);color:#fff}
+.flag b{font-weight:700}
+
+/* ── 侧栏 ───────────────────────────────── */
+.side{position:sticky;top:18px;display:grid;gap:13px}
+@media(max-width:880px){.side{position:static}}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.ptitle{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--mute);padding:11px 15px 0}
+.tally{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--rule-soft);margin-top:11px}
+.t{background:var(--surface);padding:12px 6px;text-align:center}
+.t b{display:block;font-family:var(--mono);font-size:23px;font-weight:600;line-height:1.1;
+  font-variant-numeric:tabular-nums}
+.t small{display:block;font-size:11px;color:var(--mute);margin-top:3px}
+.t.ok b{color:var(--pass)} .t.no b{color:var(--fail)} .t.hd b{color:var(--hold)}
+.gates{padding:4px 15px 14px}
+.gate{display:grid;grid-template-columns:auto 1fr;gap:9px;padding:8px 0;
+  border-bottom:1px solid var(--rule-soft);font-size:13px;line-height:1.55;align-items:start}
+.gate:last-child{border-bottom:0}
+.mark{font-family:var(--mono);font-size:11px;font-weight:600;padding:2px 6px;border-radius:3px;
+  flex:none;margin-top:1px;white-space:nowrap}
+.mark.p{background:var(--pass-bg);color:var(--pass)}
+.mark.f{background:var(--fail-bg);color:var(--fail)}
+.mark.h{background:var(--hold-bg);color:var(--hold)}
+.mark.i{background:var(--sunk);color:var(--mute);border:1px solid var(--rule-soft)}
+.mark.b{background:transparent;color:var(--mute);border:1px dashed var(--rule)}
+.gate .gt{color:var(--ink);font-weight:500}
+.gate .gn{color:var(--mute);font-size:12px;display:block;margin-top:1px;line-height:1.5}
+
+.act{display:grid;gap:8px;padding:14px 15px}
+.btn{appearance:none;border:1px solid var(--indigo);background:var(--indigo);color:#fff;
+  font:600 14px/1 var(--sans);padding:11px;border-radius:4px;cursor:pointer;text-align:center}
+.btn:hover{filter:brightness(1.12)}
+.btn.ghost{background:transparent;color:var(--indigo)}
+.btn.ghost:hover{background:var(--indigo-bg);filter:none}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.blocked{margin:0;font-size:11.5px;line-height:1.62;color:var(--fail);
+  background:var(--fail-bg);border-radius:4px;padding:9px 11px}
+.blocked b{font-weight:700}
+.blocked button{appearance:none;border:1px solid var(--fail);background:transparent;
+  color:var(--fail);font:600 11.5px/1 var(--sans);padding:6px 9px;border-radius:3px;
+  cursor:pointer;margin-top:7px}
+.blocked button:hover{background:var(--fail);color:var(--surface)}
+#fallback{margin-top:4px;min-height:150px;font-family:var(--mono);font-size:11px}
+.privacy{font-size:11.5px;line-height:1.65;color:var(--mute);padding:0 15px 14px}
+
+/* ── 结论表 ──────────────────────────────── */
+.report{margin-top:30px;background:var(--surface);border:1px solid var(--ink);border-radius:6px;
+  overflow:hidden}
+.rhead{padding:16px 20px;border-bottom:2px solid var(--ink);display:flex;
+  align-items:baseline;gap:12px;flex-wrap:wrap}
+.rhead h2{font-family:var(--serif);font-size:19px;font-weight:700;color:var(--ink);margin:0}
+.rhead .meta{font-family:var(--mono);font-size:11px;color:var(--mute);margin-left:auto}
+.rsec{padding:16px 20px;border-bottom:1px solid var(--rule-soft)}
+.rsec:last-child{border-bottom:0}
+.rsec h3{font-size:13px;font-weight:700;color:var(--ink);margin:0 0 3px;
+  display:flex;align-items:center;gap:8px}
+.rsec h3 .cnt{font-family:var(--mono);font-size:11px;font-weight:400;color:var(--mute)}
+.rsec .rnote{font-size:12.5px;color:var(--mute);margin:0 0 11px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:13.5px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+th{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--mute);font-weight:400;background:var(--sunk);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td b{color:var(--ink);font-weight:600}
+td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-top:2px}
+.empty{font-size:13px;color:var(--mute);font-style:normal;padding:4px 0}
+.finding{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:9px 0;
+  border-bottom:1px solid var(--rule-soft);font-size:13.5px;line-height:1.6;align-items:start}
+.finding:last-child{border-bottom:0}
+.sev{font-family:var(--mono);font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:3px;
+  flex:none;margin-top:2px;white-space:nowrap}
+.sev.s3{background:var(--fail-bg);color:var(--fail)}
+.sev.s2{background:var(--hold-bg);color:var(--hold)}
+.sev.s1{background:var(--indigo-bg);color:var(--indigo)}
+.finding .cat{font-family:var(--mono);font-size:11px;color:var(--mute);margin-right:5px}
+
+.foot{margin-top:26px;padding-top:18px;border-top:1px solid var(--rule);
+  font-size:12.5px;color:var(--mute);line-height:1.8}
+.foot b{color:var(--ink)}
+.exbanner{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px;min-width:0;
+  background:var(--hold-bg);color:var(--hold);border:1px solid var(--hold);
+  border-radius:5px;padding:10px 14px;margin-bottom:16px}
+.exbanner b{font-weight:700}
+.exbanner button{margin-left:auto;flex:none;appearance:none;border:1px solid var(--hold);
+  background:transparent;color:var(--hold);font:600 12.5px/1 var(--sans);
+  padding:7px 12px;border-radius:4px;cursor:pointer}
+.exbanner button:hover{background:var(--hold);color:var(--surface)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="shell">
+  <div class="masthead">
+    <p class="stamp">资格审查 · 自查用</p>
+    <h1>资格自查台</h1>
+    <p class="lede">国内编制类招聘是<b>资格硬筛加原件核验</b>，不是关键词匹配。这里不帮你把话说漂亮，只回答两件事：<b>你现在能不能报</b>，以及<b>你还缺哪张纸</b>。</p>
+  </div>
+
+  <div class="discbar" id="discbar" role="group" aria-label="选择专业方向"></div>
+  <p class="verified" id="verified"></p>
+
+  <div class="exbanner" id="exbanner">
+    <b>当前是示例数据</b><span>填的是一位体育生的真实结构（已脱敏），让你先看清这张表怎么用。</span>
+    <button type="button" id="clearAll">清空，填我自己的</button>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div id="form"></div>
+
+      <div class="report" id="report"></div>
+
+      <p class="foot">
+        <b>这张表算不了的事：</b>招聘规则有地域性和时效性，专业目录、证书门槛、报名窗口每年都在变。
+        这里的结论只是让你知道该去核实什么、该去补哪张纸——<b>最终一律以当年当地的招聘公告原文为准</b>。
+      </p>
+    </div>
+
+    <aside class="side">
+      <div class="panel">
+        <p class="ptitle">审查概览</p>
+        <div class="tally">
+          <div class="t ok"><b id="tOk">0</b><small>硬门槛满足</small></div>
+          <div class="t no"><b id="tNo">0</b><small>硬门槛不满足</small></div>
+          <div class="t hd"><b id="tHd">0</b><small>待确认</small></div>
+        </div>
+        <div class="gates" id="gates"></div>
+      </div>
+      <div class="panel">
+        <p class="ptitle">导出</p>
+        <div class="act">
+          <button class="btn" type="button" id="dlJson">下载 profile.json</button>
+          <button class="btn ghost" type="button" id="dlReport">下载审查结论</button>
+          <button class="btn ghost" type="button" id="dlResume">生成简历</button>
+          <p class="blocked" id="blocked" hidden></p>
+          <textarea id="fallback" hidden aria-label="导出内容，手动复制"></textarea>
+        </div>
+        <p class="privacy">你填的内容<b>只存在这台设备的浏览器里</b>，不上传、不经过任何服务器。换设备或清了浏览器数据就没了——要留底请下载 JSON。</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+/* ═══════════════ 学科判据 ═══════════════
+   体育那条是跑通一次真实求职才敢写的；另外三条来自公开资料调研，
+   尚未经过真人报名验证。这个区别必须让使用者看见，而不是藏在文档里。 */
+var DISC = {
+  sports:{name:"体育",validated:true,
+    note:"跑通过一次真实求职：三个硬门槛结论都是实际报名时撞出来的。",
+    portfolio:{gateRole:"面试参考",format:"动作示范视频（多项目串联，展示可任教广度）"},
+    gates:[
+      {k:"cred:教师资格",t:"教师资格证",eff:"硬门槛",n:"学段与学科必须对口，不对口等同于无效。"},
+      {k:"cred:运动员等级",t:"运动员等级证书",eff:"硬门槛",n:"教练员岗常直接卡二级或一级；项目不对口无效。"},
+      {k:"cred:语言文字",t:"普通话等级",eff:"硬门槛",n:"教师岗通常要求二级乙等及以上。"},
+      {k:"cred:裁判员等级",t:"裁判员等级",eff:"加分项",n:"带队与赛事组织岗位有实际用处。"}],
+    probes:{ach:"风速多少？超过 +2.0 m/s 不能用于等级认定。电计时还是手计时？这个成绩和证书上的达标成绩是不是同一个数？",
+            exp:"这家单位是什么性质？商业培训机构通常不被认定为专业运动队，满足不了“三年以上专业训练经历”这类条款。"},
+    traps:["超风速成绩与证书达标成绩并存——两份材料会同时交到一个人手里",
+           "“师范院校”不等于“师范类专业”，运动训练多为非师范，要教务处认定",
+           "“会打”与“能教”是两回事，教师岗面试有专项模拟实训，当场要示范"]},
+
+  music:{name:"音乐",validated:false,
+    note:"来自公开资料调研，尚未经过真实报名验证。用之前请以当年当地公告复核。",
+    portfolio:{gateRole:"报名必备",format:"完整演奏视频，不剪辑、不修音、全身入镜"},
+    gates:[
+      {k:"cred:教师资格",t:"教师资格证",eff:"硬门槛",n:"进中小学的硬门槛，与考级无关。"},
+      {k:"portfolio",t:"视频审听 + 现场专业考试",eff:"硬门槛",n:"院团招聘的真实门槛。中国交响乐团公告原文：一试第一环节，未提供视频者无法进入下一环节。"},
+      {k:"cred:艺术考级",t:"社会艺术水平考级证书",eff:"仅参考",n:"《社会艺术水平考级管理办法》第二条定义其为“测评和给予指导”，宗旨是普及艺术教育——立法目的就不是职业准入。"}],
+    probes:{ach:"主办方是谁？是比赛还是展演？",
+            exp:"是院团、院校还是商业机构？职能是演奏、教学还是行政？"},
+    traps:["把考级证书当核心资质陈列——业内视其为普及性测评，写在显要位置暴露不懂行",
+           "自称“演奏级”但发证方是中国音协——该体系只有 1–10 级，没有演奏级，设演奏级的是中央音乐学院、上海音乐学院",
+           "剪辑过或修过音的演奏视频——审听方一听即知，比不交更糟"]},
+
+  dance:{name:"舞蹈",validated:false,
+    note:"来自公开资料调研，尚未经过真实报名验证。用之前请以当年当地公告复核。",
+    portfolio:{gateRole:"报名必备",format:"剧目片段 + 基本功组合，全身入镜、不加特效"},
+    gates:[
+      {k:"cred:教师资格",t:"教师资格证",eff:"硬门槛",n:"只有教育部门颁发的才算。协会发的不是。"},
+      {k:"portfolio",t:"现场考核（基本功 + 剧目）",eff:"硬门槛",n:"院团招聘的真实门槛，普遍要求先交视频再到场。"},
+      {k:"manual:身高年龄",t:"身高 / 年龄区间",eff:"硬门槛",n:"院团岗常有明确区间，属资格硬筛，不符合直接不予报名。"},
+      {k:"cred:艺术考级",t:"社会艺术水平考级证书",eff:"仅参考",n:"同音乐，属普及性测评。"}],
+    probes:{ach:"参加的是比赛还是展演？“桃李杯”现名“全国青少年舞蹈教育教学成果展示活动”，是文旅部主办的展演，向参演项目颁证，不产生名次。",
+            exp:"是院团、院校还是商业机构？"},
+    traps:["把中国舞协停发的“教师资格证”当教师资格证写——该协会 2020-01-24 起已全面停发",
+           "把桃李杯等展演写成“获奖”——展演不产生名次，性质上就是错的",
+           "只交剧目不交基本功——考核方要看的是可塑性"]},
+
+  art:{name:"美术设计",validated:false,
+    note:"来自公开资料调研，尚未经过真实报名验证。用之前请以当年当地公告复核。",
+    portfolio:{gateRole:"报名必备",format:"作品集 PDF（图多于字），另备高清原图"},
+    gates:[
+      {k:"cred:教师资格",t:"教师资格证",eff:"硬门槛",n:"进中小学的硬门槛。"},
+      {k:"portfolio",t:"作品集",eff:"硬门槛",n:"无作品集基本不进入评审，简历只是索引。"},
+      {k:"manual:美协",t:"中国美协会员",eff:"加分项",n:"积分制入会，全国美展金奖记 9 分——把专业能力量化成了可验证货币。"},
+      {k:"cred:艺术考级",t:"社会艺术水平考级证书",eff:"仅参考",n:"同音乐，属普及性测评。"}],
+    probes:{ach:"是全国美展、省级美展，还是机构评选？主办方是谁？",
+            exp:"是学校、设计机构还是工作室？作品的分工写清楚了吗？"},
+    traps:["把 2015 年已由国发〔2015〕11 号取消的“室内设计师资格证”当现行国家职业资格写",
+           "合作作品不标注分工——面试追问细节时必然露馅",
+           "作品集堆数量不挑质量——评审只看最弱的那几件"]}
+};
+
+/* 伪资质识别：命中即拦，不等到面试才被戳破 */
+var FAKES = [
+  {re:/(中国舞(蹈家)?协会?|舞协).*(教师资格|教资)|(教师资格).*(舞协|中国舞蹈家协会)/,
+   msg:"中国舞蹈家协会自 2020-01-24 起已全面停发该证书，且它本来也不是教师资格证。山东省教育厅明确答复：只有教育部门颁发的才能叫教师资格证。"},
+  {re:/室内设计师.*(资格证|职业资格)|(资格证).*室内设计师/,
+   msg:"该职业资格已由《国务院关于取消和调整一批行政审批项目等事项的决定》（国发〔2015〕11 号）取消。现存同名证书均为协会评价，不属国家职业资格。"},
+  {re:/(音协|中国音乐家协会)[^，。]{0,12}演奏级|演奏级[^，。]{0,12}(音协|中国音乐家协会)/,
+   msg:"中国音协考级只有 1–10 级，没有“演奏级”。设演奏级的是中央音乐学院、上海音乐学院——发证方写错，比级别写低更伤。"}
+];
+
+var CRED_CATS=["运动员等级","裁判员等级","教练员资质","教师资格","语言文字",
+               "职业技能等级(人社部)","注册类职业资格","艺术考级","行业协会评价","其他"];
+var ORG_NATURES=["省级以上专业运动队","职业俱乐部运动队","高校高水平运动队","地市级以上体校",
+                 "商业培训机构","公办学校","文艺院团","其他"];
+var PROOFS=["有原件","有照片/复印件","仅电子版","暂无凭证"];
+var EVIDENCE=["赛事名次","等级证书","课程修习","自述掌握"];
+
+/* ═══════════════ 状态 ═══════════════ */
+var EXAMPLE = {
+  discipline:"sports", isExample:true,
+  me:{name:"张某某",phone:"",email:"",target:"高中体育教师 ｜ 田径方向 · 一专多能"},
+  edu:{school:"某某师范大学",major:"运动训练",code:"B040202",normal:"否",
+       level:"本科",gradYear:"2027",rank:"30/78",birthYear:"2004"},
+  jobs:[
+    {name:"某区高中体育教师（统招）",city:"深圳",edu:"本科及以上",normalReq:"不要求",
+     majors:"B0402 体育学类",tzSubject:"高中体育",athLevel:"",athDisc:"",
+     mandarin:"二级乙等",ageMax:"30",other:""},
+    {name:"某县初中体育教师",city:"惠州博罗",edu:"本科及以上",normalReq:"要求",
+     majors:"B040202 运动训练",tzSubject:"初中体育",athLevel:"",athDisc:"",
+     mandarin:"二级乙等",ageMax:"30",other:""},
+    {name:"体育教练员（田径）",city:"深圳",edu:"本科及以上",normalReq:"不要求",
+     majors:"B0402 体育学类",tzSubject:"",athLevel:"一级",athDisc:"田径",
+     mandarin:"",ageMax:"30",other:"须具备三年以上专业运动队训练经历"}
+  ],
+  creds:[
+    {name:"国家一级运动员证书",cat:"运动员等级",disc:"田径 100m",level:"国家一级",
+     issuer:"某省体育局",status:"已取得",note:"",proof:"有原件",
+     qeName:"2023 年中国田协青少年体校俱乐部田径联赛总决赛",qeMark:"10.92"},
+    {name:"教师资格证（高中体育）",cat:"教师资格",disc:"高中体育",level:"高中",
+     issuer:"",status:"部分完成",note:"笔试科目一、科目三已过，科目二未过；须先过科二方可报面试",
+     proof:"暂无凭证",qeName:"",qeMark:""},
+    {name:"普通话水平测试等级证书",cat:"语言文字",disc:"普通话",level:"二级乙等",
+     issuer:"",status:"已取得",note:"",proof:"有原件",qeName:"",qeMark:""}],
+  achs:[
+    {title:"体育单招全国田径综合分第一名",lv:"国家级",rank:"第一名",mark:"综合 92.95",
+     nature:"竞赛",date:"2023-06",wind:"",timing:"",proof:"有照片/复印件"},
+    {title:"全国体校俱乐部田径比赛 100m",lv:"国家级",rank:"第三名",mark:"10.79s",
+     nature:"竞赛",date:"2023-08",wind:"+2.4",timing:"电计时",proof:"有照片/复印件"}],
+  exps:[
+    {org:"某体考培训机构",nature:"商业培训机构",role:"短跑主教",span:"2024.01–2024.02",
+     duty:"负责短跑队伍训练任务制定与周期安排",canProof:"不确定"},
+    {org:"某田径俱乐部",nature:"商业培训机构",role:"运动员（本人训练经历）",span:"2021.01–2023.08",
+     duty:"本人短跑专项训练，达一级运动员标准",canProof:"不确定"}],
+  works:[{title:"综合技能展示视频",kind:"视频",proves:"篮球·跨栏·短跑·跳高多项目动作示范",proof:"有原件"}],
+  skills:[{d:"篮球",ev:"赛事名次",detail:"校级联赛冠军、亚军"},
+          {d:"跳高",ev:"赛事名次",detail:"188cm 校运会第五名"},
+          {d:"乒乓球",ev:"自述掌握",detail:"可承担普及性课程"}],
+  cons:{cities:"城市A、城市B",pay:"8000",press:"需自给",weekend:"尽量避免"}
+};
+var S = null;
+try{ var saved=localStorage.getItem("zgzc.v1"); if(saved) S=JSON.parse(saved); }catch(e){}
+if(!S) S=JSON.parse(JSON.stringify(EXAMPLE));
+if(!S.me) S.me={name:"",phone:"",email:"",target:""};   // 旧草稿兼容
+if(!S.jobs) S.jobs=[];
+if(S.edu.birthYear==null) S.edu.birthYear="";
+
+function save(){ try{ localStorage.setItem("zgzc.v1",JSON.stringify(S)); }catch(e){} }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function el(id){ return document.getElementById(id); }
+
+/* ═══════════════ 核查 ═══════════════ */
+function audit(){
+  var f=[], D=DISC[S.discipline];
+
+  // 师范类：师范院校 ≠ 师范类专业
+  if(S.edu.normal==="不确定" && S.edu.school)
+    f.push({s:2,c:"硬门槛",t:"“本科专业须为师范类”是广东等地教师岗的常见条款，而<b>师范院校不等于师范类专业</b>。只有教务处的正式认定说了算——这一条决定你能不能报那一批岗。"});
+  if(S.edu.normal==="否")
+    f.push({s:2,c:"硬门槛",t:"你的专业非师范类。凡公告写明“以本科专业报考的，本科专业须为师范类专业”的岗位<b>一律不可报</b>——今后每份公告都要逐字找这一句。"});
+  if(S.edu.code && !/^[A-Z]\d{4,6}$/i.test(S.edu.code.trim()))
+    f.push({s:1,c:"硬门槛",t:"专业代码格式看着不对（通常形如 <b>B040202</b>）。四位代码含其下所有六位专业，这个代码直接决定能不能报名，去教务处或成绩单上核准。"});
+
+  // 证书
+  S.creds.forEach(function(c,i){
+    if(!c.name) return;
+    FAKES.forEach(function(k){ if(k.re.test(c.name))
+      f.push({s:3,c:"硬门槛",t:"第 "+(i+1)+" 张证「"+esc(c.name)+"」<b>名实不符</b>。"+k.msg+" 作为资质陈列会被当场质疑。"}); });
+    if(c.cat==="艺术考级")
+      f.push({s:2,c:"硬门槛",t:"「"+esc(c.name)+"」属社会艺术水平考级，在求职中<b>近乎无效力</b>。可以写，但不要放在显要位置当核心资质——那会暴露不懂行。"});
+    if(c.status==="部分完成"&&!c.note)
+      f.push({s:3,c:"措辞风险",t:"「"+esc(c.name)+"」是部分完成却没写清进度。<b>“已通过”和“过了两科”是两回事</b>，资格复审时按后者算。把卡在哪一步写出来。"});
+    if(c.cat==="教师资格"&&c.status==="部分完成")
+      f.push({s:3,c:"资格时效",t:"教资<b>笔试单科成绩有效期 2 年</b>，报面试时三科必须同时在有效期内。先去查已过科目的通过时间——若在补考科目通过前到期，已过的科目作废要重考。"});
+    if(c.status==="已取得"&&c.proof==="暂无凭证")
+      f.push({s:2,c:"凭证缺失",t:"「"+esc(c.name)+"」写作已取得却没有凭证。<b>资格复审要交原件</b>，现在就去确认它在谁手里、补办要多久。"});
+  });
+
+  // 成绩
+  var windy=[];
+  S.achs.forEach(function(a,i){
+    if(!a.title) return;
+    var w=parseFloat(String(a.wind).replace("+",""));
+    if(!isNaN(w)&&w>2.0){
+      windy.push(a);
+      f.push({s:3,c:"技术条件",t:"「"+esc(a.title)+"」风速 "+esc(a.wind)+" m/s <b>超过 +2.0，不能用于等级认定</b>。这个成绩不要和该场赛事绑在一起写——它多半和你证书上的达标成绩对不上。"});
+    }
+    if(a.nature==="展演展示"&&a.rank&&a.rank!=="参演")
+      f.push({s:3,c:"措辞风险",t:"「"+esc(a.title)+"」是<b>展演不是比赛</b>，不产生名次。写成“获奖”性质上就是错的，名次位置应当写“参演”。"});
+    if(a.proof==="暂无凭证")
+      f.push({s:2,c:"凭证缺失",t:"「"+esc(a.title)+"」没有凭证。奖项和名次是最容易被要求出示的一类，现在补还来得及。"});
+  });
+  // 成绩与证书达标成绩交叉
+  windy.forEach(function(a){
+    S.creds.forEach(function(c){
+      if(c.qeMark && String(a.mark).indexOf(c.qeMark)<0)
+        f.push({s:3,c:"跨材料冲突",t:"简历上的 <b>"+esc(a.mark)+"</b> 与证书达标成绩 <b>"+esc(c.qeMark)+"</b> 指向同一场赛事。<b>两份材料会同时交到一个人手里</b>——这条不处理，前面所有硬资历都会被连带怀疑。"});
+    });
+  });
+
+  // 经历
+  var hasPro=false;
+  S.exps.forEach(function(e){
+    if(!e.org) return;
+    if(["省级以上专业运动队","职业俱乐部运动队","地市级以上体校"].indexOf(e.nature)>=0) hasPro=true;
+    if(e.canProof==="开不出来")
+      f.push({s:2,c:"凭证缺失",t:"「"+esc(e.org)+"」开不出经历证明。<b>开不出证明的经历，在资格复审时等于不存在</b>——趁还联系得上赶紧要。"});
+  });
+  if(S.discipline==="sports" && !hasPro && S.exps.some(function(e){return e.org;}))
+    f.push({s:2,c:"硬门槛",t:"你填的单位全是商业机构或学校。凡以<b>“专业运动队训练经历”</b>为门槛的教练员岗都不满足——这类岗改走运动员等级证路径，不要主张训练经历。"});
+
+  // 技能
+  S.skills.forEach(function(k){
+    if(k.ev==="自述掌握"&&k.d)
+      f.push({s:1,c:"措辞风险",t:"「"+esc(k.d)+"」只是会，没有可证明的名次或证书。写成暗示专业水平的措辞很危险——<b>教师岗面试有专项模拟实训，当场就要示范</b>。写“可承担普及性教学”是安全且诚实的。"});
+  });
+
+  // 作品集
+  if(D.portfolio.gateRole==="报名必备" && S.works.length
+     && !S.works.some(function(w){return w.title;}))
+    f.push({s:3,c:"凭证缺失",t:D.name+"的作品/演示是<b>制度性准入材料，不是加分项</b>（"+esc(D.portfolio.format)+"）。你一件都没填——这不是“再补补”的事，是很多岗位连报名都过不去。"});
+
+  f.sort(function(a,b){return b.s-a.s;});
+  return f;
+}
+
+/* 硬门槛判定 */
+function gates(){
+  return DISC[S.discipline].gates.map(function(g){
+    var st="hold", why="";
+    if(g.k.indexOf("cred:")===0){
+      var cat=g.k.slice(5);
+      var any=S.creds.filter(function(c){return c.name;}).length;
+      var hit=S.creds.filter(function(c){return c.cat===cat && c.name;});
+      // "还没填"和"没有这张证"是两回事。一张表还空着就报不满足，
+      // 会让刚打开的人以为自己根本没资格——那不是结论，是没问过。
+      if(!any){ st="blank"; why="还没填证书"; }
+      else if(!hit.length){ st = g.eff==="硬门槛" ? "fail" : "none";
+        why = g.eff==="硬门槛" ? "没有这一类证书" : "没有，但这一项不是必需"; }
+      else{
+        var got=hit.filter(function(c){return c.status==="已取得";});
+        if(got.length){ st="pass"; why=got.map(function(c){return c.level||c.name;}).join("、"); }
+        else{ st="hold"; why=hit[0].status+(hit[0].note?"："+hit[0].note:""); }
+      }
+      if(g.eff==="仅参考"&&hit.length){ st="hold"; why="效力有限，不作核心资质"; }
+    } else if(g.k==="portfolio"){
+      var w=S.works.filter(function(x){return x.title;});
+      if(w.length){ st="pass"; why=w.length+" 件已登记"; }
+      else{ st="fail"; why="一件都没有"; }
+    } else { st = g.eff==="硬门槛" ? "hold" : "none"; why="需对照公告自行核对"; }
+    if(st==="hold" && g.eff!=="硬门槛") st="none";
+    return {t:g.t,eff:g.eff,n:g.n,st:st,why:why,hard:g.eff==="硬门槛"};
+  });
+}
+
+/* ═══════════════ 渲染 ═══════════════ */
+function opt(list,v){ return list.map(function(o){
+  return '<option'+(o===v?" selected":"")+'>'+esc(o)+'</option>'; }).join(""); }
+
+function field(lb,path,ph,cls){
+  return '<label><span class="lb">'+lb+'</span><input class="'+(cls||"")+'" data-p="'+path+'" value="'+
+    esc(dig(path))+'" placeholder="'+esc(ph||"")+'"></label>';
+}
+function sel(lb,path,list){
+  return '<label><span class="lb">'+lb+'</span><select data-p="'+path+'">'+opt(list,dig(path))+'</select></label>';
+}
+function dig(p){ var o=S,a=p.split("."); for(var i=0;i<a.length;i++){ o=o[/^\d+$/.test(a[i])?+a[i]:a[i]]; if(o==null)return""; } return o; }
+function put(p,v){ var o=S,a=p.split("."); for(var i=0;i<a.length-1;i++) o=o[/^\d+$/.test(a[i])?+a[i]:a[i]];
+  o[a[a.length-1]]=v; }
+
+function group(k,name,why,body){
+  return '<div class="group"><div class="ghead"><span class="gkey">'+k+'</span>'+
+    '<span class="gname">'+name+'</span><span class="gwhy">'+why+'</span></div>'+
+    '<div class="gbody">'+body+'</div></div>';
+}
+function probe(t){ return '<p class="probe">'+t+'</p>'; }
+
+function renderForm(){
+  var D=DISC[S.discipline], h="";
+
+  h+=group("A","身份与学历","决定报名资格的第一道门槛",
+    '<div class="fields">'+
+    '<div class="f2">'+field("姓名","me.name","出简历才用得上，自查可留空")+
+      field("目标岗位","me.target","如 高中体育教师 ｜ 田径方向")+'</div>'+
+    '<div class="f2">'+field("手机","me.phone","","mono")+field("邮箱","me.email","","mono")+'</div>'+
+    '<div class="f2">'+field("学校全称","edu.school")+field("专业全称（与学信网一致）","edu.major")+'</div>'+
+    '<div class="f3">'+field("专业代码","edu.code","如 B040202","mono")+
+      sel("是否师范类专业","edu.normal",["不确定","是","否"])+
+      sel("学历层次","edu.level",["本科","专科","硕士","博士"])+'</div>'+
+    '<div class="f3">'+field("毕业年份","edu.gradYear","如 2027")+
+      field("出生年份","edu.birthYear","岗位常限年龄")+
+      field("成绩排名","edu.rank","如 30/78")+'</div>'+
+    probe("<b>师范院校不等于师范类专业。</b>这一条只有教务处的正式认定说了算，而它决定你能不能报一整批岗位——现在就去问。")+
+    '</div>');
+
+  var ch="";
+  S.creds.forEach(function(c,i){
+    ch+='<div class="row"><div class="rowtop"><span class="n">证书 '+(i+1)+'</span>'+
+      '<button class="del" data-del="creds" data-i="'+i+'" type="button">删除</button></div>'+
+      '<div class="fields">'+
+      '<div class="f2">'+field("证书名称","creds."+i+".name","照证书原文写")+
+        sel("类别","creds."+i+".cat",CRED_CATS)+'</div>'+
+      '<div class="f3">'+field("项目 / 科目","creds."+i+".disc","如 田径100m、高中体育")+
+        field("级别","creds."+i+".level","如 国家一级、二级乙等")+
+        field("发证机关","creds."+i+".issuer")+'</div>'+
+      '<div class="f2">'+sel("状态","creds."+i+".status",["已取得","部分完成","备考中","计划中"])+
+        sel("凭证","creds."+i+".proof",PROOFS)+'</div>'+
+      (c.status==="部分完成"||c.status==="备考中"
+        ? '<label><span class="lb">卡在哪一步？<span class="req">必填</span></span><input data-p="creds.'+i+'.note" value="'+esc(c.note)+'" placeholder="如：笔试过两科，科目二未过，须先补考才能报面试"></label>'
+        : "")+
+      (c.cat==="运动员等级"||c.cat==="教练员资质"
+        ? '<div class="f2">'+field("达标赛事","creds."+i+".qeName")+field("证书上的达标成绩","creds."+i+".qeMark","如 10.92")+'</div>'+
+          probe("证书上写的达标成绩<b>可能不等于你的个人最好成绩</b>。把它抄下来，待会儿好和你的比赛成绩对一遍。")
+        : "")+
+      '</div></div>';
+  });
+  h+=group("B","资质证书","艺体美求职的硬通货，逐张过",
+    '<div class="rows">'+ch+'</div><button class="add" data-add="creds" type="button">+ 再加一张证书</button>'+
+    probe("不要笼统想“我有哪些证”。<b>逐张过一遍：级别、科目、发证机关、现在到哪一步了。</b>“已通过”这三个字最容易出事——它常常意味着“过了一部分”。"));
+
+  var ah="";
+  S.achs.forEach(function(a,i){
+    ah+='<div class="row"><div class="rowtop"><span class="n">成绩 '+(i+1)+'</span>'+
+      '<button class="del" data-del="achs" data-i="'+i+'" type="button">删除</button></div>'+
+      '<div class="fields">'+
+      '<div class="f2">'+field("赛事 / 奖项名称","achs."+i+".title")+
+        sel("性质","achs."+i+".nature",["竞赛","展演展示","评优评选","待核实"])+'</div>'+
+      '<div class="f3">'+sel("级别","achs."+i+".lv",["国家级","省级","市级","校级"])+
+        field("名次","achs."+i+".rank","如 第三名")+field("成绩","achs."+i+".mark","如 10.79s")+'</div>'+
+      '<div class="f3">'+field("时间","achs."+i+".date","如 2023-08")+
+        (S.discipline==="sports"
+          ? field("风速 m/s","achs."+i+".wind","如 +2.4")+sel("计时","achs."+i+".timing",["","电计时","手计时"])
+          : '<div></div><div></div>')+'</div>'+
+      '<div class="f2">'+sel("凭证","achs."+i+".proof",PROOFS)+'<div></div></div>'+
+      '</div></div>';
+  });
+  h+=group("C","赛事与奖项","名次和级别比自述可靠",
+    '<div class="rows">'+ah+'</div><button class="add" data-add="achs" type="button">+ 再加一条</button>'+
+    probe(D.probes.ach));
+
+  var eh="";
+  S.exps.forEach(function(e,i){
+    eh+='<div class="row"><div class="rowtop"><span class="n">经历 '+(i+1)+'</span>'+
+      '<button class="del" data-del="exps" data-i="'+i+'" type="button">删除</button></div>'+
+      '<div class="fields">'+
+      '<div class="f2">'+field("单位名称","exps."+i+".org")+sel("单位性质","exps."+i+".nature",ORG_NATURES)+'</div>'+
+      '<div class="f3">'+field("职位 / 身份","exps."+i+".role")+field("起止","exps."+i+".span","如 2024.01–2024.02")+
+        sel("能开经历证明吗","exps."+i+".canProof",["不确定","能开","开不出来"])+'</div>'+
+      '<label><span class="lb">具体做什么？服务多少人？有可量化成果吗？</span>'+
+        '<textarea data-p="exps.'+i+'.duty">'+esc(e.duty)+'</textarea></label>'+
+      '</div></div>';
+  });
+  h+=group("D","经历","单位性质决定它算不算数",
+    '<div class="rows">'+eh+'</div><button class="add" data-add="exps" type="button">+ 再加一段</button>'+
+    probe(D.probes.exp+" 另外：<b>开不出证明的经历，在资格复审时等于不存在。</b>"));
+
+  var wh="";
+  S.works.forEach(function(w,i){
+    wh+='<div class="row"><div class="rowtop"><span class="n">作品 '+(i+1)+'</span>'+
+      '<button class="del" data-del="works" data-i="'+i+'" type="button">删除</button></div>'+
+      '<div class="fields">'+
+      '<div class="f3">'+field("名称","works."+i+".title")+
+        sel("形式","works."+i+".kind",["视频","作品集","演出记录","图文","其他"])+
+        sel("凭证","works."+i+".proof",PROOFS)+'</div>'+
+      '<label><span class="lb">它证明了你什么能力？</span>'+
+        '<input data-p="works.'+i+'.proves" value="'+esc(w.proves)+'"></label>'+
+      '</div></div>';
+  });
+  h+=group("E","作品与展示",D.portfolio.gateRole,
+    '<div class="rows">'+wh+'</div><button class="add" data-add="works" type="button">+ 再加一件</button>'+
+    probe("本专业的作品集属<b>"+esc(D.portfolio.gateRole)+"</b>："+esc(D.portfolio.format)+"。"+
+      (D.portfolio.gateRole==="报名必备"?"<b>这不是锦上添花，是准入材料。</b>":"现场考核仍是主战场，作品是辅助。")));
+
+  var kh="";
+  S.skills.forEach(function(k,i){
+    kh+='<div class="row"><div class="rowtop"><span class="n">技能 '+(i+1)+'</span>'+
+      '<button class="del" data-del="skills" data-i="'+i+'" type="button">删除</button></div>'+
+      '<div class="f3">'+field("项目","skills."+i+".d")+
+        sel("你能拿什么证明","skills."+i+".ev",EVIDENCE)+
+        field("具体","skills."+i+".detail","如 校联赛冠军")+'</div></div>';
+  });
+  h+=group("G","一专多能","分三档：有名次 / 有证书 / 只是会",
+    '<div class="rows">'+kh+'</div><button class="add" data-add="skills" type="button">+ 再加一项</button>'+
+    probe("<b>“会打”和“能教”是两回事。</b>只是会的项目，写成暗示专业水平的措辞，面试专项模拟实训当场就会穿帮。"));
+
+  h+=group("H","现实约束","决定哪些岗位即使能报也不该投",
+    '<div class="fields"><div class="f2">'+field("目标城市","cons.cities","顿号分隔")+
+      field("月薪底线（元）","cons.pay","","mono")+'</div>'+
+    '<div class="f2">'+sel("经济压力","cons.press",["无","需自给","需补贴家庭","需还贷+补贴"])+
+      sel("周末工作","cons.weekend",["可接受","尽量避免","不可接受"])+'</div>'+
+    probe("期望薪资<b>常被低估</b>。先翻当地公告原文里的待遇条款，再谈期望——很多编制岗的实际到手比传言高。")+
+    '</div>');
+
+  var jh="";
+  S.jobs.forEach(function(j,i){
+    var r=matchJob(j), v=VERDICT[r.verdict];
+    jh+='<div class="row"><div class="rowtop"><span class="n">岗位 '+(i+1)+'</span>'+
+      '<span class="mark '+v[0]+'">'+esc(v[1])+'</span>'+
+      '<button class="del" data-del="jobs" data-i="'+i+'" type="button">删除</button></div>'+
+      '<div class="fields">'+
+      '<div class="f2">'+field("岗位名称","jobs."+i+".name")+field("地区","jobs."+i+".city")+'</div>'+
+      '<div class="f3">'+sel("学历要求","jobs."+i+".edu",["","专科及以上","本科及以上","硕士及以上","博士"])+
+        sel("师范类要求","jobs."+i+".normalReq",["不要求","要求"])+
+        field("年龄上限","jobs."+i+".ageMax","如 30","mono")+'</div>'+
+      '<label><span class="lb">公告列出的专业范围</span>'+
+        '<input data-p="jobs.'+i+'.majors" value="'+esc(j.majors)+'" placeholder="照抄公告，如 B0402 体育学类">'+
+        '</label>'+
+      '<div class="f3">'+field("教资学段学科","jobs."+i+".tzSubject","如 高中体育")+
+        field("运动员等级要求","jobs."+i+".athLevel","如 一级")+
+        field("等级项目","jobs."+i+".athDisc","如 田径")+'</div>'+
+      '<div class="f2">'+field("普通话要求","jobs."+i+".mandarin","如 二级乙等")+
+        field("其他条款","jobs."+i+".other","照抄公告里你拿不准的那句")+'</div>'+
+      '<div class="verdict"><b>'+esc(v[2])+'</b>'+
+        r.rows.map(function(x){
+          var cls={ok:"p",no:"f",fix:"h",ask:"i"}[x.s];
+          return '<div class="vr"><span class="mark '+cls+'">'+
+            ({ok:"过",no:"卡",fix:"可补",ask:"待核"}[x.s])+'</span><span>'+esc(x.t)+'</span></div>';
+        }).join("")+'</div>'+
+      '</div></div>';
+  });
+  h+=group("J","岗位对照","公告写什么就照抄什么，别凭印象",
+    '<div class="rows">'+jh+'</div><button class="add" data-add="jobs" type="button">+ 再加一个岗位</button>'+
+    probe("<b>专业目录有包含关系：四位代码含其下所有六位专业。</b>公告写 B0402（体育学类），"+
+      "你的 B040202（运动训练）就在里面——这一条直接决定能不能报名，也是最多人搞错的地方。"+
+      "所以专业范围要<b>照抄公告原文</b>，连代码一起抄。"));
+
+  el("form").innerHTML=h;
+}
+
+function renderSide(){
+  var g=gates(), o=0,n=0,hd=0;
+  // 只有硬门槛进计数。加分项没有不叫“不满足”，
+  // 把可有可无的东西算进失败数，会让人以为自己根本报不了名。
+  g.forEach(function(x){ if(!x.hard || x.st==="blank") return;
+    if(x.st==="pass")o++; else if(x.st==="fail")n++; else hd++; });
+  el("tOk").textContent=o; el("tNo").textContent=n; el("tHd").textContent=hd;
+  el("gates").innerHTML=g.map(function(x){
+    var m=x.st==="pass"?["p","满足"]:x.st==="fail"?["f","不满足"]
+             :x.st==="none"?["i","未取得"]:x.st==="blank"?["b","未填写"]:["h","待确认"];
+    return '<div class="gate"><span class="mark '+m[0]+'">'+m[1]+'</span>'+
+      '<span><span class="gt">'+esc(x.t)+'</span>'+
+      '<span class="gn">'+esc(x.eff)+' · '+esc(x.why)+'</span></span></div>';
+  }).join("");
+}
+
+function renderReport(){
+  var D=DISC[S.discipline], f=audit(), g=gates();
+  var missing=[];
+  S.creds.forEach(function(c){ if(c.name&&c.proof==="暂无凭证")
+    missing.push({w:c.name,k:"证书",how:c.status==="已取得"?"确认原件在谁手里，需要补办的先问周期":"按 "+(c.note||"流程")+" 推进"}); });
+  S.achs.forEach(function(a){ if(a.title&&a.proof==="暂无凭证")
+    missing.push({w:a.title,k:"奖项",how:"找主办方要成绩册、证书或颁奖影像"}); });
+  S.exps.forEach(function(e){ if(e.org&&e.canProof!=="能开")
+    missing.push({w:e.org,k:"经历",how:e.canProof==="开不出来"?"开不出来就不要写成可核验经历":"趁还联系得上，现在就去要经历证明"}); });
+  S.works.forEach(function(w){ if(w.title&&w.proof==="暂无凭证")
+    missing.push({w:w.title,k:"作品",how:"整理成可提交的文件，并确认公开可访问"}); });
+
+  var sev=["","参考","注意","要紧"];
+  var h='<div class="rhead"><h2>资格审查结论</h2>'+
+    '<span class="meta">'+esc(D.name)+' · '+new Date().toLocaleDateString("zh-CN")+'</span></div>';
+
+  h+='<div class="rsec"><h3>硬门槛逐条 <span class="cnt">'+g.length+' 条</span></h3>'+
+    '<p class="rnote">效力判定来自本专业的招聘惯例，'+(D.validated?"已跑通过一次真实求职":"来自公开资料调研，未经真实报名验证")+'。</p>'+
+    '<div class="tw"><table><thead><tr><th>门槛</th><th>效力</th><th>你的状态</th></tr></thead><tbody>'+
+    g.map(function(x){
+      var m=x.st==="pass"?["p","满足"]:x.st==="fail"?["f","不满足"]
+               :x.st==="none"?["i","未取得"]:x.st==="blank"?["b","未填写"]:["h","待确认"];
+      return '<tr><td><b>'+esc(x.t)+'</b><span class="sub">'+esc(x.n)+'</span></td>'+
+        '<td>'+esc(x.eff)+'</td><td><span class="mark '+m[0]+'">'+m[1]+'</span>'+
+        '<span class="sub">'+esc(x.why)+'</span></td></tr>';
+    }).join("")+'</tbody></table></div></div>';
+
+  h+='<div class="rsec"><h3>凭证台账 <span class="cnt">'+missing.length+' 处缺口</span></h3>'+
+    '<p class="rnote">资格复审要交原件。缺件不是小事——查到这一步才发现，窗口期已经过了。</p>'+
+    (missing.length?'<div class="tw"><table><thead><tr><th>项目</th><th>类别</th><th>怎么补</th></tr></thead><tbody>'+
+      missing.map(function(m){ return '<tr><td><b>'+esc(m.w)+'</b></td><td>'+esc(m.k)+'</td><td>'+esc(m.how)+'</td></tr>'; }).join("")+
+      '</tbody></table></div>'
+      :'<p class="empty">没有缺口。每条资产都有凭证——这在实战里很少见，值得确认一遍是不是真的。</p>')+
+    '</div>';
+
+  h+='<div class="rsec"><h3>核查发现 <span class="cnt">'+f.length+' 条</span></h3>'+
+    (f.length?f.map(function(x){
+      return '<div class="finding"><span class="sev s'+x.s+'">'+sev[x.s]+'</span>'+
+        '<span><span class="cat">['+esc(x.c)+']</span>'+x.t+'</span></div>'; }).join("")
+      :'<p class="empty">没有发现冲突。</p>')+
+    '</div>';
+
+  if(S.jobs.length){
+    h+='<div class="rsec"><h3>岗位对照 <span class="cnt">'+S.jobs.length+' 个</span></h3>'+
+      '<p class="rnote">× 类要果断放弃，不浪费窗口期；○ 类盯住公告写的补交截止日。</p>'+
+      '<div class="tw"><table><thead><tr><th>岗位</th><th>结论</th><th>卡在哪</th></tr></thead><tbody>'+
+      S.jobs.map(function(j){
+        var r=matchJob(j), v=VERDICT[r.verdict];
+        var blockers=r.rows.filter(function(x){return x.s==="no"||x.s==="fix";})
+          .map(function(x){return x.t;});
+        return '<tr><td><b>'+esc(j.name||"未命名")+'</b>'+
+          (j.city?'<span class="sub">'+esc(j.city)+'</span>':"")+'</td>'+
+          '<td><span class="mark '+v[0]+'">'+esc(v[1])+'</span></td>'+
+          '<td>'+(blockers.length?esc(blockers.join("；")):'<span style="color:var(--mute)">—</span>')+'</td></tr>';
+      }).join("")+'</tbody></table></div></div>';
+  }
+  h+='<div class="rsec"><h3>本专业特有的坑</h3>'+
+    '<div class="tw"><table><tbody>'+D.traps.map(function(t){
+      return '<tr><td>'+esc(t)+'</td></tr>'; }).join("")+'</tbody></table></div></div>';
+
+  el("report").innerHTML=h;
+}
+
+function renderDisc(){
+  el("discbar").innerHTML=Object.keys(DISC).map(function(k){
+    return '<button type="button" data-d="'+k+'" aria-pressed="'+(k===S.discipline)+'">'+
+      esc(DISC[k].name)+'</button>'; }).join("");
+  var D=DISC[S.discipline];
+  el("verified").innerHTML='<span class="vb '+(D.validated?"real":"desk")+'">'+
+    (D.validated?"实战验证":"桌面调研")+'</span><span>'+esc(D.note)+'</span>';
+}
+
+function renderAll(){ renderDisc(); renderForm(); renderSide(); renderReport(); resumeGate();
+  el("exbanner").hidden=!S.isExample; save(); }
+
+/* ═══════════════ 事件 ═══════════════ */
+document.addEventListener("input",function(e){
+  var p=e.target.getAttribute("data-p"); if(!p) return;
+  put(p,e.target.value); S.isExample=false;
+  renderSide(); renderReport(); resumeGate(); el("exbanner").hidden=true; save();
+});
+document.addEventListener("change",function(e){
+  var p=e.target.getAttribute("data-p"); if(!p) return;
+  put(p,e.target.value); S.isExample=false;
+  var a=document.activeElement, id=a&&a.getAttribute("data-p");
+  renderAll();
+  if(id){ var back=document.querySelector('[data-p="'+id+'"]'); if(back) back.focus(); }
+});
+document.addEventListener("click",function(e){
+  var b=e.target.closest("button"); if(!b) return;
+  if(b.getAttribute("data-d")){ S.discipline=b.getAttribute("data-d"); renderAll(); return; }
+  var add=b.getAttribute("data-add");
+  if(add){
+    var blank={creds:{name:"",cat:"其他",disc:"",level:"",issuer:"",status:"已取得",note:"",proof:"有原件",qeName:"",qeMark:""},
+               achs:{title:"",lv:"省级",rank:"",mark:"",nature:"竞赛",date:"",wind:"",timing:"",proof:"有原件"},
+               exps:{org:"",nature:"商业培训机构",role:"",span:"",duty:"",canProof:"不确定"},
+               works:{title:"",kind:"视频",proves:"",proof:"有原件"},
+               skills:{d:"",ev:"赛事名次",detail:""},
+               jobs:{name:"",city:"",edu:"本科及以上",normalReq:"不要求",majors:"",
+                     tzSubject:"",athLevel:"",athDisc:"",mandarin:"",ageMax:"",other:""}}[add];
+    S[add].push(JSON.parse(JSON.stringify(blank))); S.isExample=false; renderAll(); return;
+  }
+  var del=b.getAttribute("data-del");
+  if(del){ S[del].splice(+b.getAttribute("data-i"),1); S.isExample=false; renderAll(); return; }
+  if(b.id==="clearAll"){
+    S={discipline:S.discipline,isExample:false,
+       me:{name:"",phone:"",email:"",target:""},
+       edu:{school:"",major:"",code:"",normal:"不确定",level:"本科",gradYear:"",rank:"",birthYear:""},
+       jobs:[],
+       creds:[],achs:[],exps:[],works:[],skills:[],
+       cons:{cities:"",pay:"",press:"需自给",weekend:"尽量避免"}};
+    renderAll(); window.scrollTo({top:0,behavior:"smooth"}); return;
+  }
+  if(b.id==="print"){ window.print(); return; }
+  if(b.id==="dlJson") doExport(b,"profile.json",JSON.stringify(buildProfile(),null,2));
+  if(b.id==="dlReport") doExport(b,"资格审查结论.html",buildReportDoc());
+  if(b.id==="forceBtn"){ forceResume=true; resumeGate(); return; }
+  if(b.id==="dlResume"){
+    if(!resumeGate()) return;
+    // alert() 在沙箱 iframe 里可能被屏蔽，会变成又一个静默失效的提示
+    if(!S.me.name){
+      var bx=el("blocked"); bx.hidden=false;
+      bx.innerHTML='<b>简历抬头不能空着。</b>先回到 A 组填上姓名。';
+      el("me.name")&&0; var f=document.querySelector('[data-p="me.name"]');
+      if(f){ f.focus(); f.scrollIntoView({block:"center"}); }
+      return;
+    }
+    doExport(b,(S.me.name||"简历")+"_简历.html",buildResumeDoc());
+  }
+});
+
+function buildProfile(){
+  var f=audit();
+  return {
+    identity:{name:"",gradYear:+S.edu.gradYear||null},
+    constraints:{targetCities:S.cons.cities.split(/[、,，]/).filter(Boolean),
+      minMonthlyPay:+S.cons.pay||null,economicPressure:S.cons.press,weekendWork:S.cons.weekend},
+    education:[{school:S.edu.school,major:S.edu.major,majorCode:S.edu.code,
+      isNormalMajor:S.edu.normal==="是"?true:S.edu.normal==="否"?false:null,
+      level:S.edu.level,rank:S.edu.rank}],
+    credentials:S.creds.filter(function(c){return c.name;}).map(function(c){
+      return {name:c.name,category:c.cat,discipline:c.disc,level:c.level,issuer:c.issuer,
+        status:c.status,progressNote:c.note||undefined,
+        gateEffect:c.cat==="艺术考级"?"仅参考":undefined,
+        qualifyingEvent:c.qeName?{eventName:c.qeName,qualifyingMark:c.qeMark}:undefined,
+        proof:{hasDocument:c.proof!=="暂无凭证",form:[c.proof]}};}),
+    achievements:S.achs.filter(function(a){return a.title;}).map(function(a){
+      var w=parseFloat(String(a.wind).replace("+",""));
+      return {title:a.title,level:a.lv,rank:a.nature==="展演展示"?"参演":a.rank,
+        mark:a.mark,date:a.date,eventNature:a.nature,
+        technicalConditions:(a.wind||a.timing)?{wind:a.wind,timing:a.timing,
+          eligibleForRanking:isNaN(w)?null:w<=2.0}:undefined,
+        proof:{hasDocument:a.proof!=="暂无凭证",form:[a.proof]}};}),
+    experience:S.exps.filter(function(e){return e.org;}).map(function(e){
+      return {org:e.org,orgNature:e.nature,role:e.role,duties:e.duty?[e.duty]:[],
+        canIssueProof:e.canProof==="能开"?true:e.canProof==="开不出来"?false:null};}),
+    portfolio:S.works.filter(function(w){return w.title;}).map(function(w){
+      return {type:w.kind,title:w.title,proves:w.proves,
+        gateRole:DISC[S.discipline].portfolio.gateRole};}),
+    skills:{secondary:S.skills.filter(function(k){return k.d;}).map(function(k){
+      return {discipline:k.d,evidenceStrength:k.ev,detail:k.detail,canTeach:true};})},
+    targets:S.jobs.filter(function(j){return j.name;}).map(function(j){
+      var r=matchJob(j);
+      return {post:j.name,city:j.city,verdict:VERDICT[r.verdict][1],
+        blockers:r.rows.filter(function(x){return x.s==="no";}).map(function(x){return x.t;}),
+        fixable:r.rows.filter(function(x){return x.s==="fix";}).map(function(x){return x.t;})};}),
+    audit:{lastChecked:new Date().toISOString().slice(0,10),
+      openIssues:f.map(function(x){
+        return {severity:x.s===3?"致命":x.s===2?"高":"中",category:x.c,
+          description:x.t.replace(/<[^>]+>/g,""),resolution:null};})}
+  };
+}
+
+/* 结论导出成独立 HTML —— 浅色、可直接打印 */
+function buildReportDoc(){
+  var D=DISC[S.discipline];
+  return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">'+
+    '<title>资格审查结论 · '+esc(D.name)+'</title><style>'+
+    'body{margin:0;background:#fff;color:#3A464D;font:14px/1.7 -apple-system,"PingFang SC",sans-serif}'+
+    '.w{max-width:760px;margin:0 auto;padding:34px 24px 60px}'+
+    'h1{font-size:22px;color:#111A1F;margin:0 0 4px;border-bottom:2px solid #111A1F;padding-bottom:12px}'+
+    '.m{font-size:12px;color:#74838B;margin:8px 0 24px}'+
+    'h3{font-size:13px;color:#111A1F;margin:26px 0 8px}'+
+    'table{border-collapse:collapse;width:100%;font-size:13px;margin-bottom:6px}'+
+    'th,td{text-align:left;padding:8px 11px;border-bottom:1px solid #E0E7EA;vertical-align:top}'+
+    'th{font-size:11px;letter-spacing:.06em;color:#74838B;background:#F2F5F6;font-weight:400}'+
+    '.sub{display:block;font-size:12px;color:#74838B;margin-top:2px}'+
+    '.k{font-size:11px;font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap}'+
+    '.p{background:#E2F0E9;color:#1D6448}.f{background:#F8E6E3;color:#A32F25}'+
+    '.h{background:#F8EFDA;color:#835B12}.i{background:#F2F5F6;color:#74838B}'+
+    '.note{margin-top:30px;padding-top:16px;border-top:1px solid #C6D0D5;font-size:12px;color:#74838B}'+
+    '@media print{.w{padding:0}}'+
+    '</style></head><body><div class="w">'+
+    el("report").innerHTML
+      .replace(/<div class="rhead">/,'<div>')
+      .replace(/<h2>/g,"<h1>").replace(/<\/h2>/g,"</h1>")
+      .replace(/<span class="meta">/g,'<p class="m">').replace(/<\/span><\/div>/,"</p></div>")
+      .replace(/class="mark ([pfhi])"/g,'class="k $1"')
+      .replace(/<div class="rsec">/g,"<div>").replace(/<p class="rnote">/g,'<p class="m">')
+      .replace(/<span class="cnt">/g,'<span style="font-weight:400;color:#74838B;font-size:11px">')
+      .replace(/<div class="finding">/g,'<div style="display:flex;gap:9px;padding:8px 0;border-bottom:1px solid #E0E7EA">')
+      .replace(/class="sev s3"/g,'class="k f"').replace(/class="sev s2"/g,'class="k h"')
+      .replace(/class="sev s1"/g,'class="k i"')
+      .replace(/<span class="cat">/g,'<span style="color:#74838B;font-size:11px">')+
+    '<p class="note">招聘规则有地域性与时效性。本结论只说明该去核实什么、该补哪张纸，'+
+    '<b>最终一律以当年当地的招聘公告原文为准</b>。</p></div></body></html>';
+}
+
+
+
+/* ═══════════ 岗位对照 ═══════════
+   前面几组回答"你有什么"，这一组回答"这份公告你能不能报"。
+   国内编制岗是布尔硬筛：不符合就是连报名按钮都点不下去，没有分数可言。 */
+var EDU_RANK={"专科":1,"本科":2,"硕士":3,"博士":4};
+var EDU_REQ={"专科及以上":1,"本科及以上":2,"硕士及以上":3,"博士":4};
+var PTH_RANK={"二级乙等":1,"二乙":1,"二级甲等":2,"二甲":2,"一级乙等":3,"一乙":3,"一级甲等":4,"一甲":4};
+var ATH_RANK={"三级":1,"二级":2,"一级":3,"运动健将":4,"国际级运动健将":5};
+
+function rankOf(map,txt){
+  var best=0; if(!txt) return 0;
+  Object.keys(map).forEach(function(k){ if(String(txt).indexOf(k)>=0) best=Math.max(best,map[k]); });
+  return best;
+}
+
+/* 专业目录的包含规则：四位代码含其下所有六位专业。
+   公告写 B0402（体育学类），你的 B040202（运动训练）就在里面。
+   这一条直接决定能不能报名，却是最多人搞错的地方。 */
+function majorMatch(mine, wanted){
+  if(!wanted) return {ok:true,why:"公告未限专业"};
+  var code=(mine.code||"").toUpperCase().trim(), name=(mine.major||"").trim();
+  var list=wanted.toUpperCase().replace(/[、，,；;]/g,"|").split("|")
+    .map(function(x){return x.trim();}).filter(Boolean);
+  for(var i=0;i<list.length;i++){
+    var w=list[i];
+    var m=w.match(/[A-Z]\d{4,6}/);
+    if(m && code){
+      if(code===m[0]) return {ok:true,why:"专业代码 "+code+" 直接列明"};
+      if(code.indexOf(m[0])===0 && m[0].length<code.length)
+        return {ok:true,why:m[0]+" 为大类，含你的 "+code};
+    }
+    if(name && w.indexOf(name.toUpperCase())>=0) return {ok:true,why:"专业名称列明"};
+  }
+  if(!code) return {ok:null,why:"你没填专业代码，无法比对——去教务处或成绩单上核准"};
+  return {ok:false,why:"你的 "+(code||name)+" 不在公告列出的专业范围内"};
+}
+
+
+/* 「其他条款」里有几句反复出现，而档案里其实已经有答案——
+   能自动判的就别推给人工，这正是这套工具区别于一张勾选清单的地方。 */
+var PRO_TEAMS=["省级以上专业运动队","职业俱乐部运动队","地市级以上体校"];
+function scanClause(txt,f){
+  var hit=false;
+
+  if(/(专业运动队|专业队|体校|专业训练)[^。；;]{0,10}(经历|训练|背景)|(经历|训练)[^。；;]{0,6}(专业运动队|专业队)/.test(txt)){
+    hit=true;
+    var pro=S.exps.filter(function(e){return e.org&&PRO_TEAMS.indexOf(e.nature)>=0;});
+    if(pro.length) f.ok("专业运动队经历：" + pro.map(function(e){return e.org;}).join("、"));
+    else if(S.exps.filter(function(e){return e.org;}).length)
+      f.no("公告要求专业运动队训练经历，而你填的单位全是商业机构或学校——"+
+           "商业培训机构通常不被认定为专业运动队，这一条补不了");
+    else f.ask("公告要求专业运动队训练经历，你还没填经历");
+  }
+
+  if(/应届/.test(txt)){
+    hit=true;
+    var y=parseInt(S.edu.gradYear,10), now=new Date().getFullYear();
+    if(!y) f.ask("公告限应届，你没填毕业年份");
+    else if(y>=now) f.ok("毕业年份 "+y+"，应届身份成立");
+    else f.no("毕业年份 "+y+" 已过，应届身份不成立——择业期政策各地不同，须查公告原文");
+  }
+
+  if(/户籍|生源/.test(txt)){
+    hit=true;
+    f.ask("公告限户籍或生源地。这张表不收集户籍信息（它不该留在网页里），请自己对着公告核一遍");
+  }
+
+  if(/(党员|中共)/.test(txt)){ hit=true; f.ask("公告要求政治面貌，自行核对"); }
+
+  if(!hit) f.ask("公告另有条款需你逐字核对：" + txt);
+}
+
+function matchJob(j){
+  var R=[], hard=[], fix=[];
+  function ok(t){ R.push({s:"ok",t:t}); }
+  function no(t){ R.push({s:"no",t:t}); hard.push(t); }
+  function mend(t){ R.push({s:"fix",t:t}); fix.push(t); }
+  function ask(t){ R.push({s:"ask",t:t}); }
+
+  // 学历
+  if(j.edu){
+    var need=EDU_REQ[j.edu]||0, got=EDU_RANK[S.edu.level]||0;
+    if(!got) ask("学历没填，无法比对");
+    else if(got>=need) ok("学历 "+S.edu.level+" 满足「"+j.edu+"」");
+    else no("学历 "+S.edu.level+" 达不到「"+j.edu+"」——这一条补不了");
+  }
+  // 师范类
+  if(j.normalReq==="要求"){
+    if(S.edu.normal==="是") ok("本科为师范类，符合");
+    else if(S.edu.normal==="否")
+      no("公告要求本科为师范类，而你的专业不是——这一条补不了，别浪费报名窗口");
+    else ask("公告要求本科为师范类，而你还没确认自己算不算——只有教务处的认定说了算");
+  }
+  // 专业
+  var mm=majorMatch(S.edu,j.majors);
+  if(mm.ok===true) ok("专业：" + mm.why);
+  else if(mm.ok===false) no("专业不符："+mm.why);
+  else ask(mm.why);
+
+  // 教师资格证
+  if(j.tzSubject){
+    var tz=S.creds.filter(function(c){return c.cat==="教师资格"&&c.name;})[0];
+    if(!tz) no("公告要求教师资格证（"+j.tzSubject+"），你没有");
+    else if(tz.status==="已取得"){
+      var d=(tz.disc||"")+(tz.level||"");
+      if(d.indexOf("体育")>=0||j.tzSubject.indexOf("体育")<0) ok("教师资格证 "+(tz.disc||tz.level)+" 对口");
+      else ask("教师资格证学段学科是否与「"+j.tzSubject+"」对口，按公告原文核对");
+    }
+    else mend("教师资格证"+(tz.note?"："+tz.note:"尚未取得")+
+      "——多数岗位允许报名时未取得但限期补交，务必看清公告写的截止日期");
+  }
+  // 运动员等级
+  if(j.athLevel){
+    var athCreds=S.creds.filter(function(c){return c.cat==="运动员等级"&&c.name;});
+    var mineA=0; athCreds.forEach(function(c){ mineA=Math.max(mineA,rankOf(ATH_RANK,c.level||c.name)); });
+    var needA=rankOf(ATH_RANK,j.athLevel);
+    if(!athCreds.length) no("公告要求运动员等级「"+j.athLevel+"」，你没填等级证书");
+    else if(mineA>=needA) ok("运动员等级满足「"+j.athLevel+"」");
+    else no("运动员等级不足「"+j.athLevel+"」——等级证不能临时补，这一条基本封死");
+    if(athCreds.length&&j.athDisc&&athCreds.every(function(c){return (c.disc||"").indexOf(j.athDisc)<0;}))
+      ask("项目是否对口「"+j.athDisc+"」——项目不对口等同于无效");
+  }
+  // 普通话
+  if(j.mandarin){
+    var pc=S.creds.filter(function(c){return c.cat==="语言文字"&&c.name;})[0];
+    var mineP=pc?rankOf(PTH_RANK,pc.level||pc.name):0, needP=rankOf(PTH_RANK,j.mandarin);
+    if(!pc) mend("公告要求普通话「"+j.mandarin+"」，你没填——这个考试频次高，来得及补");
+    else if(mineP>=needP) ok("普通话 "+pc.level+" 满足「"+j.mandarin+"」");
+    else mend("普通话 "+pc.level+" 低于「"+j.mandarin+"」——可以重考，看报名截止前来不来得及");
+  }
+  // 年龄
+  if(j.ageMax&&S.edu.birthYear){
+    var age=new Date().getFullYear()-parseInt(S.edu.birthYear,10);
+    if(age<=parseInt(j.ageMax,10)) ok("年龄 "+age+" 岁在「"+j.ageMax+"岁以下」之内");
+    else no("年龄 "+age+" 岁超过「"+j.ageMax+"岁」——硬性条件，无解");
+  } else if(j.ageMax) ask("公告限年龄 "+j.ageMax+" 岁以下，你没填出生年份");
+
+  if(j.other) scanClause(j.other,{no:no,mend:mend,ask:ask,ok:ok});
+
+  var verdict = hard.length ? "no" : (fix.length ? "fix" : (R.some(function(x){return x.s==="ask";}) ? "ask" : "ok"));
+  return {verdict:verdict, rows:R, hard:hard.length, fix:fix.length};
+}
+
+var VERDICT={ok:["p","★ 完全符合","按目前填写的信息，硬门槛都过得了"],
+  fix:["h","○ 缺一项可补","有能补齐的项，盯住公告的补交截止日"],
+  ask:["i","? 待核对","有条款无法自动判断，需要你对着公告原文看"],
+  no:["f","× 不可报","有补不了的硬门槛，果断放弃，不要浪费窗口期"]};
+
+/* ═══════════ 简历 ═══════════
+   措辞规则与命令行版 render.py 同源。展示页、简历、自查结论
+   必须说同一套话——否则三份材料摆在一起就是自相矛盾。 */
+function resumeSections(){
+  var out=[];
+
+  // 资质：部分完成输出进度，绝不写成"已通过"
+  var cred=S.creds.filter(function(c){return c.name;}).map(function(c){
+    if(c.status==="已取得")
+      return {k:c.name,v:[c.level,c.issuer].filter(Boolean).join("　"),t:""};
+    if(c.status==="部分完成")
+      return {k:c.name,v:c.note||"部分完成",t:"进行中"};
+    return {k:c.name,v:c.status==="备考中"?"备考中":"计划中",t:"进行中"};
+  });
+  if(cred.length) out.push({h:"资质证书",rows:cred});
+
+  // 成绩：不可用于等级认定的，不与赛事绑定输出
+  var ach=S.achs.filter(function(a){return a.title;}).map(function(a){
+    var w=parseFloat(String(a.wind).replace("+",""));
+    var mark=(!isNaN(w)&&w>2.0)?"":a.mark;          // 超风速 → 只留名次
+    var rank=a.nature==="展演展示"?"参演":a.rank;    // 展演不产生名次
+    return {k:a.title,v:[a.lv,a.date].filter(Boolean).join("　"),
+            t:[rank,mark].filter(Boolean).join("　")};
+  });
+  if(ach.length) out.push({h:"赛事与奖项",rows:ach});
+
+  var exp=S.exps.filter(function(e){return e.org&&e.role.indexOf("运动员")<0;}).map(function(e){
+    return {k:e.org+(e.role?"　"+e.role:""),v:[e.nature,e.span].filter(Boolean).join("　"),
+            t:"",body:e.duty};
+  });
+  if(exp.length) out.push({h:"执教与实践",rows:exp});
+
+  var work=S.works.filter(function(w){return w.title;}).map(function(w){
+    return {k:w.title,v:w.kind,t:"",body:w.proves};
+  });
+  if(work.length) out.push({h:"作品与展示",rows:work});
+
+  // 技能：自述掌握的降级措辞，不作专业水平主张
+  var sk=S.skills.filter(function(k){return k.d;});
+  if(sk.length){
+    var order={"赛事名次":0,"等级证书":1,"课程修习":2,"自述掌握":3};
+    // 注意不能写 order[a.ev]||9 —— "赛事名次"的序号是 0，而 0||9 等于 9，
+    // 结果是把最弱的"只是会"排到最前面，正好放在简历最显眼的位置。
+    var rank=function(x){ return order[x.ev]==null ? 9 : order[x.ev]; };
+    sk=sk.slice().sort(function(a,b){return rank(a)-rank(b);});
+    out.push({h:"一专多能",inline:sk.map(function(k){
+      return {d:k.d, s:k.ev==="自述掌握" ? "可承担普及性教学" : (k.detail||k.ev)};
+    })});
+  }
+  return out;
+}
+
+function buildResumeDoc(){
+  var m=S.me, e=S.edu, secs=resumeSections();
+  var contact=[m.phone,m.email].filter(Boolean).join("　|　");
+  var eduLine=[e.school,e.major,e.level].filter(Boolean).join("　");
+  var eduMeta=[e.gradYear?e.gradYear+" 届":"",e.rank?"专业排名 "+e.rank:""].filter(Boolean).join("　");
+
+  function rows(sec){
+    if(sec.inline) return '<p class="inl">'+sec.inline.map(function(x){
+      return '<span><b>'+esc(x.d)+'</b>　'+esc(x.s)+'</span>'; }).join("")+'</p>';
+    return sec.rows.map(function(r){
+      return '<div class="it"><div class="l"><span class="k">'+esc(r.k)+'</span>'+
+        (r.t?'<span class="t">'+esc(r.t)+'</span>':"")+'</div>'+
+        (r.v?'<div class="v">'+esc(r.v)+'</div>':"")+
+        (r.body?'<div class="b">'+esc(r.body)+'</div>':"")+'</div>';
+    }).join("");
+  }
+
+  return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">'+
+    '<title>'+esc(m.name||"简历")+'　简历</title><style>'+
+    /* 缺 print-color-adjust 时 Chrome 打印会丢掉所有底色，
+       文字检查全过，只有数彩色像素才发现——所以它必须写在最前面 */
+    '*{-webkit-print-color-adjust:exact;print-color-adjust:exact;box-sizing:border-box}'+
+    '@page{size:A4;margin:0}'+
+    'body{margin:0;background:#E8ECEE;font:13px/1.62 -apple-system,"PingFang SC",sans-serif;color:#33414A}'+
+    '.pg{width:210mm;min-height:297mm;margin:0 auto;background:#fff;padding:16mm 15mm}'+
+    '@media print{body{background:#fff}.pg{margin:0;min-height:auto}}'+
+    '.hd{border-bottom:2.5px solid #1B4D6B;padding-bottom:9px;margin-bottom:14px}'+
+    '.nm{font-size:26px;font-weight:700;color:#111A1F;letter-spacing:.06em;line-height:1.15}'+
+    '.tg{font-size:13px;color:#1B4D6B;font-weight:600;margin-top:3px}'+
+    '.ct{font-size:11.5px;color:#74838B;margin-top:5px;font-family:ui-monospace,Menlo,monospace}'+
+    '.ed{display:flex;justify-content:space-between;gap:12px;font-size:13px;margin-bottom:15px;'+
+      'padding:8px 11px;background:#F2F5F6;border-left:3px solid #1B4D6B}'+
+    '.ed b{color:#111A1F}.ed span{color:#74838B;white-space:nowrap}'+
+    'h2{font-size:13px;font-weight:700;color:#111A1F;margin:0 0 7px;padding-bottom:4px;'+
+      'border-bottom:1px solid #C6D0D5;letter-spacing:.06em}'+
+    'section{margin-bottom:13px}'+
+    '.it{margin-bottom:7px}'+
+    '.l{display:flex;align-items:baseline;gap:8px}'+
+    '.k{font-size:13.5px;font-weight:700;color:#111A1F}'+
+    '.t{font-size:11px;font-weight:700;color:#1B4D6B;border:1px solid #1B4D6B;'+
+      'border-radius:2px;padding:0 5px;margin-left:auto;white-space:nowrap}'+
+    '.v{font-size:12px;color:#74838B;margin-top:1px}'+
+    '.b{font-size:12.5px;margin-top:2px}'+
+    '.inl{display:flex;flex-wrap:wrap;gap:5px 16px;margin:0;font-size:12.5px}'+
+    '.inl b{color:#111A1F}'+
+    '</style></head><body><div class="pg">'+
+    '<div class="hd"><div class="nm">'+esc(m.name||"　")+'</div>'+
+    (m.target?'<div class="tg">'+esc(m.target)+'</div>':"")+
+    (contact?'<div class="ct">'+esc(contact)+'</div>':"")+'</div>'+
+    (eduLine?'<div class="ed"><span style="color:#33414A"><b>'+esc(e.school)+'</b>　'+
+      esc([e.major,e.level].filter(Boolean).join("　"))+'</span><span>'+esc(eduMeta)+'</span></div>':"")+
+    secs.map(function(sec){
+      return '<section><h2>'+esc(sec.h)+'</h2>'+rows(sec)+'</section>'; }).join("")+
+    '</div></body></html>';
+}
+
+/* 闸门：与 render.py 同一条规则——存在未解决的致命问题就拒绝生成。
+   这道闸存在的意义就是拦住「我知道有问题但先发出去再说」。 */
+var forceResume=false;
+function resumeGate(){
+  var bad=audit().filter(function(x){return x.s===3;});
+  var box=el("blocked"), btn=el("dlResume");
+  if(!bad.length||forceResume){ box.hidden=true; btn.disabled=false; return true; }
+  box.hidden=false; btn.disabled=true;
+  box.innerHTML='<b>已拦住，未生成。</b>还有 '+bad.length+' 条「要紧」问题没处理，'+
+    '这时候出的简历会把问题一起带到对方手里：<br>'+
+    bad.slice(0,3).map(function(x){
+      return '· '+esc(x.t.replace(/<[^>]+>/g,"").slice(0,44))+'…'; }).join("<br>")+
+    '<br><button type="button" id="forceBtn">我知道有问题，仍要生成</button>';
+  return false;
+}
+
+/* 导出有三条路，取决于这份页面跑在哪里：
+   Artifact 沙箱里 blob 下载是静默失效的，必须走 downloads 能力；
+   自己托管时没有 window.claude，普通 blob 下载反而是最顺的；
+   两条都走不通才退回文本框手动复制。 */
+var IN_ARTIFACT = !!(window.claude && window.claude.use);
+var DL=null;
+if(IN_ARTIFACT){
+  window.claude.use("downloads").then(function(d){ DL=d; }).catch(function(){});
+}
+
+function blobSave(filename,data){
+  try{
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([data],{type:"text/plain;charset=utf-8"}));
+    a.download=filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); },1000);
+    return true;
+  }catch(e){ return false; }
+}
+
+function doExport(btn,filename,data){
+  var old=btn.textContent;
+  function done(msg){ btn.textContent=msg;
+    setTimeout(function(){ btn.textContent=old; btn.disabled=false; },2000); }
+  if(!DL){
+    if(!IN_ARTIFACT && blobSave(filename,data)){ done("已下载"); return; }
+    var t=el("fallback"); t.hidden=false; t.value=data; t.focus(); t.select();
+    done("已展开，手动复制"); return;
+  }
+  btn.disabled=true; btn.textContent="等待确认…";
+  DL.save({filename:filename,data:data}).then(function(){ done("已保存"); })
+    .catch(function(err){
+      var c=err&&err.code;
+      done(c==="declined"?"已取消":c==="rate_limited"?"稍后再试":"保存失败，改用手动复制");
+      if(c!=="declined"&&c!=="rate_limited"){
+        var t=el("fallback"); t.hidden=false; t.value=data; t.select();
+      }
+    });
+}
+
+renderAll();
+</script>
+
+</body>
+</html>
