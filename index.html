@@ -53,7 +53,18 @@ body{margin:0;background:var(--paper);color:var(--body);font-family:var(--sans);
 .shell{max-width:1180px;margin:0 auto;padding:34px 20px 80px}
 
 /* ── 抬头 ───────────────────────────────── */
-.masthead{border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:8px}
+.masthead{position:relative;overflow:hidden;border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:8px}
+/* 专业场域：跑道 / 五线谱 / 把杆 / 画布。压在文字下面，不与阅读抢注意力，
+   但一眼能认出这是哪个专业的场子——这是"给我做的"和"通用表单"的分界。 */
+.hero-art{position:absolute;right:8px;top:-6px;width:min(42%,380px);max-height:100%;
+  color:var(--indigo);pointer-events:none;user-select:none;z-index:0}
+.hero-art svg{display:block;width:100%;height:auto}
+.hero-art .ha-field{opacity:.18}
+.hero-art .ha-figure{opacity:.28}
+.hero-art .ha-kit{opacity:.3}
+.masthead>*:not(.hero-art){position:relative;z-index:1}
+@media(max-width:700px){.hero-art{width:62%;right:2px;top:auto;bottom:-6px}}
+@media print{.hero-art{display:none!important}}
 .stamp{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:var(--indigo);
   text-transform:uppercase;margin:0 0 9px}
 h1{font-family:var(--serif);font-weight:700;font-size:clamp(27px,4.4vw,38px);
@@ -1648,6 +1659,7 @@ td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-to
 
 <div class="shell">
   <div class="masthead">
+    <div class="hero-art" id="heroArt" aria-hidden="true"></div>
     <p class="stamp">艺体美专业生 · 简历 + 展示码</p>
     <h1>入场券</h1>
     <p class="creed">用心做好一份关于你的简历</p>
@@ -2674,7 +2686,106 @@ function renderReport(){
   el("report").innerHTML=h;
 }
 
+/* ═══════════ 专业场域 ═══════════
+   一个体育生打开这一页，第一眼就该知道这是给他做的。
+   画的是"场子"与"器物"：跑道与起跑器、画布与画笔、五线谱与谱号、地板与把杆。
+   人只有姿态剪影，不可辨认为任何具体的人——在世运动员有肖像权，
+   毕加索作品还在版权期；达芬奇《维特鲁威人》是公版，所以美术那幅用得上它的圆与方。 */
+var HERO_ART = {
+  /* 体育：跑道 + 起跑器 + 各就位姿态（侧面，面朝右） */
+  sports:
+    '<svg viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">'+
+      '<g class="ha-field" stroke="currentColor" stroke-linecap="round">'+
+        '<path d="M-10 176 H390" stroke-width="3"/>'+
+        '<path d="M-10 186 H390 M-10 196 H390" stroke-width="1.2"/>'+
+        '<path d="M252 176 V164" stroke-width="3"/>'+
+      '</g>'+
+      '<g class="ha-kit" stroke="currentColor" stroke-width="3" stroke-linecap="round">'+
+        '<path d="M184 176 H250"/>'+
+        '<path d="M190 176 L208 156"/>'+
+        '<path d="M224 176 L242 158"/>'+
+      '</g>'+
+      '<g class="ha-figure" stroke="currentColor" stroke-width="9" '+
+         'stroke-linecap="round" stroke-linejoin="round">'+
+        '<path d="M284 120 L250 150 L218 167"/>'+
+        '<path d="M284 120 L316 124 L330 150"/>'+
+        '<path d="M284 120 L306 88"/>'+
+        '<path d="M306 88 L336 98 L348 77"/>'+
+        '<path d="M306 88 L282 100 L260 84"/>'+
+        '<circle cx="316" cy="72" r="11" fill="currentColor" stroke="none"/>'+
+      '</g>'+
+    '</svg>',
+
+  /* 音乐：五线谱 + 连梁八分音符 + 节拍器 */
+  music:
+    '<svg viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">'+
+      '<g class="ha-field" stroke="currentColor" stroke-width="1.4">'+
+        '<path d="M-10 92 H390 M-10 108 H390 M-10 124 H390 M-10 140 H390 M-10 156 H390"/>'+
+        '<path d="M286 92 V156" stroke-width="3"/>'+
+      '</g>'+
+      '<g class="ha-figure" fill="currentColor">'+
+        '<ellipse cx="206" cy="148" rx="11" ry="8" transform="rotate(-20 206 148)"/>'+
+        '<rect x="215" y="94" width="3.5" height="56"/>'+
+        '<ellipse cx="252" cy="132" rx="11" ry="8" transform="rotate(-20 252 132)"/>'+
+        '<rect x="261" y="86" width="3.5" height="48"/>'+
+        '<path d="M215 94 L264.5 86 L264.5 95 L215 103 Z"/>'+
+      '</g>'+
+      '<g class="ha-kit" stroke="currentColor" stroke-linecap="round">'+
+        '<path d="M312 176 L330 94 H346 L364 176" stroke-width="2.6"/>'+
+        '<path d="M304 176 H372" stroke-width="3"/>'+
+        '<path d="M340 172 L330 84" stroke-width="2.4"/>'+
+        '<rect x="328" y="128" width="15" height="7" fill="currentColor" stroke="none" '+
+          'transform="rotate(-5 335 131)"/>'+
+      '</g>'+
+    '</svg>',
+
+  /* 舞蹈：把杆 + 地板 + 阿拉贝斯克 + 足尖鞋 */
+  dance:
+    '<svg viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">'+
+      '<g class="ha-field" stroke="currentColor" stroke-linecap="round">'+
+        '<path d="M-10 176 H390" stroke-width="3"/>'+
+        '<path d="M-10 188 H390" stroke-width="1.2"/>'+
+        '<path d="M-10 44 H390" stroke-width="4"/>'+
+        '<path d="M40 44 V176 M344 44 V176" stroke-width="2.4"/>'+
+      '</g>'+
+      '<g class="ha-figure" stroke="currentColor" stroke-width="8" '+
+         'stroke-linecap="round" stroke-linejoin="round">'+
+        '<path d="M234 82 L230 118"/>'+
+        '<path d="M230 118 L232 148 L232 173"/>'+
+        '<path d="M230 118 L192 117 L160 100"/>'+
+        '<path d="M234 82 L264 73 L292 60"/>'+
+        '<path d="M234 82 L206 89 L178 84"/>'+
+        '<circle cx="236" cy="70" r="9.5" fill="currentColor" stroke="none"/>'+
+      '</g>'+
+      '<g class="ha-kit" stroke="currentColor" fill="none" stroke-linecap="round">'+
+        '<rect x="286" y="54" width="82" height="122" stroke-width="2.4"/>'+
+        '<path d="M296 176 L340 112 M316 176 L360 112" stroke-width="1.6"/>'+
+      '</g>'+
+    '</svg>',
+
+  /* 美术：画布 + 维特鲁威的圆与方（达芬奇，公版）+ 画笔 */
+  art:
+    '<svg viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">'+
+      '<g class="ha-field" stroke="currentColor">'+
+        '<rect x="104" y="12" width="226" height="176" stroke-width="2.6"/>'+
+        '<path d="M160 12 V188 M217 12 V188 M274 12 V188" stroke-width="1"/>'+
+        '<path d="M104 56 H330 M104 100 H330 M104 144 H330" stroke-width="1"/>'+
+      '</g>'+
+      '<g class="ha-figure" stroke="currentColor" stroke-width="2.4" fill="none">'+
+        '<circle cx="217" cy="100" r="58"/>'+
+        '<rect x="168" y="51" width="98" height="98"/>'+
+      '</g>'+
+      '<g class="ha-kit" stroke="currentColor" stroke-linecap="round" fill="none">'+
+        '<path d="M320 186 L335 141 L346 147 Z" fill="currentColor" stroke="none"/>'+
+        '<path d="M342 140 L348 130" stroke-width="10"/>'+
+        '<path d="M349 128 L372 92" stroke-width="4.5"/>'+
+      '</g>'+
+    '</svg>'
+};
+
 function renderDisc(){
+  var ha=el("heroArt");
+  if(ha){ ha.innerHTML=HERO_ART[S.discipline]||""; ha.setAttribute("data-disc",S.discipline); }
   el("discbar").innerHTML=Object.keys(DISC).map(function(k){
     return '<button type="button" data-d="'+k+'" aria-pressed="'+(k===S.discipline)+'">'+
       esc(DISC[k].name)+'</button>'; }).join("");
@@ -3610,7 +3721,7 @@ function doExport(btn,filename,data){
    数据只存本机，我们看不到任何人怎么用——出错只能靠使用者告诉我们。
    所以反馈要做到点一下就带上该带的：版本、设备、那条结论、公告原文。
    不带姓名、电话、学校、照片；附带内容摊开给使用者看、能删改，由他自己发出去。 */
-var APP_VER="1.0", APP_BUILD="09-15 18:05";     // APP_BUILD 由 build_standalone.py 打包时写入
+var APP_VER="1.0", APP_BUILD="09-15 20:40";     // APP_BUILD 由 build_standalone.py 打包时写入
 var FEEDBACK_URL="";                     // 建好问卷后填链接；空着就只走「复制 → 发微信」
 var FB_TYPES=[["judge","判定不对"],["export","简历 / 存图有问题"],
               ["stuck","看不懂、卡住了"],["idea","其他建议"]];
