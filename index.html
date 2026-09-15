@@ -13,7 +13,7 @@ img{max-width:100%}
 </style>
 </head>
 <body>
-<title>资格自查台</title>
+<title>入场券 · 内测版</title>
 <style>
 :root{
   --paper:#E8ECEE; --surface:#FFFFFF; --sunk:#F2F5F6; --field:#FBFCFC;
@@ -335,12 +335,59 @@ td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-to
   background:transparent;color:var(--hold);font:600 12.5px/1 var(--sans);
   padding:7px 12px;border-radius:4px;cursor:pointer}
 .exbanner button:hover{background:var(--hold);color:var(--surface)}
+/* ── 内测：版本标识 / 引导 / 反馈 ─────────────── */
+.betaline{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin:12px 0 0;font-size:12.5px;color:var(--mute)}
+.beta-tag{font:600 11px/1 var(--sans);letter-spacing:.06em;color:var(--hold);background:var(--hold-bg);
+  border:1px solid var(--hold);border-radius:3px;padding:4px 6px}
+.beta-ver{font-family:var(--mono);font-size:11.5px;margin-left:-6px}
+.beta-btn,.fb-link{appearance:none;border:0;background:none;padding:0;min-height:40px;display:inline-flex;align-items:center;
+  color:var(--indigo);cursor:pointer;
+  font:600 13px/1.2 var(--sans);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.beta-btn:hover,.fb-link:hover{text-decoration-thickness:2px}
+.fb-link{margin-top:2px;font-size:12.5px}
+.beta-btn:focus-visible,.fb-link:focus-visible,.fb-types button:focus-visible,.dlg-x:focus-visible,.ovl-fb:focus-visible{
+  outline:2px solid var(--ink);outline-offset:2px}
+.dlg{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;
+  padding:16px;background:rgba(8,14,18,.55)}
+.dlg-box{width:100%;max-width:520px;max-height:100%;display:flex;flex-direction:column;outline:0;
+  background:var(--surface);border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.dlg-hd{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 16px;border-bottom:1px solid var(--rule-soft)}
+.dlg-hd b{font-family:var(--serif);font-size:17px;color:var(--ink);margin-right:auto}
+.dlg-x{appearance:none;border:0;background:none;color:var(--mute);font:400 26px/1 var(--sans);
+  width:44px;height:44px;border-radius:4px;cursor:pointer}
+.dlg-x:hover{color:var(--ink);background:var(--sunk)}
+.dlg-bd{padding:14px 16px;overflow:auto;-webkit-overflow-scrolling:touch;font-size:14px;line-height:1.7}
+.dlg-ft{display:flex;gap:10px;padding:12px 16px;border-top:1px solid var(--rule-soft);background:var(--sunk)}
+.dlg-ft .btn{flex:1 1 0;min-width:0;text-decoration:none}
+.dlg-lead{margin:0 0 12px;color:var(--body)}
+.dlg-lb{display:block;font-size:13px;font-weight:600;color:var(--ink);margin:0 0 6px}
+.intro-steps{margin:0 0 12px;padding-left:1.4em}
+.intro-steps li{margin-bottom:6px}
+.intro-steps b,.intro-notes b{color:var(--ink)}
+.intro-notes{margin:0;padding:10px 12px 10px 2em;background:var(--sunk);border-radius:5px;font-size:13px}
+.intro-notes li{margin-bottom:3px}
+.fb-types{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.fb-types button{appearance:none;border:1px solid var(--rule);background:var(--field);color:var(--body);
+  font:500 13.5px/1 var(--sans);padding:0 13px;min-height:40px;border-radius:999px;cursor:pointer}
+.fb-types button[aria-pressed="true"]{border-color:var(--indigo);background:var(--indigo-bg);color:var(--indigo);font-weight:600}
+.dlg textarea{display:block;width:100%;min-height:96px;border:1px solid var(--rule);border-radius:5px;
+  background:var(--field);color:var(--ink);font:14px/1.6 var(--sans);padding:9px 10px;resize:vertical}
+.dlg details{margin-top:12px}
+.dlg summary{cursor:pointer;color:var(--indigo);font-size:13px;padding:4px 0}
+.dlg #fbCtx{margin-top:6px;min-height:160px;font:12px/1.6 var(--mono);color:var(--body)}
+.dlg #fbAll{margin-top:8px;min-height:160px;font-size:12px}
+@media (max-width:880px){.dlg textarea,.dlg #fbCtx,.dlg #fbAll{font-size:16px}}
+.fb-msg{margin:10px 0 0;font-size:13px;color:var(--pass)}
+.fb-msg:empty{display:none}
+.fb-msg.bad{color:var(--fail)}
+.ovl-fb{appearance:none;border:0;background:none;padding:6px 0;margin-left:8px;color:var(--indigo);
+  font:600 12px/1.6 var(--sans);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 <style id="frontend-overrides">
 /* 前端视觉覆盖层：WorkBuddy 起草，经核对与实测后合入。只含样式，不改结构与脚本 */
 /* ═══════════════════════════════════════════════════════════════════════════
-   overrides.css ── 艺体美求职资格自查台 · 视觉与交互观感覆盖层
+   overrides.css ── 入场券（艺体美求职资格自查）· 视觉与交互观感覆盖层
    ───────────────────────────────────────────────────────────────────────────
    约束（全部遵守，逐条见 changes.md）：
      · 纯 CSS；不改 HTML 结构、不改 JS、不改 id / class / data-* 名
@@ -802,9 +849,10 @@ td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-to
 
 <div class="shell">
   <div class="masthead">
-    <p class="stamp">资格审查 · 自查用</p>
-    <h1>资格自查台</h1>
-    <p class="lede">按下面几组填完，得到两样东西：<b>哪些条件你已经满足</b>、<b>还要补哪张凭证</b>。带 <span class="rq">※</span> 的必填，少一项就判不出结论。</p>
+    <p class="stamp">报名前 · 岗位资格自查</p>
+    <h1>入场券</h1>
+    <p class="lede">这个岗位，你有没有入场券？按下面几组填完，得到两样东西：<b>哪些条件你已经满足</b>、<b>还要补哪张凭证</b>。带 <span class="rq">※</span> 的必填，少一项就判不出结论。</p>
+    <p class="betaline"><span class="beta-tag">内测版</span><span class="beta-ver" id="betaVer"></span><button type="button" class="beta-btn" id="introOpen">怎么用</button><button type="button" class="beta-btn" id="fbOpen">反馈问题</button></p>
   </div>
 
   <div class="discbar" id="discbar" role="group" aria-label="选择专业方向"></div>
@@ -1473,7 +1521,7 @@ var NoticeParser=(function(){
     // 学位
     var pj=plain.join("；");
     if(!/学位不限|不限学位|不要求学位/.test(t) &&
-       (/学士\s*(?:[（(]含[）)])?\s*(?:及以上|以上)?\s*学位|硕士\s*(?:[（(]含[）)])?\s*(?:及以上|以上)?\s*学位|取得相应学位|具有相应学位|具有学位|学历学位|学位证|学位\s*[：:]\s*(?:学士|硕士|博士)/.test(pj)
+       (/学士\s*(?:[（(]含[）)])?\s*(?:及以上|以上)?\s*学位|硕士\s*(?:[（(]含[）)])?\s*(?:及以上|以上)?\s*学位|取得相应学位|具有相应学位|具有学位|学历学位|学位证|学位\s*(?:要求)?\s*[：:]\s*(?:学士|硕士|博士)/.test(pj)
         || plain.some(function(s){ return /^(学士|硕士|博士)(?:及以上|以上)?(?:学位)?$/.test(s); })))
       set("degreeReq","要求学位");
 
@@ -1813,7 +1861,8 @@ function renderForm(){
           var cls={ok:"p",no:"f",fix:"h",ask:"i"}[x.s];
           return '<div class="vr"><span class="mark '+cls+'">'+
             ({ok:"过",no:"卡",fix:"可补",ask:"待核"}[x.s])+'</span><span>'+esc(x.t)+'</span></div>';
-        }).join("")+'</div>'+
+        }).join("")+
+        '<button type="button" class="fb-link" data-fb="job" data-i="'+i+'">结论或识别不对？点这里反馈</button></div>'+
       '</div></div>';
   });
   ROW_I=0; h+=group("J","岗位对照","粘贴公告自动识别，或逐项照抄原文",
@@ -1982,6 +2031,9 @@ document.addEventListener("change",function(e){
 });
 document.addEventListener("click",function(e){
   var b=e.target.closest("button"); if(!b) return;
+  if(b.id==="fbOpen"){ openFeedback(null,"general"); return; }
+  if(b.id==="introOpen"){ openIntro(); return; }
+  if(b.getAttribute("data-fb")==="job"){ openFeedback("judge","job",+b.getAttribute("data-i")); return; }
   if(b.getAttribute("data-d")){ S.discipline=b.getAttribute("data-d"); renderAll(); return; }
   var add=b.getAttribute("data-add");
   if(add){
@@ -2381,7 +2433,7 @@ function matchJob(j){
 var VERDICT={ok:["p","★ 完全符合","按目前填写的信息，硬门槛都过得了"],
   fix:["h","○ 缺一项可补","有能补齐的项，盯住公告的补交截止日"],
   ask:["i","? 待核对","有条款无法自动判断，需要你对着公告原文看"],
-  no:["f","× 不可报","有补不了的硬门槛，果断放弃，不要浪费窗口期"]};
+  no:["f","× 不可报","有补不了的硬门槛。先对照公告原文确认这一条，确认无误再放弃"]};
 
 /* ═══════════ 简历 ═══════════
    措辞规则与命令行版 render.py 同源。展示页、简历、自查结论
@@ -2596,7 +2648,8 @@ function showDoc(html, title, kind){
 
   ov.innerHTML=
     '<div class="ovl-bar"><span class="ovl-t">'+esc(title)+'</span>'+btns+'</div>'+
-    '<p class="ovl-tip">'+tip+'</p>'+
+    '<p class="ovl-tip"><span class="ovl-tipt">'+tip+'</span>'+
+      '<button type="button" class="ovl-fb" data-act="fb">有问题？反馈</button></p>'+
     '<div class="ovl-body"><div class="ovl-box">'+
       '<iframe class="ovl-fr" title="'+esc(title)+'"></iframe></div>'+
       '<div class="ovl-img"></div></div>';
@@ -2632,6 +2685,11 @@ function showDoc(html, title, kind){
     }
     if(act==="dl"){ doExport(b, kind==="resume" ? (S.me.name||"简历")+"_简历.html" : "自查结果.html", html); return; }
     if(act==="pdf"){ location.href=location.pathname+"?print=resume"; return; }
+    if(act==="fb"){
+      openFeedback("export","export",{doc:kind==="resume"?"简历":"自查结果",
+        tip:ov.querySelector(".ovl-tipt").textContent, img:!!ov.querySelector(".ovl-img img")});
+      return;
+    }
     if(act==="img"){ makeImage(ov,fr,kind,b); }
   });
 }
@@ -2639,7 +2697,7 @@ function showDoc(html, title, kind){
 /* 把预览里的版面画成一张图。库注入到预览 iframe 自己的窗口里再调用——
    从父窗口去画另一个窗口里的元素，会碰到跨窗口的类型判断问题。 */
 function makeImage(ov,fr,kind,btn){
-  var tipEl=ov.querySelector(".ovl-tip"), old=btn.textContent;
+  var tipEl=ov.querySelector(".ovl-tipt"), old=btn.textContent;
   if(ov.querySelector(".ovl-img img")){          // 已生成：在图片与预览之间切换
     var on=ov.classList.toggle("showimg");
     btn.textContent = on ? "看预览" : "看图片";
@@ -2791,10 +2849,185 @@ function doExport(btn,filename,data){
     });
 }
 
+/* ═══════════════ 内测：版本、首次引导、反馈 ═══════════════
+   数据只存本机，我们看不到任何人怎么用——出错只能靠使用者告诉我们。
+   所以反馈要做到点一下就带上该带的：版本、设备、那条结论、公告原文。
+   不带姓名、电话、学校、照片；附带内容摊开给使用者看、能删改，由他自己发出去。 */
+var APP_VER="0.9", APP_BUILD="09-14 23:36";     // APP_BUILD 由 build_standalone.py 打包时写入
+var FEEDBACK_URL="";                     // 建好问卷后填链接；空着就只走「复制 → 发微信」
+var FB_TYPES=[["judge","判定不对"],["parse","公告识别错了"],["export","简历 / 存图有问题"],
+              ["stuck","看不懂、卡住了"],["idea","其他建议"]];
+var FB_PH={judge:"哪一条判错了？按公告原文应该是怎样？",
+  parse:"哪一项识别错了、漏了？原文是怎么写的？",
+  export:"点了哪个按钮，出现了什么？",
+  stuck:"卡在哪一组、哪一项？",
+  idea:"想加什么、改什么？"};
+var JOB_FIELD={name:"岗位名称",city:"地区",edu:"学历",degreeReq:"学位",normalReq:"师范类",partyReq:"政治面貌",
+  hukouReq:"户籍 / 生源",majors:"专业范围",tzSubject:"教资",athLevel:"运动员等级",athDisc:"等级项目",
+  mandarin:"普通话",ageMax:"年龄上限",other:"其他条款"};
+
+function verText(){ return "v"+APP_VER+(APP_BUILD==="dev" ? " · 开发预览" : " · "+APP_BUILD+" 版"); }
+
+function deviceInfo(ua){
+  ua=ua||UA;
+  var os = /iPhone|iPod/.test(ua) ? "iPhone"
+    : /iPad/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1) ? "iPad"
+    : /HarmonyOS|OpenHarmony/i.test(ua) ? "鸿蒙"
+    : /Android/.test(ua) ? "安卓"
+    : /Macintosh/.test(ua) ? "Mac" : /Windows/.test(ua) ? "Windows" : "其他系统";
+  var iv=ua.match(/OS (\d+)[_.](\d+)/), av=ua.match(/Android ([\d.]+)/),
+      md=ua.match(/Android [\d.]+; (?:HarmonyOS; )?([^;)]+?)(?: Build\/[^;)]*)?[;)]/);
+  if(/iPhone|iPad/.test(os) && iv) os+=" iOS "+iv[1]+"."+iv[2];
+  else if(av) os+=" "+av[1]+(md && !/^(K|wv)$/.test(md[1]) ? "（"+md[1]+"）" : "");
+  var wx=ua.match(/MicroMessenger\/([\d.]+)/);
+  var app = wx ? "微信 "+wx[1] : /QQ\//.test(ua) ? "QQ 内" : IN_APP ? "App 内置浏览器" : "浏览器";
+  return os+" · "+app+" · 屏宽 "+(document.documentElement.clientWidth||window.innerWidth);
+}
+
+function fbContext(kind,arg){
+  var L=["专业方向："+(DISC[S.discipline] ? DISC[S.discipline].name : "未选")];
+  if(kind==="job"){
+    var j=S.jobs[arg]; if(!j) return L.join("\n");
+    var r=matchJob(j);
+    L.push("岗位："+([j.name,j.city].filter(Boolean).join(" · ")||"（未填名称）"));
+    L.push("工具结论："+VERDICT[r.verdict][1]);
+    r.rows.forEach(function(x){ L.push("　"+{ok:"过",no:"卡",fix:"可补",ask:"待核"}[x.s]+"｜"+x.t); });
+    L.push("岗位各项：");
+    Object.keys(JOB_FIELD).forEach(function(k){ L.push("　"+JOB_FIELD[k]+"："+(j[k]||"（空）")); });
+    if(j.hukouReq==="有限制") L.push("　是否符合户籍 / 生源："+(j.hukouOk||"未选"));
+    if(j.auto && j.auto.length)
+      L.push("还没核对的识别项："+j.auto.map(function(k){ return JOB_FIELD[k]||k; }).join("、"));
+    if(j.src){
+      var s=String(j.src);
+      L.push("公告原文：\n"+(s.length>3000 ? s.slice(0,3000)+"\n…（原文太长，后面截掉了）" : s));
+    } else L.push("（手动填的岗位，没有粘贴原文）");
+  } else if(kind==="export"){
+    L.push("在导出："+arg.doc, "图片生成了吗："+(arg.img ? "生成了" : "还没有"), "当时的提示："+arg.tip);
+  } else {
+    var gaps=required();
+    L.push("还是示例数据吗："+(S.isExample ? "是" : "否"));
+    L.push("必填还差："+gaps.length+" 项"+(gaps.length ? "（"+gaps.slice(0,6).map(function(x){ return x.t; }).join("、")+(gaps.length>6 ? "…" : "")+"）" : ""));
+    L.push("岗位数："+S.jobs.length);
+  }
+  return L.join("\n");
+}
+
+/* 微信内置浏览器里 navigator.clipboard 常常不可用，先走 execCommand（要在点击的同一拍里同步执行）。
+   iOS 上临时文本框必须能被选中：选之前设 readonly，防止弹键盘。 */
+function copyText(text){
+  var ta=document.createElement("textarea"), ok=false;
+  ta.value=text; ta.setAttribute("readonly","");
+  ta.style.cssText="position:fixed;top:0;left:-9999px;font-size:12pt;border:0;padding:0;margin:0";
+  document.body.appendChild(ta);
+  try{ ta.select(); ta.setSelectionRange(0,ta.value.length); ok=document.execCommand("copy"); }catch(e){}
+  ta.parentNode.removeChild(ta);
+  if(ok || !(navigator.clipboard && window.isSecureContext)) return Promise.resolve(ok);
+  return navigator.clipboard.writeText(text).then(function(){ return true; },function(){ return false; });
+}
+
+function openDlg(title,body,foot,onAct){
+  var prevFocus=document.activeElement, prevOv=document.body.style.overflow;
+  var d=document.createElement("div");
+  d.className="dlg"; d.setAttribute("role","dialog"); d.setAttribute("aria-modal","true");
+  d.setAttribute("aria-labelledby","dlgT");
+  d.innerHTML='<div class="dlg-box" tabindex="-1"><div class="dlg-hd"><b id="dlgT">'+esc(title)+'</b>'+
+    '<button type="button" class="dlg-x" data-dlg="close" aria-label="关闭">×</button></div>'+
+    '<div class="dlg-bd">'+body+'</div><div class="dlg-ft">'+foot+'</div></div>';
+  document.body.appendChild(d); document.body.style.overflow="hidden";
+  function key(e){ if(e.key==="Escape") close(); }
+  function close(){
+    if(!d.parentNode) return;
+    d.parentNode.removeChild(d); document.removeEventListener("keydown",key);
+    document.body.style.overflow=prevOv;
+    try{ if(prevFocus && prevFocus.focus) prevFocus.focus(); }catch(e){}
+  }
+  document.addEventListener("keydown",key);
+  // 不响应点遮罩关闭：写了半天的反馈，手一滑就没了
+  d.addEventListener("click",function(e){
+    var b=e.target.closest("[data-dlg]"); if(!b) return;
+    var a=b.getAttribute("data-dlg");
+    if(a==="close"){ close(); return; }
+    if(onAct) onAct(a,b,d,close);
+  });
+  d.querySelector(".dlg-box").focus();
+  return {el:d, close:close};
+}
+
+function openIntro(){
+  var dev=IS_MOBILE ? "这台手机" : "这台电脑";
+  openDlg("先看 30 秒",
+    '<ol class="intro-steps">'+
+      (S.isExample
+        ? '<li><b>先点「清空，填我自己的」</b>：页面上现在是虚构的示例。然后按 A–D 组填，带 <span class="rq">※</span> 的必填。</li>'
+        : '<li><b>按 A–D 组把自己的情况填完</b>，带 <span class="rq">※</span> 的必填。</li>')+
+      '<li><b>把想报的招聘公告粘贴到 J 组「岗位对照」</b>：逐条告诉你学历、专业、教资、年龄、户籍这些条件过不过。</li>'+
+      '<li><b>生成简历</b>：'+(IS_MOBILE ? '点「存为图片」，再长按图片保存。' : '在打印对话框里选「另存为 PDF」。')+'</li>'+
+    '</ol>'+
+    '<ul class="intro-notes">'+
+      '<li>这是内测版。<b>只有体育类的判据经过真实求职验证</b>，音乐、舞蹈、美术的仅供参考。</li>'+
+      '<li>一切以公告原文为准。说「不可报」的，<b>先对照原文确认</b>，别直接放弃。</li>'+
+      '<li>填的内容只存在'+dev+'的浏览器里，不上传。清缓存、换设备就没了。</li>'+
+      '<li>判错了、识别错了、卡住了：点页面顶部的「反馈问题」。</li>'+
+    '</ul>',
+    '<button type="button" class="btn" data-dlg="close">知道了，开始</button>');
+}
+
+function openFeedback(type,kind,arg){
+  var cur=type;
+  var body=
+    '<p class="dlg-lead">写清楚哪里不对，点「复制反馈」，再回微信粘贴，发到内测群或发给邀请你的人。</p>'+
+    '<span class="dlg-lb" id="fbTypeLb">是哪类问题</span>'+
+    '<div class="fb-types" role="group" aria-labelledby="fbTypeLb">'+
+      FB_TYPES.map(function(t){
+        return '<button type="button" data-dlg="type" data-t="'+t[0]+'" aria-pressed="'+(t[0]===cur)+'">'+esc(t[1])+'</button>';
+      }).join("")+'</div>'+
+    '<label><span class="dlg-lb">具体说说 <span class="rq">※</span></span>'+
+      '<textarea id="fbText" placeholder="'+esc(FB_PH[cur]||"哪里不对、卡在哪、想改什么？")+'"></textarea></label>'+
+    '<details><summary>会一起附上的信息（可删改，不含姓名、电话、学校）</summary>'+
+      '<textarea id="fbCtx" aria-label="会一起附上的信息">'+
+        esc("版本："+verText()+"\n设备："+deviceInfo()+"\n"+fbContext(kind,arg))+'</textarea></details>'+
+    '<p class="fb-msg" id="fbMsg" role="status"></p>';
+  var foot='<button type="button" class="btn" data-dlg="copy">复制反馈</button>'+
+    (FEEDBACK_URL ? '<a class="btn ghost" href="'+esc(FEEDBACK_URL)+'" target="_blank" rel="noopener">填反馈问卷</a>' : '')+
+    '<button type="button" class="btn ghost" data-dlg="close">关闭</button>';
+  var dlg=openDlg("反馈问题",body,foot,function(a,b,d){
+    var msg=d.querySelector("#fbMsg"), txt=d.querySelector("#fbText");
+    if(a==="type"){
+      cur=b.getAttribute("data-t");
+      [].forEach.call(d.querySelectorAll('[data-dlg="type"]'),function(x){ x.setAttribute("aria-pressed",String(x===b)); });
+      txt.placeholder=FB_PH[cur]; return;
+    }
+    if(a!=="copy") return;
+    var said=txt.value.trim();
+    if(!said){ msg.className="fb-msg bad"; msg.textContent="先写一句哪里不对，再复制。"; txt.focus(); return; }
+    var name="未选"; FB_TYPES.forEach(function(t){ if(t[0]===cur) name=t[1]; });
+    var all="【入场券 · 内测反馈】\n类型："+name+"\n说明："+said+"\n—— 附带信息 ——\n"+d.querySelector("#fbCtx").value.trim();
+    copyText(all).then(function(ok){
+      if(ok){
+        msg.className="fb-msg"; msg.textContent="已复制。回微信粘贴，发到内测群或发给邀请你的人。";
+        b.textContent="已复制"; return;
+      }
+      msg.className="fb-msg bad";
+      msg.innerHTML="这里不让自动复制。<b>长按下面的文字 → 全选 → 复制</b>，再发到微信。";
+      var t=d.querySelector("#fbAll");
+      if(!t){ t=document.createElement("textarea"); t.id="fbAll"; t.readOnly=true;
+              t.setAttribute("aria-label","反馈全文"); msg.parentNode.appendChild(t); }
+      t.value=all; t.scrollIntoView({block:"nearest"}); t.focus(); t.select();
+    });
+  });
+  if(!IS_MOBILE) dlg.el.querySelector("#fbText").focus();   // 手机上自动聚焦会弹键盘盖住选项
+}
+
+function initBeta(){
+  var v=el("betaVer"); if(v) v.textContent=verText();
+  var seen=null; try{ seen=localStorage.getItem("zgzc.intro"); }catch(e){}
+  if(seen!==APP_VER){ try{ localStorage.setItem("zgzc.intro",APP_VER); }catch(e){} openIntro(); }
+}
+
 var PRINT_MODE = !IN_ARTIFACT && /[?&]print=resume(&|$)/.test(location.search);
 // 打印页一打开就要生成简历，展示页二维码得等库加载完
 if(PRINT_MODE){ if(S.me&&S.me.showcase&&!window.qrcode) loadQR(openPrintPage); else openPrintPage(); }
-else renderAll();
+else { renderAll(); initBeta(); }
 </script>
 
 </body>
