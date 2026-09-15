@@ -1776,7 +1776,7 @@ var EXAMPLE = {
     {name:"二级运动员证书",cat:"运动员等级",disc:"篮球",level:"二级",issuer:"某市体育局",
      status:"已取得",note:"",proof:"有原件",qeName:"",qeMark:""},
     {name:"教师资格证（初中体育与健康）",cat:"教师资格",disc:"初中体育与健康",level:"初中",issuer:"",
-     status:"部分完成",note:"笔试三科已过，面试未考",proof:"暂无凭证",qeName:"",qeMark:""},
+     status:"部分完成",note:"笔试三科已过，面试未考",eta:"2026.05",proof:"暂无凭证",qeName:"",qeMark:""},
     {name:"普通话水平测试等级证书",cat:"语言文字",disc:"普通话",level:"二级甲等",issuer:"",
      status:"已取得",note:"",proof:"有原件",qeName:"",qeMark:""},
     {name:"篮球三级裁判员证书",cat:"裁判员等级",disc:"篮球",level:"三级",issuer:"某市篮球协会",
@@ -1830,6 +1830,7 @@ if(!S.papers) S.papers=[];
 /* 作品形式改用档案 schema 的枚举，旧草稿里的写法就地换掉 */
 var KIND_MAP={"作品集":"文档","演出记录":"视频","图文":"图像","其他":"链接"};
 S.works.forEach(function(w){ if(KIND_MAP[w.kind]) w.kind=KIND_MAP[w.kind]; if(w.url==null) w.url=""; });
+S.creds.forEach(function(c){ if(c.eta==null) c.eta=""; });   // 还没取得的证，写清预计什么时候拿到
 
 function save(){ try{ localStorage.setItem("zgzc.v1",JSON.stringify(S)); }catch(e){} }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){
@@ -2375,7 +2376,8 @@ function renderForm(){
       '<div class="f2">'+sel("状态"+RQ,p+"status",["","已取得","部分完成","备考中","计划中"],"证书没拿到手，就不算「已取得」")+
         sel("凭证"+RQ,p+"proof",P,"资格复审要交原件")+'</div>'+
       (c.status==="部分完成"||c.status==="备考中"
-        ? field("卡在哪一步"+RQ,p+"note","如：笔试三科已过，面试未考") : "")+
+        ? '<div class="f2">'+field("卡在哪一步"+RQ,p+"note","如：笔试三科已过，面试未考")+
+            field("预计取得",p+"eta","如 2026.05","mono","不写，对方只能当作遥遥无期")+'</div>' : "")+
       (c.cat==="运动员等级"||c.cat==="教练员资质"
         ? '<div class="f2">'+field("达标赛事",p+"qeName","照证书原文写")+
             field("证书上的达标成绩",p+"qeMark","如 11.20","mono","可能和你的个人最好成绩不是一个数")+'</div>'
@@ -2654,7 +2656,7 @@ document.addEventListener("change",function(e){
   renderAll();
   if(id){ var back=document.querySelector('[data-p="'+id+'"]'); if(back) back.focus(); }
 });
-var BLANK={creds:{name:"",cat:"",disc:"",level:"",issuer:"",status:"",note:"",proof:"",qeName:"",qeMark:""},
+var BLANK={creds:{name:"",cat:"",disc:"",level:"",issuer:"",status:"",note:"",eta:"",proof:"",qeName:"",qeMark:""},
            achs:{title:"",lv:"",rank:"",mark:"",nature:"",date:"",wind:"",timing:"",proof:""},
            exps:{org:"",nature:"",desc:"",role:"",span:"",duty:"",canProof:"不确定"},
            projects:{name:"",role:"",scope:"",span:"",did:"",proof:""},
@@ -3049,6 +3051,42 @@ function buildShowcaseDoc(){
     '</style></head><body><div class="w">'+body+'</div></body></html>';
 }
 
+/* HR 初审只核六项：学历学位、专业代码、教资学段学科、普通话、运动员等级、年龄。
+   这六项原来散在简历末尾的证书行里，人事干事得翻到底——搬到抬头下面成一条。 */
+function qualStrip(){
+  var e=S.edu, out=[], tr=function(x){ return String(x||"").trim(); };
+  function find(cat){ return S.creds.filter(function(c){ return c.cat===cat && tr(c.name); })[0]; }
+  function add(k,v,pending){ if(v) out.push({k:k,v:v,p:!!pending}); }
+
+  add("学历", tr(e.level)+(e.degree==="已取得" ? " · 学位已取得"
+      : e.degree==="预计取得（应届）" ? " · 学位应届取得" : e.degree==="无学位" ? " · 无学位" : ""));
+  add("专业", tr(e.major)+(tr(e.code)?"（"+tr(e.code)+"）":"")+(e.normal==="是"?" · 师范类":""));
+
+  var tz=find("教师资格");
+  if(tz){
+    var st = tz.status==="已取得" ? "已取得"
+      : (tr(tz.note)||tr(tz.status)||"未取得")+(tr(tz.eta)?"，预计 "+tr(tz.eta)+" 取得":"");
+    add("教师资格", (tr(tz.disc)||tr(tz.level)||"")+"　"+st, tz.status!=="已取得");
+  }
+  var pt=find("语言文字"); if(pt) add("普通话", tr(pt.level)||tr(pt.name), pt.status!=="已取得");
+  var ath=find("运动员等级");
+  if(ath) add("运动员等级", tr(ath.level)+(tr(ath.disc)?" · "+tr(ath.disc):""), ath.status!=="已取得");
+  if(tr(e.birthYear)){
+    var age=new Date().getFullYear()-parseInt(e.birthYear,10);
+    if(age>0&&age<80) add("年龄", age+" 岁");
+  }
+  if(!out.length) return "";
+  return '<div class="qs">'+out.map(function(x){
+    return '<div>'+esc(x.k)+'<b'+(x.p?' class="pd"':'')+'>'+esc(x.v)+'</b></div>'; }).join("")+'</div>';
+}
+
+/* 导出文件名：HR 一天收几十份，文件名决定你会不会被找到 */
+function fileTag(){
+  var m=S.me, tr=function(x){ return String(x||"").trim(); };
+  var post=tr(m.target).split(/[｜|·]/)[0].trim();
+  return [tr(m.name),post,tr(m.phone)].filter(Boolean).join("_") || "简历";
+}
+
 function buildResumeDoc(){
   var m=S.me, e=S.edu, R=resumeSections(), trim=function(x){ return String(x||"").trim(); };
   var cities=trim(S.cons&&S.cons.cities).split(/[、,，\/]/).map(trim).filter(Boolean);
@@ -3086,6 +3124,7 @@ function buildResumeDoc(){
       (meta?'<div class="mt">'+esc(meta)+'</div>':"")+
       (contact?'<div class="ct">'+esc(contact)+'</div>':"")+'</div>'+
       (m.photo?'<div class="ph" role="img" aria-label="证件照" style="background-image:url(\''+m.photo+'\')"></div>':"")+'</div>'+
+    qualStrip()+
     (badges.length?'<div class="bd">'+badges.map(function(b){ return '<span>'+esc(b)+'</span>'; }).join("")+'</div>':"")+
     (kpis.length?'<div class="kp" style="grid-template-columns:repeat('+kpis.length+',1fr)">'+kpis.map(function(k){
       return '<div><b>'+esc(trim(k.v))+'</b><small>'+esc(trim(k.l))+'</small></div>'; }).join("")+'</div>':"");
@@ -3110,7 +3149,7 @@ function buildResumeDoc(){
     // A4 宽 210mm≈794px。手机视口只有 375px，不声明就会被切掉右边；
     // 按 794 声明后浏览器整页缩放显示，打印输出不受影响。
     '<meta name="viewport" content="width=794">'+
-    '<title>'+esc(m.name||"简历")+'　简历</title><style>'+
+    '<title>'+esc(fileTag())+'</title><style>'+
     /* 缺 print-color-adjust 时 Chrome 打印会丢掉所有底色，
        文字检查全过，只有数彩色像素才发现——所以它必须写在最前面 */
     '*{-webkit-print-color-adjust:exact;print-color-adjust:exact;box-sizing:border-box}'+
@@ -3131,6 +3170,11 @@ function buildResumeDoc(){
       'background-size:cover;background-position:center top;background-repeat:no-repeat}'+
     '.bd{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}'+
     '.bd span{font-size:11px;font-weight:700;color:'+AT+';background:'+ABG+';border:1px solid '+ABD+';border-radius:3px;padding:2px 7px}'+
+    '.qs{display:flex;flex-wrap:wrap;gap:2px 14px;margin-top:7px;padding:6px 9px;'+
+      'background:#F4F7F8;border:1px solid #D5DDE1;border-radius:4px}'+
+    '.qs div{font-size:11px;color:#55656D;white-space:nowrap}'+
+    '.qs b{color:#111A1F;font-weight:700;margin-left:5px}'+
+    '.qs b.pd{color:#8A5E1A}'+
     '.kp{display:grid;gap:6px;margin-top:7px}'+
     '.kp div{border:1px solid #D5DDE1;border-radius:4px;padding:4px 6px;text-align:center}'+
     '.kp b{display:block;font-size:16px;color:'+AT+';line-height:1.25;font-variant-numeric:tabular-nums}'+
@@ -3154,9 +3198,9 @@ function buildResumeDoc(){
     '.qr img{width:20mm;height:20mm;display:block;image-rendering:pixelated;margin:0 auto 2px}'+
     '.qr small{display:block;max-width:26mm;word-break:break-all}'+
     '</style></head><body><div class="pg">'+head+
-    sec("核心荣誉与竞赛成绩", honors)+
     sec("一专多能 · 可任教项目", skillBody)+
     sec("执教与教学经历", expBody)+
+    sec("核心荣誉与竞赛成绩", honors)+
     sec("教育科研", R.papers.map(item).join(""))+
     sec("项目实践", R.projects.map(item).join(""))+
     sec("教育背景", eduBody)+
@@ -3286,7 +3330,8 @@ function showDoc(html, title, kind){
       catch(err){ window.print(); }
       return;
     }
-    if(act==="dl"){ doExport(b, kind==="resume" ? (S.me.name||"简历")+"_简历.html" : "自查结果.html", html); return; }
+    if(act==="dl"){ doExport(b, kind==="resume" ? fileTag()+".html"
+      : kind==="showcase" ? fileTag()+"_展示页.html" : "自查结果.html", html); return; }
     if(act==="pdf"){ location.href=location.pathname+"?print=resume"; return; }
     if(act==="fb"){
       openFeedback("export","export",{doc:kind==="resume"?"简历":"自查结果",
@@ -3456,7 +3501,7 @@ function doExport(btn,filename,data){
    数据只存本机，我们看不到任何人怎么用——出错只能靠使用者告诉我们。
    所以反馈要做到点一下就带上该带的：版本、设备、那条结论、公告原文。
    不带姓名、电话、学校、照片；附带内容摊开给使用者看、能删改，由他自己发出去。 */
-var APP_VER="0.9", APP_BUILD="09-15 15:19";     // APP_BUILD 由 build_standalone.py 打包时写入
+var APP_VER="0.9", APP_BUILD="09-15 16:47";     // APP_BUILD 由 build_standalone.py 打包时写入
 var FEEDBACK_URL="";                     // 建好问卷后填链接；空着就只走「复制 → 发微信」
 var FB_TYPES=[["judge","判定不对"],["export","简历 / 存图有问题"],
               ["stuck","看不懂、卡住了"],["idea","其他建议"]];
