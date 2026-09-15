@@ -1640,9 +1640,9 @@ td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-to
 
 <div class="shell">
   <div class="masthead">
-    <p class="stamp">报名前 · 岗位资格自查</p>
+    <p class="stamp">艺体美专业生 · 简历 + 展示码</p>
     <h1>入场券</h1>
-    <p class="lede">把你手上的证、等级、名次、经历填清楚，这张表给你两样东西：<b>哪些硬门槛你已经满足</b>、<b>还要补哪张凭证</b>，再生成一页 A4 简历。带 <span class="rq">※</span> 的必填。</p>
+    <p class="lede"><b>填一次信息，得到一份能直接投的简历。</b>证书、等级、名次、可任教项目按 HR 初审的读法排好，右下角一个专属二维码——扫开是你的技能展示与说课视频。<br>不替你美化，只把<b>有凭证</b>的东西摆清楚；顺带告诉你还缺哪张证。带 <span class="rq">※</span> 的必填。</p>
     <p class="betaline"><span class="beta-tag">内测版</span><span class="beta-ver" id="betaVer"></span><button type="button" class="beta-btn" id="introOpen">怎么用</button><button type="button" class="beta-btn" id="fbOpen">反馈问题</button></p>
   </div>
 
@@ -3599,7 +3599,7 @@ function doExport(btn,filename,data){
    数据只存本机，我们看不到任何人怎么用——出错只能靠使用者告诉我们。
    所以反馈要做到点一下就带上该带的：版本、设备、那条结论、公告原文。
    不带姓名、电话、学校、照片；附带内容摊开给使用者看、能删改，由他自己发出去。 */
-var APP_VER="0.9", APP_BUILD="09-15 17:46";     // APP_BUILD 由 build_standalone.py 打包时写入
+var APP_VER="1.0", APP_BUILD="09-15 17:55";     // APP_BUILD 由 build_standalone.py 打包时写入
 var FEEDBACK_URL="";                     // 建好问卷后填链接；空着就只走「复制 → 发微信」
 var FB_TYPES=[["judge","判定不对"],["export","简历 / 存图有问题"],
               ["stuck","看不懂、卡住了"],["idea","其他建议"]];
@@ -3687,13 +3687,15 @@ function openIntro(){
         ? '<li><b>先点「清空，填我自己的」</b>：页面上现在是虚构的示例。然后按 A–D 组填，带 <span class="rq">※</span> 的必填。</li>'
         : '<li><b>按 A–D 组把自己的情况填完</b>，带 <span class="rq">※</span> 的必填。</li>')+
       '<li><b>边填边看「硬门槛」那一栏</b>：教师资格证、运动员等级、普通话，哪些已经满足、哪些还缺。手机上它在表格上面。</li>'+
+      '<li><b>G 组填两段视频的链接</b>（技能展示、说课教学），再在 J 组填一个<b>展示页代号</b>——简历右下角的二维码就是扫进这两段视频的。</li>'+
       '<li><b>拉到页面最下面，点「生成简历」</b>'+(IS_MOBILE ? '，再点「存为图片」，长按保存到手机。' : '，然后打印或存 PDF。')+'</li>'+
     '</ol>'+
     '<ul class="intro-notes">'+
       '<li>这是内测版。<b>只有体育类的判据经过真实求职验证</b>，音乐、舞蹈、美术的仅供参考。</li>'+
-      '<li>一切以公告原文为准。说「不可报」的，<b>先对照原文确认</b>，别直接放弃。</li>'+
+      '<li>一切以招聘公告原文为准：这里说你满足某项硬门槛，<b>报名前仍要对着公告再核一遍</b>。</li>'+
       '<li>填的内容只存在'+dev+'的浏览器里，不上传。清缓存、换设备就没了。</li>'+
-      '<li>判错了、识别错了、卡住了：点页面顶部的「反馈问题」。</li>'+
+      '<li>展示页要群主统一发布：填完点页尾的「复制档案，发给群主」，他放上去，你的二维码就通了。</li>'+
+      '<li>判错了、卡住了、哪句话看不懂：点页面顶部的「反馈问题」。</li>'+
     '</ul>',
     '<button type="button" class="btn" data-dlg="close">知道了，开始</button>');
 }
