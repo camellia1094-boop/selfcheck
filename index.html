@@ -303,6 +303,13 @@ td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-to
 .submit-n{margin:0 0 14px;font-size:13px;line-height:1.6;color:var(--mute)}
 .submit .btn.big{width:100%;max-width:320px;margin:0 auto;font-size:15.5px;padding:14px;min-height:48px}
 .submit .blocked{margin-top:12px;text-align:left}
+.slug{display:grid;gap:8px;margin-bottom:13px;padding:12px 13px;background:var(--sunk);
+  border:1px dashed var(--indigo);border-radius:6px}
+.slug .fh b{color:var(--ink)}
+.slug .fh em{font-style:normal;color:var(--fail)}
+.slug .logo-btn{justify-self:start}
+.submit-2 .btn + .btn,
+.submit-2 .submit-n2 + .btn{margin-top:12px}
 .submit-2{margin-top:16px;padding-top:14px;border-top:1px dashed var(--rule)}
 .submit-2 .btn{width:100%;max-width:320px;margin:0 auto}
 .submit-n2{margin:10px 0 0;font-size:12.5px;line-height:1.7;color:var(--mute);text-align:left}
@@ -1655,6 +1662,9 @@ td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-to
         <div class="submit-2">
           <button class="btn ghost" type="button" id="dlShowcase">生成展示页</button>
           <p class="submit-n2" id="showcaseNote"></p>
+          <button class="btn ghost" type="button" id="copyProfile">复制档案，发给群主</button>
+          <p class="submit-n2">展示页要有人发布才能被扫到。<b>手机上点这个</b>，复制成一段文字粘到微信发给群主；
+            电脑上也可以用右边的「下载 profile.json」。证件照不跟着走，需要就单独发一张。</p>
         </div>
       </div>
 
@@ -1821,6 +1831,7 @@ if(S.me.photo==null) S.me.photo="";
 if(S.me.badges==null) S.me.badges="";
 if(S.me.tools==null) S.me.tools="";
 if(S.me.showcase==null) S.me.showcase="";
+if(S.me.slug==null) S.me.slug="";   // 展示页代号：地址先约定，文件后补
 if(S.me.accent==null) S.me.accent="#1B4D6B";
 if(!S.me.kpis) S.me.kpis=[{v:"",l:""},{v:"",l:""},{v:"",l:""},{v:"",l:""}];
 ["tier","span","gpa","avg","honors"].forEach(function(k){ if(S.edu[k]==null) S.edu[k]=""; });
@@ -2545,6 +2556,7 @@ function renderForm(){
     '<div class="kg">'+kp+'</div>'+
     '<span class="fh kg-hint">数字亮点最多 4 个，每个都要拿得出凭证，比如成绩册、带训记录</span>'+
     field("通用技能","me.tools","如 剪映（视频剪辑）、PowerPoint / Excel / Word")+
+    slugBlock()+
     field("个人展示页链接","me.showcase","https://…","mono","填了会在简历上生成二维码。先用手机扫一次，确认能打开")+
     '</div>');
 
@@ -2679,6 +2691,19 @@ document.addEventListener("click",function(e){
     var rb=el("dlResume"); if(rb && !rb.disabled) rb.click();   // 被拦住时让人看见拦住的理由
     return;
   }
+  if(b.id==="useSlug"){
+    if(slugOK(S.me.slug)){ S.me.showcase=slugUrl(S.me.slug); S.isExample=false; renderAll(); }
+    return;
+  }
+  if(b.id==="copyProfile"){
+    var old=b.textContent;
+    copyText(submitText()).then(function(ok){
+      b.textContent = ok ? "已复制，去微信粘贴" : "复制不了，用电脑下载";
+      if(!ok){ var t=el("fallback"); if(t){ t.hidden=false; t.value=submitText(); t.focus(); t.select(); } }
+      setTimeout(function(){ b.textContent=old; },2600);
+    });
+    return;
+  }
   if(b.id==="libPick"){ openLogoLib(); return; }
   if(b.getAttribute("data-lib")){ pickLib(b.getAttribute("data-lib")); return; }
   if(b.id==="logoDel"){ S.edu.logo=""; S.edu.logoR=0; LOGO_MSG=""; renderAll(); return; }
@@ -2695,7 +2720,7 @@ document.addEventListener("click",function(e){
   }
   if(b.id==="clearAll"){
     S={discipline:S.discipline,isExample:false,
-       me:{name:"",phone:"",email:"",target:"",photo:"",badges:"",tools:"",showcase:"",accent:"#1B4D6B",
+       me:{name:"",phone:"",email:"",target:"",photo:"",badges:"",tools:"",showcase:"",slug:"",accent:"#1B4D6B",
            kpis:[{v:"",l:""},{v:"",l:""},{v:"",l:""},{v:"",l:""}]},
        edu:{school:"",major:"",code:"",normal:"不确定",level:"",degree:"",party:"",
             gradYear:"",rank:"",birthYear:"",logo:"",tier:"",span:"",gpa:"",avg:"",honors:""},
@@ -2775,6 +2800,7 @@ function buildProfile(){
         proof:proofOf(r.proof)};}),
     portfolio:S.works.filter(function(w){return w.title;}).map(function(w){
       return {type:KIND_MAP[w.kind]||w.kind||undefined,title:w.title,proves:w.proves,
+        publicUrl:tr(w.url)||undefined,
         gateRole:DISC[S.discipline].portfolio.gateRole};}),
     skills:{secondary:S.skills.filter(function(k){return k.d;}).map(function(k){
       return {discipline:k.d,evidenceStrength:k.ev||undefined,detail:k.detail,canTeach:true,
@@ -3501,7 +3527,7 @@ function doExport(btn,filename,data){
    数据只存本机，我们看不到任何人怎么用——出错只能靠使用者告诉我们。
    所以反馈要做到点一下就带上该带的：版本、设备、那条结论、公告原文。
    不带姓名、电话、学校、照片；附带内容摊开给使用者看、能删改，由他自己发出去。 */
-var APP_VER="0.9", APP_BUILD="09-15 16:47";     // APP_BUILD 由 build_standalone.py 打包时写入
+var APP_VER="0.9", APP_BUILD="09-15 17:02";     // APP_BUILD 由 build_standalone.py 打包时写入
 var FEEDBACK_URL="";                     // 建好问卷后填链接；空着就只走「复制 → 发微信」
 var FB_TYPES=[["judge","判定不对"],["export","简历 / 存图有问题"],
               ["stuck","看不懂、卡住了"],["idea","其他建议"]];
@@ -3671,6 +3697,40 @@ function watchSubmit(){
   new IntersectionObserver(function(es){
     SUBMIT_SEEN = es[0].isIntersecting; syncSticky();
   },{rootMargin:"-40px 0px"}).observe(box);
+}
+
+/* ═══════════ 展示页：地址先约定，文件后补 ═══════════
+   展示页要有人托管（内测期是群主统一发布）。如果等发布完再回来填地址，
+   简历就得重做一遍、二维码也要重印。所以让使用者先定一个代号，
+   地址当场算出来印进二维码，群主之后把文件放到这个路径上，码就通了。 */
+var SHOWCASE_BASE="https://camellia1094-boop.github.io/selfcheck/p/";
+function slugOK(s){ return /^[a-z0-9][a-z0-9-]{1,23}$/.test(String(s||"")); }
+function slugUrl(s){ return SHOWCASE_BASE+String(s||"")+".html"; }
+
+function slugBlock(){
+  var s=String(S.me.slug||"").trim(), ok=slugOK(s);
+  var tip = !s ? '用你名字的拼音，全小写，如 <b>wuyuhang</b>。定下来就别改——简历上的二维码指的就是它。'
+    : ok ? '你的展示页地址：<b class="mono">'+esc(slugUrl(s))+'</b>　还没发布，把档案发给群主，他放上去这个地址就能打开。'
+    : '<em>只能用小写字母、数字和短横线，2–24 位。</em>';
+  return '<div class="slug"><label><span class="lb">展示页代号</span>'+
+    '<input class="mono" data-p="me.slug" value="'+esc(s)+'" maxlength="24" placeholder="wuyuhang" aria-label="展示页代号">'+
+    '<span class="fh">'+tip+'</span></label>'+
+    (ok ? '<button type="button" class="logo-btn" id="useSlug">把这个地址填进下面</button>' : "")+
+    '</div>';
+}
+
+/* 手机上「下载文件」是废的（微信里点了没反应），所以提交走剪贴板：
+   复制成一段文字，粘到微信发给群主。这条路反馈功能已经验证过。 */
+function submitText(){
+  var m=S.me, tr=function(x){ return String(x||"").trim(); };
+  var slug=tr(m.slug);
+  return "【入场券 · 展示页提交】\n"+
+    "姓名："+(tr(m.name)||"（没填）")+"\n"+
+    "代号："+(slug||"（没填，群主会代取）")+"\n"+
+    (slugOK(slug) ? "发布后地址："+slugUrl(slug)+"\n" : "")+
+    "日期："+new Date().toISOString().slice(0,10)+"　版本："+verText()+"\n"+
+    "说明：把这整段发给内测群主，他发布后上面那个地址就能打开。证件照不会跟着复制，需要的话单独发一张。\n\n"+
+    "<<<PROFILE\n"+JSON.stringify(buildProfile())+"\nPROFILE>>>";
 }
 
 function initBeta(){
