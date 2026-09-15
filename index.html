@@ -303,6 +303,11 @@ td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-to
 .submit-n{margin:0 0 14px;font-size:13px;line-height:1.6;color:var(--mute)}
 .submit .btn.big{width:100%;max-width:320px;margin:0 auto;font-size:15.5px;padding:14px;min-height:48px}
 .submit .blocked{margin-top:12px;text-align:left}
+.submit-2{margin-top:16px;padding-top:14px;border-top:1px dashed var(--rule)}
+.submit-2 .btn{width:100%;max-width:320px;margin:0 auto}
+.submit-n2{margin:10px 0 0;font-size:12.5px;line-height:1.7;color:var(--mute);text-align:left}
+.submit-n2 b{color:var(--ink)}
+.submit-n2 em{font-style:normal;color:var(--hold)}
 .submit-warn{margin:12px 0 0;font-size:12.5px;line-height:1.65;color:var(--hold);
   background:var(--hold-bg);border-radius:4px;padding:9px 11px;text-align:left}
 .submit-warn b{font-weight:700}
@@ -1647,6 +1652,10 @@ td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-to
         <button class="btn big" type="button" id="dlResume">生成简历</button>
         <p class="submit-warn" id="submitWarn" hidden></p>
         <p class="blocked" id="blocked" hidden></p>
+        <div class="submit-2">
+          <button class="btn ghost" type="button" id="dlShowcase">生成展示页</button>
+          <p class="submit-n2" id="showcaseNote"></p>
+        </div>
       </div>
 
       <p class="foot">招聘规则有地域性与时效性，<b>最终以当年当地的公告原文为准</b>。填的内容只存本机浏览器，不上传。</p>
@@ -1792,7 +1801,8 @@ var EXAMPLE = {
     {title:"初中篮球课分层教学的实践探索",venue:"某省体育科学学会年会",author:"第一作者",
      form:"墙报",date:"2025-10",status:"已录用",attended:"未到场",proof:"有照片/复印件",
      method:"问卷调查与课堂观察",findings:"两个班分层教学后，运球达标率由 58% 提升至 81%"}],
-  works:[{title:"篮球教学示范视频",kind:"视频",proves:"运球、传球、投篮的分解示范与常见错误纠正",proof:"有原件"}],
+  works:[{title:"篮球教学示范视频",kind:"视频",proves:"运球、传球、投篮的分解示范与常见错误纠正",proof:"有原件",
+          url:"https://example.com/li-xiang/video"}],
   skills:[{d:"篮球",ev:"赛事名次",detail:"省大学生联赛团体第四",cat:"球类项目",teach:"可承担篮球专项课与校队训练"},
           {d:"排球",ev:"课程修习",detail:"专项课 90 分",cat:"球类项目",teach:""},
           {d:"羽毛球",ev:"自述掌握",detail:"",cat:"普及项目",teach:""}],
@@ -1819,7 +1829,7 @@ if(S.teachMore==null) S.teachMore="";
 if(!S.papers) S.papers=[];
 /* 作品形式改用档案 schema 的枚举，旧草稿里的写法就地换掉 */
 var KIND_MAP={"作品集":"文档","演出记录":"视频","图文":"图像","其他":"链接"};
-S.works.forEach(function(w){ if(KIND_MAP[w.kind]) w.kind=KIND_MAP[w.kind]; });
+S.works.forEach(function(w){ if(KIND_MAP[w.kind]) w.kind=KIND_MAP[w.kind]; if(w.url==null) w.url=""; });
 
 function save(){ try{ localStorage.setItem("zgzc.v1",JSON.stringify(S)); }catch(e){} }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){
@@ -2468,6 +2478,8 @@ function renderForm(){
         sel("形式",p+"kind",["视频","图像","音频","文档","链接"])+
         sel("凭证"+RQ,p+"proof",P)+'</div>'+
       field("它证明了你什么能力",p+"proves","如 运球、传球、投篮的分解示范与纠错")+
+      field("公开链接（选填）",p+"url","https://…　视频或作品放在哪","mono",
+            "展示页上会把地址一起印出来——展示页多半是当图片发出去的，图里点不动")+
       '</div></div>';
   });
   ROW_I=0; h+=group("G","作品与展示","视频、作品集、演出记录",
@@ -2647,7 +2659,7 @@ var BLANK={creds:{name:"",cat:"",disc:"",level:"",issuer:"",status:"",note:"",pr
            exps:{org:"",nature:"",desc:"",role:"",span:"",duty:"",canProof:"不确定"},
            projects:{name:"",role:"",scope:"",span:"",did:"",proof:""},
            papers:{title:"",venue:"",author:"",form:"",date:"",status:"",attended:"",proof:"",method:"",findings:""},
-           works:{title:"",kind:"视频",proves:"",proof:""},
+           works:{title:"",kind:"视频",proves:"",proof:"",url:""},
            skills:{d:"",ev:"",detail:"",cat:"",teach:""}};
 function seedRow(k){ if(BLANK[k]) S[k].push(JSON.parse(JSON.stringify(BLANK[k]))); }
 
@@ -2696,6 +2708,7 @@ document.addEventListener("click",function(e){
   if(b.id==="print"){ window.print(); return; }
   if(b.id==="dlJson") doExport(b,"profile.json",JSON.stringify(buildProfile(),null,2));
   if(b.id==="dlReport") showDoc(buildReportDoc(),"我的自查结果","report");
+  if(b.id==="dlShowcase"){ showDoc(buildShowcaseDoc(),(S.me.name||"我")+" 展示页","showcase"); return; }
   if(b.id==="forceBtn"){ forceResume=true; resumeGate(); return; }
   if(b.id==="dlResume"){
     if(!resumeGate()) return;
@@ -2880,6 +2893,162 @@ function resumeSections(){
   return out;
 }
 
+/* ═══════════ 展示页 ═══════════
+   和简历不是一回事：简历是"我说我有什么"，展示页是"你可以核验"。
+   所以只陈列有凭证的东西——没凭证的不上页，但要告诉使用者缺什么才能上。
+   另两类一律拦下：考级类（业内不作职业资格，陈列反而暴露不懂行）、命中伪资质识别的。 */
+function showcasePick(){
+  var o={certs:[],achs:[],exps:[],projects:[],papers:[],works:[],teach:[],common:[],excluded:[]};
+  var tr=function(x){ return String(x||"").trim(); };
+  function drop(what,why){ if(what) o.excluded.push({what:tr(what),why:why}); }
+  function proofed(p){ return p && p!=="暂无凭证"; }
+  function windy(a){ var w=parseFloat(String(a.wind).replace("+","")); return !isNaN(w)&&w>2.0; }
+
+  S.creds.forEach(function(c){
+    if(!tr(c.name)) return;
+    if(FAKES.some(function(k){ return k.re.test(c.name); })){
+      drop(c.name,"名实不符，陈列出来会被当场戳破"); return; }
+    if(c.cat==="艺术考级"){ drop(c.name,"考级证书不作职业资格，摆上去反而露怯"); return; }
+    if(c.status!=="已取得"){ drop(c.name,(tr(c.note)||tr(c.status)||"尚未取得")+"，拿到手再上页"); return; }
+    if(!proofed(c.proof)){ drop(c.name,"没有凭证，补一张原件或照片就能上页"); return; }
+    o.certs.push({t:tr(c.name)+(tr(c.level)&&c.name.indexOf(c.level)<0?"（"+tr(c.level)+"）":""),
+                  s:[tr(c.disc),tr(c.issuer)].filter(Boolean).join(" · ")});
+  });
+  S.achs.forEach(function(a){
+    if(!tr(a.title)) return;
+    if(!proofed(a.proof)){ drop(a.title,"没有凭证，找主办方要成绩册或证书"); return; }
+    o.achs.push({t:tr(a.title),
+                 r:a.nature==="展演展示" ? "参演" : tr(a.rank),
+                 m:windy(a) ? "" : tr(a.mark),          // 风速超标的成绩不作数，只留名次
+                 lv:tr(a.lv), d:tr(a.date)});
+  });
+  S.exps.forEach(function(e){
+    if(!tr(e.org)) return;
+    if(e.canProof!=="能开"){ drop(e.org,"经历证明开不出来或还没确认，去原单位要一份就能上页"); return; }
+    o.exps.push({t:tr(e.org),r:tr(e.role),s:tr(e.span),d:tr(e.duty),n:tr(e.desc)});
+  });
+  S.projects.forEach(function(p){
+    if(!tr(p.name)) return;
+    if(!proofed(p.proof)){ drop(p.name,"没有凭证，留一张现场照片或记录就能上页"); return; }
+    o.projects.push({t:tr(p.name),r:tr(p.role),s:tr(p.span),d:tr(p.did)});
+  });
+  S.papers.forEach(function(p){
+    if(!tr(p.title)) return;
+    if(!proofed(p.proof)){ drop(p.title,"没有录用通知或收录页，拿到再上页"); return; }
+    o.papers.push({t:tr(p.title),st:tr(p.status)+(tr(p.form)?"（"+tr(p.form)+"）":""),
+                   v:tr(p.venue),a:tr(p.author),f:tr(p.findings)});
+  });
+  S.works.forEach(function(w){
+    if(!tr(w.title)) return;
+    if(!proofed(w.proof)){ drop(w.title,"没有凭证，作品本身就是凭证——传上去再填链接"); return; }
+    o.works.push({t:tr(w.title),k:tr(w.kind),p:tr(w.proves),u:tr(w.url)});
+  });
+  S.skills.forEach(function(k){
+    if(!tr(k.d)) return;
+    if(k.ev==="自述掌握"){ o.common.push(tr(k.d)); return; }   // 自述的归到普及性教学，不单列
+    o.teach.push({d:tr(k.d),e:tr(k.ev),v:tr(k.detail),c:tr(k.cat),n:tr(k.teach)});
+  });
+  return o;
+}
+
+function buildShowcaseDoc(){
+  var m=S.me, e=S.edu, P=showcasePick();
+  var A=normHex(m.accent)||ACCENT_DEFAULT, AT=textSafe(A),
+      ABG=mixHex(A,"#FFFFFF",0.92), ABD=mixHex(A,"#FFFFFF",0.7);
+  var tr=function(x){ return String(x||"").trim(); };
+  function sec(title,body){ return body ? '<section><h2>'+esc(title)+'</h2>'+body+'</section>' : ""; }
+  function row(t,meta,body,tag){
+    return '<div class="it">'+(tag?'<span class="tag">'+esc(tag)+'</span>':"")+
+      '<div class="it-b"><b>'+esc(t)+'</b>'+(meta?'<span class="mt">'+esc(meta)+'</span>':"")+
+      (body?'<p>'+esc(body)+'</p>':"")+'</div></div>';
+  }
+  var kpis=(m.kpis||[]).filter(function(k){ return k&&tr(k.v); });
+  var contact=[tr(m.phone),tr(m.email)].filter(Boolean).join("　·　");
+
+  var body=
+    '<header>'+
+      (e.logo?'<img class="lg" src="'+e.logo+'" alt="">':"")+
+      '<h1>'+esc(tr(m.name)||"　")+'</h1>'+
+      (tr(m.target)?'<p class="tg">'+esc(tr(m.target))+'</p>':"")+
+      '<p class="mt">'+esc([tr(e.school),tr(e.major)?tr(e.major)+"专业":"",tr(e.gradYear)?tr(e.gradYear)+" 届":""].filter(Boolean).join("　·　"))+'</p>'+
+      (contact?'<p class="ct">'+esc(contact)+'</p>':"")+
+    '</header>'+
+    (kpis.length?'<div class="kp">'+kpis.map(function(k){
+      return '<div><b>'+esc(tr(k.v))+'</b><small>'+esc(tr(k.l))+'</small></div>'; }).join("")+'</div>':"")+
+
+    sec("可任教项目", P.teach.map(function(k){
+      return row(k.d,[k.c,k.e,k.v].filter(Boolean).join("　·　"),k.n); }).join("")+
+      (P.common.length?'<p class="cm">另可承担普及性教学：'+esc(P.common.join("、"))+'</p>':""))+
+
+    sec("竞赛成绩", P.achs.map(function(a){
+      return row(a.t,[a.lv,a.d].filter(Boolean).join("　·　"),a.m?("成绩 "+a.m):"",a.r); }).join(""))+
+
+    sec("执教与实践", P.exps.map(function(x){
+      return row(x.t,[x.r,x.n,x.s].filter(Boolean).join("　·　"),x.d); }).join(""))+
+
+    sec("项目实践", P.projects.map(function(x){
+      return row(x.t,[x.r,x.s].filter(Boolean).join("　·　"),x.d); }).join(""))+
+
+    sec("教育科研", P.papers.map(function(x){
+      return row("《"+x.t+"》",[x.v,x.a].filter(Boolean).join("　·　"),x.f,x.st); }).join(""))+
+
+    sec("作品与影像", P.works.map(function(w){
+      /* 链接同时印出地址：展示页多半是以图片形式发出去的，图里点不动 */
+      return '<div class="it"><span class="tag">'+esc(w.k||"作品")+'</span><div class="it-b">'+
+        '<b>'+esc(w.t)+'</b>'+(w.p?'<p>'+esc(w.p)+'</p>':"")+
+        (w.u?'<p class="lk"><a href="'+esc(w.u)+'" target="_blank" rel="noopener">'+esc(w.u)+'</a></p>':"")+
+        '</div></div>'; }).join(""))+
+
+    sec("可核验的证书", P.certs.length
+      ? '<ul class="cl">'+P.certs.map(function(c){
+          return '<li><b>'+esc(c.t)+'</b>'+(c.s?'<span>'+esc(c.s)+'</span>':"")+'</li>'; }).join("")+'</ul>'
+      : "")+
+
+    '<p class="ft">以上材料均可提供原件核验。'+
+      (tr(m.showcase)?'　完整版：'+esc(tr(m.showcase)):"")+
+      '<span>生成于 '+new Date().toISOString().slice(0,10)+'</span></p>';
+
+  return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">'+
+    '<meta name="viewport" content="width=device-width,initial-scale=1">'+
+    '<title>'+esc(tr(m.name)||"展示页")+'　可核验材料</title><style>'+
+    '*{box-sizing:border-box}'+
+    'body{margin:0;background:#fff;color:#33414A;font:14.5px/1.75 -apple-system,"PingFang SC",sans-serif}'+
+    '.w{max-width:720px;margin:0 auto;padding:36px 26px 48px}'+
+    'header{border-bottom:3px solid '+A+';padding-bottom:16px}'+
+    '.lg{max-height:40px;max-width:160px;object-fit:contain;object-position:left center;margin-bottom:10px}'+
+    'h1{font-size:30px;font-weight:700;color:#111A1F;margin:0;letter-spacing:.06em}'+
+    '.tg{margin:6px 0 0;font-size:15px;font-weight:600;color:'+AT+'}'+
+    'header .mt{margin:6px 0 0;font-size:13px;color:#5B6B73}'+
+    '.ct{margin:4px 0 0;font-size:13px;color:#5B6B73;font-family:ui-monospace,Menlo,monospace}'+
+    '.kp{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 4px}'+
+    '.kp div{flex:1 1 120px;background:'+ABG+';border-radius:8px;padding:12px 10px;text-align:center}'+
+    '.kp b{display:block;font-size:22px;color:'+AT+';font-variant-numeric:tabular-nums}'+
+    '.kp small{display:block;font-size:11.5px;color:#5B6B73;margin-top:2px}'+
+    'section{margin-top:26px}'+
+    'h2{font-size:14px;color:'+AT+';margin:0 0 10px;padding-bottom:6px;border-bottom:1px solid '+ABD+';'+
+      'letter-spacing:.08em}'+
+    '.it{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #EEF2F4}'+
+    '.it:last-child{border-bottom:0}'+
+    '.tag{flex:none;font-size:11px;font-weight:700;color:'+AT+';background:'+ABG+';border-radius:4px;'+
+      'padding:3px 8px;height:fit-content;white-space:nowrap}'+
+    '.it-b{min-width:0;flex:1}'+
+    '.it-b b{font-size:14.5px;color:#111A1F}'+
+    '.mt{display:block;font-size:12.5px;color:#74838B;margin-top:1px}'+
+    '.it-b p{margin:4px 0 0;font-size:13.5px}'+
+    '.lk{word-break:break-all;font-family:ui-monospace,Menlo,monospace;font-size:12px}'+
+    '.lk a{color:'+AT+'}'+
+    '.cm{margin:10px 0 0;font-size:13px;color:#5B6B73}'+
+    '.cl{margin:0;padding:0;list-style:none}'+
+    '.cl li{padding:7px 0;border-bottom:1px solid #EEF2F4;font-size:13.5px}'+
+    '.cl li:last-child{border-bottom:0}'+
+    '.cl b{color:#111A1F}'+
+    '.cl span{color:#74838B;margin-left:8px;font-size:12.5px}'+
+    '.ft{margin:30px 0 0;padding-top:14px;border-top:1px solid #C6D0D5;font-size:12px;color:#74838B}'+
+    '.ft span{display:block;margin-top:3px;font-family:ui-monospace,Menlo,monospace}'+
+    '@media print{.w{padding:0}}'+
+    '</style></head><body><div class="w">'+body+'</div></body></html>';
+}
+
 function buildResumeDoc(){
   var m=S.me, e=S.edu, R=resumeSections(), trim=function(x){ return String(x||"").trim(); };
   var cities=trim(S.cons&&S.cons.cities).split(/[、,，\/]/).map(trim).filter(Boolean);
@@ -3000,7 +3169,7 @@ function buildResumeDoc(){
 var forceResume=false;
 function resumeGate(){
   var box=el("blocked"), btn=el("dlResume");
-  thinResumeHint();
+  thinResumeHint(); showcaseNote();
   // 先看必填：状态、级别这些没选，简历要么缺项、要么写错
   var gaps=required().filter(function(x){return x.r;});
   if(gaps.length){
@@ -3024,6 +3193,21 @@ function resumeGate(){
 
 /* 只有学历、没有证书没有经历时，简历会是一页空白纸。
    不拦——有人就是想先看看长什么样——但得实话告诉他现在生成会很空。 */
+/* 展示页的说明随内容变：能上页几条、被挡下几条、缺什么 */
+function showcaseNote(){
+  var n=el("showcaseNote"); if(!n) return;
+  var P=showcasePick();
+  var on=P.certs.length+P.achs.length+P.exps.length+P.projects.length+P.papers.length+P.works.length+P.teach.length;
+  var h='<b>展示页只放有凭证的东西</b>——它的用处是让对方核验，不是再写一遍简历。';
+  if(on) h+='现在有 '+on+' 条可以上页。';
+  if(P.excluded.length){
+    h+='<br><em>已挡下 '+P.excluded.length+' 条：</em>'+
+      P.excluded.slice(0,3).map(function(x){ return esc(x.what)+"——"+esc(x.why); }).join("；")+
+      (P.excluded.length>3 ? "；另有 "+(P.excluded.length-3)+" 条" : "")+"。";
+  }
+  n.innerHTML=h;
+}
+
 function thinResumeHint(){
   var w=el("submitWarn"); if(!w) return;
   var n=0;
@@ -3272,7 +3456,7 @@ function doExport(btn,filename,data){
    数据只存本机，我们看不到任何人怎么用——出错只能靠使用者告诉我们。
    所以反馈要做到点一下就带上该带的：版本、设备、那条结论、公告原文。
    不带姓名、电话、学校、照片；附带内容摊开给使用者看、能删改，由他自己发出去。 */
-var APP_VER="0.9", APP_BUILD="09-15 13:04";     // APP_BUILD 由 build_standalone.py 打包时写入
+var APP_VER="0.9", APP_BUILD="09-15 15:19";     // APP_BUILD 由 build_standalone.py 打包时写入
 var FEEDBACK_URL="";                     // 建好问卷后填链接；空着就只走「复制 → 发微信」
 var FB_TYPES=[["judge","判定不对"],["export","简历 / 存图有问题"],
               ["stuck","看不懂、卡住了"],["idea","其他建议"]];
