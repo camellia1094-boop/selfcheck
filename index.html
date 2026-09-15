@@ -1044,6 +1044,7 @@ if(!S.me) S.me={name:"",phone:"",email:"",target:""};   // 旧草稿兼容
 if(!S.jobs) S.jobs=[];
 if(S.edu.birthYear==null) S.edu.birthYear="";
 if(S.edu.logo==null) S.edu.logo="";
+if(S.edu.logoR==null) S.edu.logoR=0;   // 校徽长宽比，简历里要按它算出确切宽高
 if(S.edu.degree==null) S.edu.degree="";
 if(S.edu.party==null) S.edu.party="";
 if(S.jobPaste==null) S.jobPaste="";
@@ -1205,6 +1206,7 @@ document.addEventListener("change",function(e){
       fitLogo(im,function(url){
         // 缩完反而更大就用原图——这种情况在小尺寸优化过的 PNG 上很常见
         S.edu.logo = (raw.length<=url.length && raw.length<=LOGO_CAP*2) ? raw : url;
+        S.edu.logoR = im.naturalHeight ? im.naturalWidth/im.naturalHeight : 0;
         S.isExample=false;
         renderAll();
         if(!logoStored()){
@@ -1317,7 +1319,7 @@ function pickLib(id){
     .then(function(b){
       var fr=new FileReader();
       fr.onload=function(){
-        S.edu.logo=fr.result; S.isExample=false;
+        S.edu.logo=fr.result; S.edu.logoR = (e.w&&e.h) ? e.w/e.h : 0; S.isExample=false;
         LOGO_MSG="已用"+e.name+"官网公布的校徽";
         if(e.color && normHex(e.color)){ S.me.accent=e.color; LOGO_MSG+="，简历主题色设为该校标准色 "+e.color+"（可在 K 组改）"; }
         LOGO_MSG+="。";
@@ -2193,7 +2195,7 @@ document.addEventListener("click",function(e){
   }
   if(b.id==="libPick"){ openLogoLib(); return; }
   if(b.getAttribute("data-lib")){ pickLib(b.getAttribute("data-lib")); return; }
-  if(b.id==="logoDel"){ S.edu.logo=""; LOGO_MSG=""; renderAll(); return; }
+  if(b.id==="logoDel"){ S.edu.logo=""; S.edu.logoR=0; LOGO_MSG=""; renderAll(); return; }
   if(b.id==="photoDel"){ S.me.photo=""; renderAll(); return; }
   if(b.getAttribute("data-accent")){ S.me.accent=b.getAttribute("data-accent"); ACCENT_MSG=""; S.isExample=false; renderAll(); return; }
   if(b.id==="accentFromLogo"){
@@ -2628,13 +2630,26 @@ function buildResumeDoc(){
   }
   function sec(title, body){ return body ? '<section><h2>'+esc(title)+'</h2>'+body+'</section>' : ""; }
 
+  /* 校徽：按长宽比算出确切宽高，最高 44px、最宽 170px。
+     不写 object-fit ——手机端出图用的 html2canvas 不支持它，会把图拉满整个框。 */
+  function lgTag(e){
+    if(!e.logo) return "";
+    var r=+e.logoR||0, st="";
+    if(r>0){
+      var h=44, w=Math.round(44*r);
+      if(w>170){ w=170; h=Math.round(170/r); }
+      st=' style="width:'+w+'px;height:'+h+'px"';
+    }
+    return '<img class="lg"'+st+' src="'+e.logo+'" alt="">';
+  }
+
   var head='<div class="hd"><div class="who">'+
-      (e.logo?'<img class="lg" src="'+e.logo+'" alt="">':"")+
+      lgTag(e)+
       '<div class="nm">'+esc(m.name||"　")+'</div>'+
       (m.target?'<div class="tg">'+esc(m.target)+'</div>':"")+
       (meta?'<div class="mt">'+esc(meta)+'</div>':"")+
       (contact?'<div class="ct">'+esc(contact)+'</div>':"")+'</div>'+
-      (m.photo?'<img class="ph" src="'+m.photo+'" alt="证件照">':"")+'</div>'+
+      (m.photo?'<div class="ph" role="img" aria-label="证件照" style="background-image:url(\''+m.photo+'\')"></div>':"")+'</div>'+
     (badges.length?'<div class="bd">'+badges.map(function(b){ return '<span>'+esc(b)+'</span>'; }).join("")+'</div>':"")+
     (kpis.length?'<div class="kp" style="grid-template-columns:repeat('+kpis.length+',1fr)">'+kpis.map(function(k){
       return '<div><b>'+esc(trim(k.v))+'</b><small>'+esc(trim(k.l))+'</small></div>'; }).join("")+'</div>':"");
@@ -2676,7 +2691,8 @@ function buildResumeDoc(){
     '.tg{font-size:13px;color:'+AT+';font-weight:600;margin-top:3px}'+
     '.mt{font-size:11.5px;color:#55656D;margin-top:3px}'+
     '.ct{font-size:11px;color:#74838B;margin-top:2px;font-family:ui-monospace,Menlo,monospace}'+
-    '.ph{width:25mm;height:33mm;object-fit:cover;flex:none;border:1px solid #D5DDE1;border-radius:2px}'+
+    '.ph{width:25mm;height:33mm;flex:none;border:1px solid #D5DDE1;border-radius:2px;'+
+      'background-size:cover;background-position:center top;background-repeat:no-repeat}'+
     '.bd{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}'+
     '.bd span{font-size:11px;font-weight:700;color:'+AT+';background:'+ABG+';border:1px solid '+ABD+';border-radius:3px;padding:2px 7px}'+
     '.kp{display:grid;gap:6px;margin-top:7px}'+
@@ -2969,7 +2985,7 @@ function doExport(btn,filename,data){
    数据只存本机，我们看不到任何人怎么用——出错只能靠使用者告诉我们。
    所以反馈要做到点一下就带上该带的：版本、设备、那条结论、公告原文。
    不带姓名、电话、学校、照片；附带内容摊开给使用者看、能删改，由他自己发出去。 */
-var APP_VER="0.9", APP_BUILD="09-15 10:58";     // APP_BUILD 由 build_standalone.py 打包时写入
+var APP_VER="0.9", APP_BUILD="09-15 11:11";     // APP_BUILD 由 build_standalone.py 打包时写入
 var FEEDBACK_URL="";                     // 建好问卷后填链接；空着就只走「复制 → 发微信」
 var FB_TYPES=[["judge","判定不对"],["parse","公告识别错了"],["export","简历 / 存图有问题"],
               ["stuck","看不懂、卡住了"],["idea","其他建议"]];
@@ -3134,8 +3150,20 @@ function openFeedback(type,kind,arg){
   if(!IS_MOBILE) dlg.el.querySelector("#fbText").focus();   // 手机上自动聚焦会弹键盘盖住选项
 }
 
+/* html2canvas 不认 object-fit：手机上「存为图片」那条路会把校徽直接拉满整个框。
+   所以简历里不靠 object-fit，改成按长宽比算出确切宽高。旧草稿里没存比例的，启动时量一次。 */
+function measureLogo(){
+  if(!S.edu.logo || S.edu.logoR) return;
+  var im=new Image();
+  im.onload=function(){
+    if(im.naturalWidth && im.naturalHeight){ S.edu.logoR=im.naturalWidth/im.naturalHeight; save(); }
+  };
+  im.src=S.edu.logo;
+}
+
 function initBeta(){
   var v=el("betaVer"); if(v) v.textContent=verText();
+  measureLogo();
   logoLib(function(lib){ if(lib) renderForm(); });
   var seen=null; try{ seen=localStorage.getItem("zgzc.intro"); }catch(e){}
   if(seen!==APP_VER){ try{ localStorage.setItem("zgzc.intro",APP_VER); }catch(e){} openIntro(); }
