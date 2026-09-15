@@ -2669,7 +2669,9 @@ function buildResumeDoc(){
     '@media print{body{background:#fff}.pg{margin:0;min-height:auto}}'+
     '.hd{display:flex;gap:14px;align-items:stretch;border-bottom:2.5px solid '+A+';padding-bottom:8px}'+
     '.who{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end}'+
-    '.lg{height:30px;max-width:170px;object-fit:contain;object-position:left center;margin-bottom:6px}'+
+    /* 不写死高度：校徽库里多是正方形徽章，写死 30px 高会缩成一个小点；
+       校名横版则由 max-width 收住。两个上限一起给，比例交给图片自己 */
+    '.lg{max-height:44px;max-width:170px;object-fit:contain;object-position:left center;margin-bottom:6px}'+
     '.nm{font-size:25px;font-weight:700;color:#111A1F;letter-spacing:.06em;line-height:1.1}'+
     '.tg{font-size:13px;color:'+AT+';font-weight:600;margin-top:3px}'+
     '.mt{font-size:11.5px;color:#55656D;margin-top:3px}'+
@@ -2967,7 +2969,7 @@ function doExport(btn,filename,data){
    数据只存本机，我们看不到任何人怎么用——出错只能靠使用者告诉我们。
    所以反馈要做到点一下就带上该带的：版本、设备、那条结论、公告原文。
    不带姓名、电话、学校、照片；附带内容摊开给使用者看、能删改，由他自己发出去。 */
-var APP_VER="0.9", APP_BUILD="09-15 10:47";     // APP_BUILD 由 build_standalone.py 打包时写入
+var APP_VER="0.9", APP_BUILD="09-15 10:58";     // APP_BUILD 由 build_standalone.py 打包时写入
 var FEEDBACK_URL="";                     // 建好问卷后填链接；空着就只走「复制 → 发微信」
 var FB_TYPES=[["judge","判定不对"],["parse","公告识别错了"],["export","简历 / 存图有问题"],
               ["stuck","看不懂、卡住了"],["idea","其他建议"]];
