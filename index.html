@@ -303,6 +303,13 @@ td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-to
 .submit-n{margin:0 0 14px;font-size:13px;line-height:1.6;color:var(--mute)}
 .submit .btn.big{width:100%;max-width:320px;margin:0 auto;font-size:15.5px;padding:14px;min-height:48px}
 .submit .blocked{margin-top:12px;text-align:left}
+.vrow{display:grid;gap:11px;padding:13px;margin-bottom:12px;background:var(--surface);
+  border:1px solid var(--indigo);border-radius:6px}
+.vrow-h b{display:block;font-size:14px;color:var(--ink);margin-bottom:3px}
+.vrow-h span{display:block;font-size:12.5px;line-height:1.65;color:var(--body)}
+.vrow-h span b{display:inline;font-size:inherit}
+.vtip{margin:0 0 14px;font-size:12.5px;line-height:1.7;color:var(--mute)}
+.vtip b{color:var(--ink)}
 .slug{display:grid;gap:8px;margin-bottom:13px;padding:12px 13px;background:var(--sunk);
   border:1px dashed var(--indigo);border-radius:6px}
 .slug .fh b{color:var(--ink)}
@@ -1833,6 +1840,7 @@ if(S.me.badges==null) S.me.badges="";
 if(S.me.tools==null) S.me.tools="";
 if(S.me.showcase==null) S.me.showcase="";
 if(S.me.slug==null) S.me.slug="";   // 展示页代号：地址先约定，文件后补
+if(!S.videos) S.videos={skill:{url:"",cap:""},lesson:{url:"",cap:""}};   // 两个固定视频栏
 if(S.me.accent==null) S.me.accent="#1B4D6B";
 if(!S.me.kpis) S.me.kpis=[{v:"",l:""},{v:"",l:""},{v:"",l:""},{v:"",l:""}];
 ["tier","span","gpa","avg","honors"].forEach(function(k){ if(S.edu[k]==null) S.edu[k]=""; });
@@ -2496,7 +2504,25 @@ function renderForm(){
             "展示页上会把地址一起印出来——展示页多半是当图片发出去的，图里点不动")+
       '</div></div>';
   });
-  ROW_I=0; h+=group("G","作品与展示","视频、作品集、演出记录",
+  var vB=function(k,title,tip,ph){
+    var v=(S.videos&&S.videos[k])||{url:"",cap:""};
+    return '<div class="vrow"><div class="vrow-h"><b>'+esc(title)+'</b><span>'+tip+'</span></div>'+
+      field("公开链接","videos."+k+".url",ph,"mono")+
+      field("这段证明了什么","videos."+k+".cap","一句话，会印在展示页视频下面")+
+      '</div>';
+  };
+  var videoBlock=
+    vB("skill","综合技能展示",
+       "30–60 秒，多项目串联，每项 5–10 秒。横屏、固定机位、全身入镜，别加特效和音乐——它证明的是你能示范，不是你会剪片子。",
+       "https://…　视频号 / 腾讯文档 / 微云的地址")+
+    vB("lesson","说课教学展示",
+       "3–5 分钟，挑一节你最熟的课，按说课结构走：教材与学情 → 教学目标 → 重难点 → 教法学法 → 教学过程 → 场地器材。站着说、声音清楚。<b>教师岗面试考的就是这个</b>。",
+       "https://…　没有就先空着，但这段最值钱")+
+    '<p class="vtip">传哪里：<b>视频号</b>（微信里打开最顺）&gt; 腾讯文档 &gt; 微云。'+
+    'B 站在微信里会被拦跳转，别用。工具只收链接，不存视频。</p>';
+
+  ROW_I=0; h+=group("G","作品与展示","两段视频 + 其他作品",
+    videoBlock+
     '<div class="rows">'+wh+'</div><button class="add" data-add="works" type="button">+ 加一件</button>'+
     probe("本专业的作品属<b>"+esc(D.portfolio.gateRole)+"</b>："+esc(D.portfolio.format)+"。"));
 
@@ -2734,6 +2760,7 @@ document.addEventListener("click",function(e){
        edu:{school:"",major:"",code:"",normal:"不确定",level:"",degree:"",party:"",
             gradYear:"",rank:"",birthYear:"",logo:"",tier:"",span:"",gpa:"",avg:"",honors:""},
        creds:[],achs:[],exps:[],projects:[],papers:[],works:[],skills:[],teachMore:"",
+       videos:{skill:{url:"",cap:""},lesson:{url:"",cap:""}},
        cons:{cities:"",pay:"",press:"",weekend:""}};
     /* 清空后 B–H 全是一个「+ 加一条」按钮，既看不出里面要填什么，还得多点好几次。
        证书、赛事、执教、一专多能这四组几乎人人都有，各留一行空白让人直接开写。
@@ -2814,10 +2841,15 @@ function buildProfile(){
         attended:r.attended==="已到场"?true:r.attended==="未到场"?false:null,
         method:r.method||undefined, findings:r.findings?[r.findings]:undefined,
         proof:proofOf(r.proof)};}),
-    portfolio:S.works.filter(function(w){return w.title;}).map(function(w){
+    portfolio:[{k:"skill",t:"综合技能展示"},{k:"lesson",t:"说课教学展示"}]
+      .filter(function(x){ return tr(((S.videos||{})[x.k]||{}).url); })
+      .map(function(x){ var v=S.videos[x.k];
+        return {type:"视频",title:x.t,slot:x.k,proves:tr(v.cap)||undefined,
+          publicUrl:tr(v.url),gateRole:DISC[S.discipline].portfolio.gateRole}; })
+      .concat(S.works.filter(function(w){return w.title;}).map(function(w){
       return {type:KIND_MAP[w.kind]||w.kind||undefined,title:w.title,proves:w.proves,
         publicUrl:tr(w.url)||undefined,
-        gateRole:DISC[S.discipline].portfolio.gateRole};}),
+        gateRole:DISC[S.discipline].portfolio.gateRole};})),
     skills:{secondary:S.skills.filter(function(k){return k.d;}).map(function(k){
       return {discipline:k.d,evidenceStrength:k.ev||undefined,detail:k.detail,canTeach:true,
         category:k.cat||undefined,teachScope:k.teach||undefined};}),
@@ -3020,6 +3052,20 @@ function buildShowcaseDoc(){
     (kpis.length?'<div class="kp">'+kpis.map(function(k){
       return '<div><b>'+esc(tr(k.v))+'</b><small>'+esc(tr(k.l))+'</small></div>'; }).join("")+'</div>':"")+
 
+    (function(){
+      var V=S.videos||{}, rows=[
+        {k:"skill", t:"综合技能展示", v:V.skill||{}},
+        {k:"lesson", t:"说课教学展示", v:V.lesson||{}}
+      ].filter(function(x){ return String(x.v.url||"").trim(); });
+      if(!rows.length) return "";
+      /* 地址连同标题一起印出来：展示页多半是当图片发出去的，图里点不动 */
+      return sec("视频", rows.map(function(x){
+        return '<div class="it"><span class="tag">'+esc(x.t)+'</span><div class="it-b">'+
+          (String(x.v.cap||"").trim()?'<b>'+esc(String(x.v.cap).trim())+'</b>':"")+
+          '<p class="lk"><a href="'+esc(String(x.v.url).trim())+'" target="_blank" rel="noopener">'+
+            esc(String(x.v.url).trim())+'</a></p></div></div>';
+      }).join(""));
+    })()+
     sec("可任教项目", P.teach.map(function(k){
       return row(k.d,[k.c,k.e,k.v].filter(Boolean).join("　·　"),k.n); }).join("")+
       (P.common.length?'<p class="cm">另可承担普及性教学：'+esc(P.common.join("、"))+'</p>':""))+
@@ -3291,7 +3337,10 @@ function showcaseNote(){
   }
   var P=showcasePick();
   var on=P.certs.length+P.achs.length+P.exps.length+P.projects.length+P.papers.length+P.works.length+P.teach.length;
-  var h='<b>展示页只放有凭证的东西</b>——它的用处是让对方核验，不是再写一遍简历。';
+  var V=S.videos||{};
+  var vmiss = !String((V.lesson||{}).url||"").trim();
+  var h=(vmiss ? '<em>还没填说课视频的链接。</em>教师岗面试考的就是说课，这段是展示页里最值钱的一栏。<br>' : '')+
+    '<b>展示页只放有凭证的东西</b>——它的用处是让对方核验，不是再写一遍简历。';
   if(on) h+='现在有 '+on+' 条可以上页。';
   if(P.excluded.length){
     h+='<br><em>已挡下 '+P.excluded.length+' 条：</em>'+
@@ -3550,7 +3599,7 @@ function doExport(btn,filename,data){
    数据只存本机，我们看不到任何人怎么用——出错只能靠使用者告诉我们。
    所以反馈要做到点一下就带上该带的：版本、设备、那条结论、公告原文。
    不带姓名、电话、学校、照片；附带内容摊开给使用者看、能删改，由他自己发出去。 */
-var APP_VER="0.9", APP_BUILD="09-15 17:20";     // APP_BUILD 由 build_standalone.py 打包时写入
+var APP_VER="0.9", APP_BUILD="09-15 17:46";     // APP_BUILD 由 build_standalone.py 打包时写入
 var FEEDBACK_URL="";                     // 建好问卷后填链接；空着就只走「复制 → 发微信」
 var FB_TYPES=[["judge","判定不对"],["export","简历 / 存图有问题"],
               ["stuck","看不懂、卡住了"],["idea","其他建议"]];
