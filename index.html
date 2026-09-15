@@ -1657,6 +1657,7 @@ td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-to
         <p class="submit-t">填完了，生成简历</p>
         <p class="submit-n" id="submitNote">按上面填的内容排成一页 A4。</p>
         <button class="btn big" type="button" id="dlResume">生成简历</button>
+        <p class="submit-warn" id="qrNote" hidden></p>
         <p class="submit-warn" id="submitWarn" hidden></p>
         <p class="blocked" id="blocked" hidden></p>
         <div class="submit-2">
@@ -2650,9 +2651,17 @@ function renderAll(){ renderDisc(); renderForm(); renderSide(); renderReport(); 
   el("exbanner").hidden=!S.isExample; save(); }
 
 /* ═══════════════ 事件 ═══════════════ */
+/* 代号一填就写进展示页链接。原来还要再点一次「把这个地址填进下面」，
+   漏点就整张简历没有二维码——而人不会知道自己漏了什么。 */
+function syncSlug(p){
+  if(p!=="me.slug") return;
+  var sg=String(S.me.slug||"").trim(), cur=String(S.me.showcase||"").trim();
+  if(slugOK(sg) && (!cur || cur.indexOf(SHOWCASE_BASE)===0)) S.me.showcase=slugUrl(sg);
+}
+
 document.addEventListener("input",function(e){
   var p=e.target.getAttribute("data-p"); if(!p) return;
-  put(p,e.target.value); S.isExample=false;
+  put(p,e.target.value); S.isExample=false; syncSlug(p);
     if(p==="me.accent"){           // 拖动取色盘时就更新预览，不用等松手
     var acv=normHex(e.target.value), dm=document.querySelector(".accent-demo");
     if(acv && dm){ var tx=textSafe(acv); dm.querySelector("b").style.color=tx;
@@ -2663,7 +2672,7 @@ document.addEventListener("input",function(e){
 });
 document.addEventListener("change",function(e){
   var p=e.target.getAttribute("data-p"); if(!p) return;
-  put(p,e.target.value); S.isExample=false;
+  put(p,e.target.value); S.isExample=false; syncSlug(p);
   var a=document.activeElement, id=a&&a.getAttribute("data-p");
   renderAll();
   if(id){ var back=document.querySelector('[data-p="'+id+'"]'); if(back) back.focus(); }
@@ -2747,7 +2756,14 @@ document.addEventListener("click",function(e){
       if(f){ f.focus(); f.scrollIntoView({block:"center"}); }
       return;
     }
-    showDoc(buildResumeDoc(),(S.me.name||"")+" 简历","resume");
+    var go=function(){ showDoc(buildResumeDoc(),(S.me.name||"")+" 简历","resume"); };
+    // 二维码的库是异步加载的。不等它就生成，简历上那块会静默变成一行网址
+    if(String(S.me.showcase||"").trim() && !window.qrcode){
+      var lab=b.textContent; b.disabled=true; b.textContent="生成中…";
+      loadQR(function(){ b.disabled=false; b.textContent=lab; go(); });
+      return;
+    }
+    go();
   }
 });
 
@@ -3266,6 +3282,13 @@ function resumeGate(){
 /* 展示页的说明随内容变：能上页几条、被挡下几条、缺什么 */
 function showcaseNote(){
   var n=el("showcaseNote"); if(!n) return;
+  var qrn=el("qrNote");
+  if(qrn){
+    var sc=String(S.me.showcase||"").trim();
+    qrn.hidden=!!sc;
+    if(!sc) qrn.innerHTML='<b>现在生成的简历上不会有二维码。</b>'+
+      '要让 HR 扫码看到你的展示页，先去 J 组填一个「展示页代号」——填完这里就会变。';
+  }
   var P=showcasePick();
   var on=P.certs.length+P.achs.length+P.exps.length+P.projects.length+P.papers.length+P.works.length+P.teach.length;
   var h='<b>展示页只放有凭证的东西</b>——它的用处是让对方核验，不是再写一遍简历。';
@@ -3527,7 +3550,7 @@ function doExport(btn,filename,data){
    数据只存本机，我们看不到任何人怎么用——出错只能靠使用者告诉我们。
    所以反馈要做到点一下就带上该带的：版本、设备、那条结论、公告原文。
    不带姓名、电话、学校、照片；附带内容摊开给使用者看、能删改，由他自己发出去。 */
-var APP_VER="0.9", APP_BUILD="09-15 17:02";     // APP_BUILD 由 build_standalone.py 打包时写入
+var APP_VER="0.9", APP_BUILD="09-15 17:20";     // APP_BUILD 由 build_standalone.py 打包时写入
 var FEEDBACK_URL="";                     // 建好问卷后填链接；空着就只走「复制 → 发微信」
 var FB_TYPES=[["judge","判定不对"],["export","简历 / 存图有问题"],
               ["stuck","看不懂、卡住了"],["idea","其他建议"]];
