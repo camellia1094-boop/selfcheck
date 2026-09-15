@@ -1,0 +1,78 @@
+[
+ {
+  "id": "ccnu",
+  "name": "华中师范大学",
+  "alias": [
+   "华师",
+   "华中师大",
+   "CCNU"
+  ],
+  "color": "#01556B",
+  "w": 183,
+  "h": 183,
+  "kind": "校徽",
+  "source": "https://www.ccnu.edu.cn/xxgk/hdbs.htm"
+ },
+ {
+  "id": "scnu",
+  "name": "华南师范大学",
+  "alias": [
+   "华南师大",
+   "SCNU"
+  ],
+  "color": "#01355A",
+  "w": 220,
+  "h": 241,
+  "kind": "校徽",
+  "source": "https://www.scnu.edu.cn/a/20150906/2.html"
+ },
+ {
+  "id": "gzsport",
+  "name": "广州体育学院",
+  "alias": [
+   "广体"
+  ],
+  "color": "#00368C",
+  "w": 222,
+  "h": 256,
+  "kind": "校徽",
+  "source": "https://www.gzsport.edu.cn/node/101"
+ },
+ {
+  "id": "gzhu",
+  "name": "广州大学",
+  "alias": [
+   "广大"
+  ],
+  "color": "#D8251D",
+  "w": 219,
+  "h": 218,
+  "kind": "校徽",
+  "source": "https://www.gzhu.edu.cn/"
+ },
+ {
+  "id": "syty",
+  "name": "沈阳体育学院",
+  "alias": [
+   "沈体"
+  ],
+  "color": "#C20511",
+  "w": 256,
+  "h": 256,
+  "kind": "校徽",
+  "source": "https://www.syty.edu.cn/info/1123/2398.htm"
+ },
+ {
+  "id": "snnu",
+  "name": "陕西师范大学",
+  "alias": [
+   "陕师大",
+   "SNNU"
+  ],
+  "color": "#B60004",
+  "w": 277,
+  "h": 209,
+  "kind": "校徽+校名",
+  "source": "https://www.snnu.edu.cn/xxgk/sdbs.htm"
+ }
+]

@@ -380,6 +380,18 @@ td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-to
 .fb-msg{margin:10px 0 0;font-size:13px;color:var(--pass)}
 .fb-msg:empty{display:none}
 .fb-msg.bad{color:var(--fail)}
+.lib-q{width:100%;margin-bottom:10px;border:1px solid var(--rule);border-radius:5px;background:var(--field);
+  color:var(--ink);font:14px/1.5 var(--sans);padding:9px 10px}
+.lib-list{display:grid;gap:8px;max-height:46vh;overflow:auto;-webkit-overflow-scrolling:touch}
+.lib-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;appearance:none;cursor:pointer;
+  border:1px solid var(--rule);background:var(--surface);border-radius:6px;padding:8px 10px;min-height:56px}
+.lib-item:hover{border-color:var(--indigo);background:var(--indigo-bg)}
+.lib-item img{width:36px;height:36px;object-fit:contain;flex:none}
+.lib-item span{display:block;min-width:0;margin-right:auto;font-size:14px;color:var(--ink)}
+.lib-item i{display:block;font-style:normal;font-size:12px;color:var(--mute)}
+.lib-item em{width:14px;height:14px;border-radius:50%;flex:none;border:1px solid var(--rule)}
+.lib-empty{margin:0;font-size:13px;line-height:1.7;color:var(--mute)}
+@media (max-width:880px){.lib-q{font-size:16px}}
 .ovl-fb{appearance:none;border:0;background:none;padding:6px 0;margin-left:8px;color:var(--indigo);
   font:600 12px/1.6 var(--sans);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -1213,6 +1225,112 @@ document.addEventListener("change",function(e){
   rd.readAsDataURL(f);
 });
 
+/* ═══════════════ 校徽库 ═══════════════
+   同目录的 logos-index.json 与 logo-<id>.png，打包时一并复制过去。取不到就当没有——
+   本地 file:// 打开、断网、或这一版没带库时，照旧走手动上传，不报错。
+   库里存的是各校官网公布的校徽，index.json 里逐条记着来源地址。 */
+var LOGO_LIB=null, LOGO_LIB_STATE="", LOGO_MSG="";
+
+function libBase(){ return location.href.split(/[?#]/)[0].replace(/[^\/]*$/,""); }
+
+function logoLib(cb){
+  if(LOGO_LIB_STATE==="ok"||LOGO_LIB_STATE==="no"){ if(cb) cb(LOGO_LIB); return; }
+  if(LOGO_LIB_STATE==="loading") return;
+  LOGO_LIB_STATE="loading";
+  if(!window.fetch){ LOGO_LIB_STATE="no"; if(cb) cb(null); return; }
+  fetch(libBase()+"logos-index.json").then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      LOGO_LIB = (j&&j.length) ? j : null;
+      LOGO_LIB_STATE = LOGO_LIB ? "ok" : "no";
+      if(cb) cb(LOGO_LIB);
+    })
+    .catch(function(){ LOGO_LIB_STATE="no"; if(cb) cb(null); });
+}
+
+/* 校名匹配：先全等、再简称、最后互相包含（「华中师范大学（本部）」也能中） */
+function libMatch(school){
+  var s=String(school||"").trim(); if(!LOGO_LIB||!s) return null;
+  var i,k,e;
+  for(i=0;i<LOGO_LIB.length;i++){ e=LOGO_LIB[i];
+    if(e.name===s || (e.alias||[]).indexOf(s)>=0) return e; }
+  for(i=0;i<LOGO_LIB.length;i++){ e=LOGO_LIB[i];
+    if(s.indexOf(e.name)>=0 || e.name.indexOf(s)>=0) return e;
+    for(k=0;k<(e.alias||[]).length;k++) if(e.alias[k].length>=2 && s.indexOf(e.alias[k])>=0) return e; }
+  return null;
+}
+
+function logoBlock(){
+  var e=libMatch(S.edu.school);
+  var hint = LOGO_MSG ? esc(LOGO_MSG)
+    : '上传后会印在生成的简历抬头上。'+(S.edu.logo
+        ? '已存本机，占 '+Math.round(S.edu.logo.length/1024)+' KB。'
+        : e ? '校徽库里有<b>'+esc(e.name)+'</b>，可以直接用。'
+            : 'PNG 透明底最好，一般在学校官网「视觉识别系统 / VI」栏目能下到。');
+  return '<p class="logo-hint">'+hint+'</p>'+
+    '<div class="logo-btns">'+
+      (e&&!S.edu.logo ? '<button type="button" class="logo-btn" data-lib="'+esc(e.id)+'">用'+esc(e.name)+'校徽</button>' : "")+
+      (LOGO_LIB ? '<button type="button" class="logo-btn ghost" id="libPick">从校徽库选</button>' : "")+
+      '<label class="logo-btn">选择图片<input type="file" accept="image/*" id="logoFile" hidden></label>'+
+      (S.edu.logo ? '<button type="button" class="logo-btn ghost" id="logoDel">移除</button>' : "")+
+    '</div>';
+}
+
+function libRows(kw){
+  kw=String(kw||"").trim();
+  var list=(LOGO_LIB||[]).filter(function(e){
+    if(!kw) return true;
+    if(e.name.indexOf(kw)>=0) return true;
+    return (e.alias||[]).some(function(a){ return a.toUpperCase().indexOf(kw.toUpperCase())>=0; });
+  });
+  if(!list.length)
+    return '<p class="lib-empty">库里还没有这一所。先用「选择图片」自己上传；把校徽发到内测群，我加进库里，下一版所有人都能选。</p>';
+  return list.map(function(e){
+    return '<button type="button" class="lib-item" data-dlg="lib" data-libid="'+esc(e.id)+'">'+
+      '<img src="'+esc(libBase())+'logo-'+esc(e.id)+'.png" alt="">'+
+      '<span><b>'+esc(e.name)+'</b>'+((e.alias||[]).length ? '<i>'+esc(e.alias.join(" · "))+'</i>' : "")+'</span>'+
+      '<em style="background:'+esc(e.color||"#888888")+'"></em></button>';
+  }).join("");
+}
+
+function openLogoLib(){
+  if(!LOGO_LIB){
+    LOGO_MSG="校徽库没取到（断网，或这一版没带库）。用「选择图片」上传一张。";
+    renderAll(); return;
+  }
+  var d=openDlg("校徽库（"+LOGO_LIB.length+" 所）",
+    '<p class="dlg-lead">选中后校徽会填进 A 组，简历主题色同时设成这所学校的标准色。'+
+    '<br><small>校徽版权归各高校所有。这里只收录各校官网公开发布的版本，索引里记着来源地址，'+
+    '仅供本人投递简历使用。</small></p>'+
+    '<input class="lib-q" id="libQ" placeholder="输入校名或简称筛选" aria-label="筛选学校">'+
+    '<div class="lib-list" id="libList">'+libRows("")+'</div>',
+    '<button type="button" class="btn ghost" data-dlg="close">关闭</button>',
+    function(a,b,dd,close){ if(a==="lib"){ pickLib(b.getAttribute("data-libid")); close(); } });
+  var q=d.el.querySelector("#libQ");
+  q.addEventListener("input",function(){ d.el.querySelector("#libList").innerHTML=libRows(q.value); });
+  if(!IS_MOBILE) q.focus();
+}
+
+function pickLib(id){
+  var e=null; (LOGO_LIB||[]).forEach(function(x){ if(x.id===id) e=x; });
+  if(!e) return;
+  fetch(libBase()+"logo-"+e.id+".png").then(function(r){ if(!r.ok) throw 0; return r.blob(); })
+    .then(function(b){
+      var fr=new FileReader();
+      fr.onload=function(){
+        S.edu.logo=fr.result; S.isExample=false;
+        LOGO_MSG="已用"+e.name+"官网公布的校徽";
+        if(e.color && normHex(e.color)){ S.me.accent=e.color; LOGO_MSG+="，简历主题色设为该校标准色 "+e.color+"（可在 K 组改）"; }
+        LOGO_MSG+="。";
+        renderAll();
+        if(!logoStored()){    // 浏览器存不下就退回去，别让人以为存上了
+          S.edu.logo=""; LOGO_MSG="这台设备存不下这张图，用「选择图片」换一张小的。"; renderAll();
+        }
+      };
+      fr.readAsDataURL(b);
+    })
+    .catch(function(){ LOGO_MSG="校徽没下下来，检查网络再试，或用「选择图片」上传。"; renderAll(); });
+}
+
 /* 证件照：压成 JPEG 存本机。只用于生成简历，不写进导出的档案 */
 var PHOTO_CAP = 140000;
 function fitPhoto(img, cb){
@@ -1656,13 +1774,7 @@ function renderForm(){
       (S.edu.logo ? '<img class="logo-pv" src="'+S.edu.logo+'" alt="校徽">'
                   : '<div class="logo-pv empty">校徽</div>')+
       '<div class="logo-txt"><span class="lb">学校校徽（选填）</span>'+
-      '<p class="logo-hint">上传后会印在生成的简历抬头上。'+
-      (S.edu.logo ? '已存本机，占 '+Math.round(S.edu.logo.length/1024)+' KB。'
-                  : 'PNG 透明底最好，一般在学校官网「视觉识别系统 / VI」栏目能下到。')+'</p>'+
-      '<div class="logo-btns">'+
-        '<label class="logo-btn">选择图片<input type="file" accept="image/*" id="logoFile" hidden></label>'+
-        (S.edu.logo ? '<button type="button" class="logo-btn ghost" id="logoDel">移除</button>' : "")+
-      '</div></div></div>'+
+      logoBlock()+'</div></div>'+
     '<div class="logo-row">'+
       (S.me.photo ? '<img class="logo-pv photo" src="'+S.me.photo+'" alt="证件照">'
                   : '<div class="logo-pv photo empty">照片</div>')+
@@ -2079,7 +2191,9 @@ document.addEventListener("click",function(e){
     var cj=S.jobs[+b.getAttribute("data-confirm")]; if(cj) cj.auto=[];
     renderAll(); return;
   }
-  if(b.id==="logoDel"){ S.edu.logo=""; renderAll(); return; }
+  if(b.id==="libPick"){ openLogoLib(); return; }
+  if(b.getAttribute("data-lib")){ pickLib(b.getAttribute("data-lib")); return; }
+  if(b.id==="logoDel"){ S.edu.logo=""; LOGO_MSG=""; renderAll(); return; }
   if(b.id==="photoDel"){ S.me.photo=""; renderAll(); return; }
   if(b.getAttribute("data-accent")){ S.me.accent=b.getAttribute("data-accent"); ACCENT_MSG=""; S.isExample=false; renderAll(); return; }
   if(b.id==="accentFromLogo"){
@@ -2853,7 +2967,7 @@ function doExport(btn,filename,data){
    数据只存本机，我们看不到任何人怎么用——出错只能靠使用者告诉我们。
    所以反馈要做到点一下就带上该带的：版本、设备、那条结论、公告原文。
    不带姓名、电话、学校、照片；附带内容摊开给使用者看、能删改，由他自己发出去。 */
-var APP_VER="0.9", APP_BUILD="09-14 23:36";     // APP_BUILD 由 build_standalone.py 打包时写入
+var APP_VER="0.9", APP_BUILD="09-15 10:47";     // APP_BUILD 由 build_standalone.py 打包时写入
 var FEEDBACK_URL="";                     // 建好问卷后填链接；空着就只走「复制 → 发微信」
 var FB_TYPES=[["judge","判定不对"],["parse","公告识别错了"],["export","简历 / 存图有问题"],
               ["stuck","看不懂、卡住了"],["idea","其他建议"]];
@@ -3020,6 +3134,7 @@ function openFeedback(type,kind,arg){
 
 function initBeta(){
   var v=el("betaVer"); if(v) v.textContent=verText();
+  logoLib(function(lib){ if(lib) renderForm(); });
   var seen=null; try{ seen=localStorage.getItem("zgzc.intro"); }catch(e){}
   if(seen!==APP_VER){ try{ localStorage.setItem("zgzc.intro",APP_VER); }catch(e){} openIntro(); }
 }
