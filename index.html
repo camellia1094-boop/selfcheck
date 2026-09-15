@@ -57,7 +57,10 @@ body{margin:0;background:var(--paper);color:var(--body);font-family:var(--sans);
 .stamp{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:var(--indigo);
   text-transform:uppercase;margin:0 0 9px}
 h1{font-family:var(--serif);font-weight:700;font-size:clamp(27px,4.4vw,38px);
-  margin:0 0 10px;color:var(--ink);letter-spacing:.02em;line-height:1.2;text-wrap:balance}
+  margin:0 0 4px;color:var(--ink);letter-spacing:.02em;line-height:1.2;text-wrap:balance}
+/* 这一句是这个工具存在的理由，不是宣传语——所以它在功能说明之前 */
+.creed{margin:0 0 11px;font-family:var(--serif);font-size:clamp(15px,2.2vw,17px);
+  font-weight:600;color:var(--indigo);letter-spacing:.06em}
 .lede{margin:0;font-size:15px;max-width:60ch}
 .lede b{color:var(--ink);font-weight:700}
 
@@ -336,6 +339,7 @@ td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-to
 .foot{margin-top:26px;padding-top:18px;border-top:1px solid var(--rule);
   font-size:12.5px;color:var(--mute);line-height:1.8}
 .foot b{color:var(--ink)}
+.foot-creed{display:inline-block;margin-top:6px;font-family:var(--serif);color:var(--indigo);letter-spacing:.06em}
 .exbanner{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px;min-width:0;
   background:var(--hold-bg);color:var(--hold);border:1px solid var(--hold);
   border-radius:5px;padding:10px 14px;margin-bottom:16px}
@@ -369,6 +373,10 @@ td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-to
 .dlg-ft{display:flex;gap:10px;padding:12px 16px;border-top:1px solid var(--rule-soft);background:var(--sunk)}
 .dlg-ft .btn{flex:1 1 0;min-width:0;text-decoration:none}
 .dlg-lead{margin:0 0 12px;color:var(--body)}
+.why-lead{margin:0 0 12px;font-family:var(--serif);font-size:18px;font-weight:700;color:var(--ink);letter-spacing:.04em}
+.dlg-bd p{margin:0 0 11px}
+.dlg-bd p b{color:var(--ink)}
+.why-who{padding-top:11px;border-top:1px solid var(--rule-soft);font-size:13px;color:var(--mute)}
 .dlg-lb{display:block;font-size:13px;font-weight:600;color:var(--ink);margin:0 0 6px}
 .intro-steps{margin:0 0 12px;padding-left:1.4em}
 .intro-steps li{margin-bottom:6px}
@@ -1642,8 +1650,9 @@ td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-to
   <div class="masthead">
     <p class="stamp">艺体美专业生 · 简历 + 展示码</p>
     <h1>入场券</h1>
-    <p class="lede"><b>填一次信息，得到一份能直接投的简历。</b>证书、等级、名次、可任教项目按 HR 初审的读法排好，右下角一个专属二维码——扫开是你的技能展示与说课视频。<br>不替你美化，只把<b>有凭证</b>的东西摆清楚；顺带告诉你还缺哪张证。带 <span class="rq">※</span> 的必填。</p>
-    <p class="betaline"><span class="beta-tag">内测版</span><span class="beta-ver" id="betaVer"></span><button type="button" class="beta-btn" id="introOpen">怎么用</button><button type="button" class="beta-btn" id="fbOpen">反馈问题</button></p>
+    <p class="creed">用心做好一份关于你的简历</p>
+    <p class="lede"><b>填一次信息，得到一份能直接投的简历。</b>证书、等级、名次、作品与可任教项目按 HR 初审的读法排好，右下角一个专属二维码——扫开是你的技能展示与说课视频。<br>不替你美化，只把<b>有凭证</b>的东西摆清楚；顺带告诉你还缺哪张证。带 <span class="rq">※</span> 的必填。</p>
+    <p class="betaline"><span class="beta-tag">内测版</span><span class="beta-ver" id="betaVer"></span><button type="button" class="beta-btn" id="introOpen">怎么用</button><button type="button" class="beta-btn" id="whyOpen">为什么做这个</button><button type="button" class="beta-btn" id="fbOpen">反馈问题</button></p>
   </div>
 
   <div class="discbar" id="discbar" role="group" aria-label="选择专业方向"></div>
@@ -1676,7 +1685,8 @@ td .sub{display:block;font-size:12px;color:var(--mute);line-height:1.5;margin-to
         </div>
       </div>
 
-      <p class="foot">招聘规则有地域性与时效性，<b>最终以当年当地的公告原文为准</b>。填的内容只存本机浏览器，不上传。</p>
+      <p class="foot">招聘规则有地域性与时效性，<b>最终以当年当地的公告原文为准</b>。填的内容只存本机浏览器，不上传。<br>
+      <span class="foot-creed">用心做好一份关于你的简历。</span></p>
     </div>
 
     <aside class="side">
@@ -2716,6 +2726,7 @@ document.addEventListener("click",function(e){
   var b=e.target.closest("button"); if(!b) return;
   if(b.id==="fbOpen"){ openFeedback(null,"general"); return; }
   if(b.id==="introOpen"){ openIntro(); return; }
+  if(b.id==="whyOpen"){ openWhy(); return; }
   if(b.getAttribute("data-d")){ S.discipline=b.getAttribute("data-d"); renderAll(); return; }
   var add=b.getAttribute("data-add");
   if(add && BLANK[add]){ seedRow(add); S.isExample=false; renderAll(); return; }
@@ -3599,7 +3610,7 @@ function doExport(btn,filename,data){
    数据只存本机，我们看不到任何人怎么用——出错只能靠使用者告诉我们。
    所以反馈要做到点一下就带上该带的：版本、设备、那条结论、公告原文。
    不带姓名、电话、学校、照片；附带内容摊开给使用者看、能删改，由他自己发出去。 */
-var APP_VER="1.0", APP_BUILD="09-15 17:55";     // APP_BUILD 由 build_standalone.py 打包时写入
+var APP_VER="1.0", APP_BUILD="09-15 18:05";     // APP_BUILD 由 build_standalone.py 打包时写入
 var FEEDBACK_URL="";                     // 建好问卷后填链接；空着就只走「复制 → 发微信」
 var FB_TYPES=[["judge","判定不对"],["export","简历 / 存图有问题"],
               ["stuck","看不懂、卡住了"],["idea","其他建议"]];
@@ -3698,6 +3709,23 @@ function openIntro(){
       '<li>判错了、卡住了、哪句话看不懂：点页面顶部的「反馈问题」。</li>'+
     '</ul>',
     '<button type="button" class="btn" data-dlg="close">知道了，开始</button>');
+}
+
+/* 初心。用户自己的一句话，别替他改写成宣传腔。 */
+function openWhy(){
+  openDlg("为什么做这个",
+    '<p class="why-lead">用心做好一份关于你的简历。</p>'+
+    '<p>起初只是因为<b>我自己和身边的人都急着要这么一个东西</b>：投出去的简历问的都是 GPA 和实习，'+
+      '而我们真正拿得出手的——证书、等级、名次、能带的项目、能拿出来的作品——没有地方写。</p>'+
+    '<p>所以这张表反过来做：先把你手上<b>有凭证</b>的东西一条条摆清楚，再按对方初审的读法排好。'+
+      '我希望你看完自己那一页的时候，想的是<b>「原来我的核心竞争力是这个」</b>，'+
+      '或者<b>「简历还能这样写」</b>。</p>'+
+    '<p>它不替你美化。没拿到的证、开不出证明的经历，会写清卡在哪一步，而不是含糊过去——'+
+      '含糊过去的东西，资格复审那一关也留不住。</p>'+
+    '<p class="why-who">做的人：一个 2027 届运动训练专业的学生，和你一样在准备求职。'+
+      '内测中：体育类的判据经过一次完整的真实求职验证，音乐、舞蹈、美术的还只是资料调研——'+
+      '哪句说错了，点「反馈问题」告诉我。</p>',
+    '<button type="button" class="btn" data-dlg="close">开始填</button>');
 }
 
 function openFeedback(type,kind,arg){
