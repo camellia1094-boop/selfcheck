@@ -1809,7 +1809,8 @@ var EXAMPLE = {
       kpis:[{v:"30+",l:"暑期带训学员"},{v:"4 项",l:"可任教运动项目"},{v:"12/96",l:"专业排名"},{v:"1 篇",l:"会议论文录用"}],
       tools:"剪映（视频剪辑）、PowerPoint / Excel / Word", showcase:"https://example.com/li-xiang", accent:"#1B4D6B"},
   edu:{school:"某某体育学院",major:"体育教育",code:"B040201",normal:"是",
-       level:"本科",degree:"预计取得（应届）",party:"共青团员",
+       level:"本科",degree:"预计取得（应届）",degreeName:"教育学学士",degreeDate:"2027.06",
+       specialty:"篮球专项",party:"共青团员",
        gradYear:"2027",rank:"12/96",birthYear:"2005",logo:"",
        tier:"省属本科院校",span:"2023.09–2027.06",gpa:"3.5",avg:"85.2",honors:"校级一等奖学金（2025.12）"},
   creds:[
@@ -1830,9 +1831,9 @@ var EXAMPLE = {
      wind:"",timing:"",proof:"有照片/复印件"}],
   exps:[
     {org:"某某中学",nature:"公办学校",desc:"市级体育特色学校",role:"体育教育实习教师",span:"2025.09–2025.12",
-     duty:"带初二两个班体育与健康课，组织年级篮球联赛",canProof:"能开"},
+     ongoing:"否",duty:"带初二两个班体育与健康课，组织年级篮球联赛",canProof:"能开"},
     {org:"某青少年篮球培训中心",nature:"商业培训机构",desc:"暑期青少年篮球训练营",role:"助理教练",span:"2024.07–2024.08",
-     duty:"暑期基础班 30 人，负责运球与传球分组训练",canProof:"不确定"}],
+     ongoing:"否",duty:"暑期基础班 30 人，负责运球与传球分组训练",canProof:"不确定"}],
   teachMore:"可协助组织课间操与校运会，有班主任助理经验",
   projects:[
     {name:"社区少儿周末篮球课",role:"发起人 / 主讲教练",scope:"8–12 岁社区儿童公益体育课",span:"2025.03–2025.06",
@@ -1856,6 +1857,10 @@ if(S.edu.birthYear==null) S.edu.birthYear="";
 if(S.edu.logo==null) S.edu.logo="";
 if(S.edu.logoR==null) S.edu.logoR=0;   // 校徽长宽比，简历里要按它算出确切宽高
 if(S.edu.degree==null) S.edu.degree="";
+if(S.edu.degreeName==null) S.edu.degreeName="";
+if(S.edu.degreeDate==null) S.edu.degreeDate="";
+if(S.edu.specialty==null) S.edu.specialty="";
+S.exps.forEach(function(e){ if(e.ongoing==null) e.ongoing="否"; });
 if(S.edu.party==null) S.edu.party="";
 if(S.me.photo==null) S.me.photo="";
 if(S.me.badges==null) S.me.badges="";
@@ -2376,6 +2381,9 @@ function renderForm(){
     '<div class="f3">'+field("专业代码"+RQ,"edu.code","如 B040201","mono","成绩单上或教务处能查到")+
       sel("是否师范类专业","edu.normal",["不确定","是","否"],"师范院校 ≠ 师范类专业，以教务处认定为准")+
       sel("学历层次"+RQ,"edu.level",["","本科","专科","硕士","博士"])+'</div>'+
+    '<div class="f3">'+field("学位名称","edu.degreeName","如 教育学学士","","公告常写「本科及以上并取得相应学位」，写清名称比只写「有」管用")+
+      field("预计授予时间","edu.degreeDate","如 2027.06","mono","还没拿到学位时填")+
+      field("专项 / 主项","edu.specialty","如 田径专项（100m / 200m）","","选填；写在简历教育背景那一行")+'</div>'+
     '<div class="f3">'+sel("学位"+RQ,"edu.degree",["","已取得","预计取得（应届）","无学位"],"应届生选「预计取得」")+
       sel("政治面貌"+RQ,"edu.party",["","中共党员","中共预备党员","共青团员","群众","其他"])+
       field("毕业年份"+RQ,"edu.gradYear","如 2027","mono")+'</div>'+
@@ -2383,7 +2391,7 @@ function renderForm(){
       field("专业排名","edu.rank","如 12/96","","选填，只用在简历上")+'</div>'+
     '<div class="f3">'+field("学校层次","edu.tier","如 教育部直属师范院校（211 / 双一流）","","选填，只用在简历上")+
       field("在校起止","edu.span","如 2023.09–2027.06","mono")+
-      field("GPA","edu.gpa","如 3.3","mono")+'</div>'+
+      field("GPA","edu.gpa","如 3.3","mono","有重修、成绩没定下来就留空——写一个还会变的数，不如不写")+'</div>'+
     '<div class="f2">'+field("均分","edu.avg","如 80.8","mono")+
       field("奖学金与荣誉","edu.honors","用顿号隔开，如 少数民族奖学金（2024.12）","","选填，只写拿到手的")+'</div>'+
     '<div class="logo-row">'+
@@ -2459,7 +2467,8 @@ function renderForm(){
       '<div class="fields">'+
       '<div class="f2">'+field("单位名称",p+"org","照合同或证明上的名称写")+
         sel("单位性质"+RQ,p+"nature",[""].concat(ORG_NATURES),D.probes.exp)+'</div>'+
-      field("单位简介",p+"desc","如 广东省知名短跑训练营","","选填；简历上代替「单位性质」显示，要属实")+
+      '<div class="f2">'+field("单位简介",p+"desc","如 广东省知名短跑训练营","","选填；简历上代替「单位性质」显示，要属实")+
+        sel("现在还在岗吗",p+"ongoing",["否","是"],"还没结束就选「是」——简历上会标出来，写成已结束的区间是不实的")+'</div>'+
       '<div class="f3">'+field("职位 / 身份"+RQ,p+"role","如 实习教师、助理教练")+
         field("起止"+RQ,p+"span","如 2025.09–2025.12")+
         sel("能开经历证明吗",p+"canProof",["不确定","能开","开不出来"],"开不出证明的经历，资格复审时不算数")+'</div>'+
@@ -2519,7 +2528,7 @@ function renderForm(){
       '<button class="del" data-del="works" data-i="'+i+'" type="button">删除</button></div>'+
       '<div class="fields">'+
       '<div class="f3">'+field("名称",p+"title","如 篮球教学示范视频")+
-        sel("形式",p+"kind",["视频","图像","音频","文档","链接"])+
+        sel("形式",p+"kind",["视频","图像","音频","文档","网页 / 程序","链接"])+
         sel("凭证"+RQ,p+"proof",P)+'</div>'+
       field("它证明了你什么能力",p+"proves","如 运球、传球、投篮的分解示范与纠错")+
       field("公开链接（选填）",p+"url","https://…　视频或作品放在哪","mono",
@@ -2646,7 +2655,9 @@ function renderReport(){
     missing.push({w:c.name,k:"证书",how:c.status==="已取得"?"确认原件在谁手里，需要补办的先问周期":"按 "+(c.note||"流程")+" 推进"}); });
   S.achs.forEach(function(a){ if(a.title&&a.proof==="暂无凭证")
     missing.push({w:a.title,k:"奖项",how:"找主办方要成绩册、证书或颁奖影像"}); });
-  S.exps.forEach(function(e){ if(e.org&&e.canProof!=="能开")
+  S.exps.forEach(function(e){ if(e.org&&e.ongoing==="是")
+    missing.push({w:e.org,k:"经历",how:"还在岗，证明要等结束后才开得出来——结束那天就去取，别拖到毕业前再回去要"}); });
+  S.exps.forEach(function(e){ if(e.org&&e.ongoing!=="是"&&e.canProof!=="能开")
     missing.push({w:e.org,k:"经历",how:e.canProof==="开不出来"?"开不出来就不要写成可核验经历":"趁还联系得上，现在就去要经历证明"}); });
   S.papers.forEach(function(r){ if(r.title&&r.proof==="暂无凭证")
     missing.push({w:r.title,k:"论文",how:"找会议或期刊要录用通知、收录页或会议议程"}); });
@@ -3063,7 +3074,9 @@ function resumeSections(){
   out.skills=groups;
 
   out.exps=S.exps.filter(function(e){ return e.org&&String(e.role).indexOf("运动员")<0; }).map(function(e){
-    return {k:e.org, t:e.role, v:trim(e.desc)||e.nature, r:e.span, b:e.duty};
+    // 还没干完的经历必须标出来：写成已结束的区间会被读成已完成，而这时证明也开不出来
+    return {k:e.org, t:e.role, v:trim(e.desc)||e.nature,
+            r:e.span+(e.ongoing==="是"?"（在岗）":""), b:e.duty};
   });
   out.teachMore=trim(S.teachMore);
 
@@ -3345,8 +3358,15 @@ function buildResumeDoc(){
       return '<dt>'+esc(g.cat)+'</dt><dd>'+esc(g.items.join(" · "))+(g.teach.length?' <em>— '+esc(g.teach.join("；"))+'</em>':"")+'</dd>';
     }).join("")+'</dl>' : "";
   var expBody=R.exps.map(item).join("")+(R.teachMore?'<div class="ln"><b>教学补充</b>'+esc(R.teachMore)+'</div>':"");
+  var degTxt=(function(){
+    var nm=trim(e.degreeName); if(!nm) return "";
+    if(e.degree==="预计取得（应届）")
+      return nm+(trim(e.degreeDate)?"（预计 "+trim(e.degreeDate)+" 授予）":"（预计授予）");
+    return e.degree==="已取得" ? nm : "";
+  })();
   var eduBody=e.school ? item({k:e.school, v:[e.major?e.major+(/专业$/.test(e.major)?"":"专业"):"", e.level, trim(e.tier)].filter(Boolean).join(" · "),
-      r:trim(e.span), b:[e.gpa?"GPA "+e.gpa:"", e.avg?"均分 "+e.avg:"", e.rank?"专业排名 "+e.rank:"", trim(e.honors)].filter(Boolean).join("　｜　")}) : "";
+      r:trim(e.span), b:[degTxt, trim(e.specialty), e.gpa?"GPA "+e.gpa:"", e.avg?"均分 "+e.avg:"",
+        e.rank?"专业排名 "+e.rank:"", trim(e.honors)].filter(Boolean).join("　｜　")}) : "";
   var certBody=(R.certs.length?'<div class="ln"><b>证书</b>'+esc(R.certs.join(" · "))+'</div>':"")+
       (trim(m.tools)?'<div class="ln"><b>技能</b>'+esc(trim(m.tools))+'</div>':"")+
       (!trim(m.showcase)&&R.works.length?'<div class="ln"><b>作品</b>'+esc(R.works.join(" · "))+'</div>':"");
@@ -3721,7 +3741,7 @@ function doExport(btn,filename,data){
    数据只存本机，我们看不到任何人怎么用——出错只能靠使用者告诉我们。
    所以反馈要做到点一下就带上该带的：版本、设备、那条结论、公告原文。
    不带姓名、电话、学校、照片；附带内容摊开给使用者看、能删改，由他自己发出去。 */
-var APP_VER="1.0", APP_BUILD="09-15 20:40";     // APP_BUILD 由 build_standalone.py 打包时写入
+var APP_VER="1.0", APP_BUILD="09-16 15:26";     // APP_BUILD 由 build_standalone.py 打包时写入
 var FEEDBACK_URL="";                     // 建好问卷后填链接；空着就只走「复制 → 发微信」
 var FB_TYPES=[["judge","判定不对"],["export","简历 / 存图有问题"],
               ["stuck","看不懂、卡住了"],["idea","其他建议"]];
