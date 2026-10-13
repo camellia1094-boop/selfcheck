@@ -29,6 +29,7 @@
       <button class="tab is-active" data-tab="dashboard" type="button">总览与排行</button>
       <button class="tab" data-tab="schedule" type="button">赛程管理</button>
       <button class="tab" data-tab="scoring" type="button">比赛数据</button>
+      <button class="tab" data-tab="import" type="button">导入说明</button>
       <button class="tab" data-tab="roster" type="button">参赛名单</button>
     </nav>
 
@@ -180,6 +181,43 @@
             <div><span class="mini-label">当前比赛</span><h3>球员得分明细</h3></div>
           </div>
           <div class="table-wrap"><table id="entries-table"></table></div>
+        </article>
+      </section>
+
+      <section class="view" id="view-import" data-view="import">
+        <div class="page-heading import-heading">
+          <div>
+            <p class="eyebrow">技术台助手</p>
+            <h2>拍照识别与批量导入</h2>
+            <p>管理端支持照片生成识别草稿和Excel批量导入；所有结果均须人工核对后才写入正式数据。</p>
+          </div>
+          <span class="import-runtime is-offline" id="import-runtime-note">公网展示页 · 仅查看说明</span>
+        </div>
+
+        <div class="import-grid">
+          <article class="card import-card">
+            <div class="card-title-row"><div><span class="mini-label">方式一</span><h3>拍照识别比赛记录表</h3></div><span class="import-icon" aria-hidden="true">▣</span></div>
+            <p class="import-copy">管理端支持一次选择多张照片，识别队伍、日期、比分和得分号码，并按参赛名单匹配姓名；低置信度内容会标黄等待人工确认。</p>
+            <div class="public-import-note">照片识别和数据写入仅在授权管理端开放，公开网页不接收照片，也不会保存上传内容。</div>
+          </article>
+          <article class="card import-card">
+            <div class="card-title-row"><div><span class="mini-label">方式二</span><h3>Excel / CSV 批量导入</h3></div><span class="import-icon" aria-hidden="true">⇩</span></div>
+            <p class="import-copy">管理端可下载标准模板，也可导入本系统导出的Excel文件；系统先预览、校验比分与名单，再由老师确认导入。</p>
+            <div class="public-import-note">重复比赛默认跳过，不会静默覆盖已有成绩。</div>
+          </article>
+        </div>
+
+        <article class="card photo-spec-card">
+          <div class="card-title-row"><div><span class="mini-label">拍摄规范</span><h3>这样拍，识别最稳</h3></div><span class="spec-badge">一张照片一张表</span></div>
+          <div class="spec-grid">
+            <div class="spec-item"><strong>画面与角度</strong><span>竖屏拍摄，四角和整张表完整入镜；手机与纸面尽量平行，倾斜不超过10°，不要裁掉表头、累计分或最终比分。</span></div>
+            <div class="spec-item"><strong>清晰度</strong><span>推荐长边2500像素以上，最低1600像素；对焦在表格中部，放大后球员号码、斜杠和罚球黑点仍应清楚。</span></div>
+            <div class="spec-item"><strong>格式与大小</strong><span>支持 JPG/JPEG、PNG、HEIC/HEIF；建议每张2–8MB，系统上限12MB。不要上传微信截图、拼图或压缩严重的缩略图。</span></div>
+            <div class="spec-item"><strong>光线与背景</strong><span>均匀亮光，避免反光、阴影、手指和其他纸张遮挡；记录表尽量铺平，背景与纸张颜色有明显区分。</span></div>
+            <div class="spec-item"><strong>填写要求</strong><span>用黑色或深蓝色笔；得分号码写在对应累计分外侧；斜杠完整穿过得分数字，罚球黑点涂实，修改处注明并避免多次覆盖。</span></div>
+            <div class="spec-item"><strong>文件命名</strong><span>建议“日期_组别_队A-队B_序号.jpg”，例如“20261013_A组_2402-2404_01.jpg”，便于批量核对和追溯原图。</span></div>
+          </div>
+          <div class="recognition-note"><strong>识别边界：</strong>手写体、斜杠、黑点和涂改存在误识别可能。系统优先按球员号码和参赛名单关键词匹配，但最终比分、三分进球和罚球必须由老师在草稿中复核后再导入。</div>
         </article>
       </section>
 
