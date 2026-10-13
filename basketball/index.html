@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>深圳市第二实验学校｜校长杯三人篮球统计系统</title>
+  <link rel="icon" href="./favicon.svg">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <div class="brand-mark"><img src="./assets/szdesy-crest.png" alt="深圳市第二实验学校校徽"></div>
+        <div>
+          <p class="eyebrow">深圳市第二实验学校</p>
+          <h1>校长杯三人篮球统计系统</h1>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span class="save-state"><span class="save-dot"></span><span id="save-status">正在读取公开数据</span></span>
+        <button class="button button-refresh" id="refresh-button" type="button" title="读取网上最新数据"><span aria-hidden="true">↻</span> 刷新数据</button>
+        <button class="button button-primary" id="export-button" type="button">一键导出Excel</button>
+      </div>
+    </header>
+
+    <nav class="tabbar" aria-label="主要功能">
+      <button class="tab is-active" data-tab="dashboard" type="button">总览与排行</button>
+      <button class="tab" data-tab="schedule" type="button">赛程管理</button>
+      <button class="tab" data-tab="scoring" type="button">比赛数据</button>
+      <button class="tab" data-tab="roster" type="button">参赛名单</button>
+    </nav>
+
+    <main>
+      <section class="view is-active" id="view-dashboard" data-view="dashboard">
+        <div class="hero-panel">
+          <img class="hero-emblem" src="./assets/szdesy-emblem.png" alt="" aria-hidden="true">
+          <div>
+            <p class="eyebrow">SZDESY · 1989</p>
+            <h2>校长杯三人篮球公开数据</h2>
+            <p>普通进球与罚球各计1分；三分进球每球计2分。男子、女子分开排名，年级混排。</p>
+            <div class="school-spirit"><span>敢为人先</span><i></i><span>善谋实干</span><i></i><span>勇于超越</span></div>
+          </div>
+          <button class="button button-light" type="button" data-go="scoring">查看比赛数据</button>
+        </div>
+
+        <div class="metrics" id="metric-cards"></div>
+
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">个人荣誉</p>
+            <h2>实时排行榜</h2>
+          </div>
+          <div class="segmented" role="group" aria-label="性别筛选">
+            <button class="segment is-active" data-ranking-sex="男" type="button">男子</button>
+            <button class="segment" data-ranking-sex="女" type="button">女子</button>
+          </div>
+        </div>
+
+        <div class="leader-grid">
+          <article class="card leaderboard-card">
+            <div class="card-title-row">
+              <div>
+                <span class="mini-label">总得分</span>
+                <h3>得分王</h3>
+              </div>
+              <span class="trophy" aria-hidden="true">🏆</span>
+            </div>
+            <div id="points-leaderboard"></div>
+          </article>
+          <article class="card leaderboard-card">
+            <div class="card-title-row">
+              <div>
+                <span class="mini-label">三分进球数</span>
+                <h3>三分王</h3>
+              </div>
+              <span class="trophy" aria-hidden="true">◎</span>
+            </div>
+            <div id="three-leaderboard"></div>
+          </article>
+        </div>
+
+        <article class="card recent-card">
+          <div class="card-title-row">
+            <div>
+              <span class="mini-label">数据质量</span>
+              <h3>最近比赛与比分核对</h3>
+            </div>
+            <button class="text-button" type="button" data-go="schedule">查看全部赛程 →</button>
+          </div>
+          <div class="table-wrap"><table id="recent-games-table"></table></div>
+        </article>
+      </section>
+
+      <section class="view" id="view-schedule" data-view="schedule">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">比赛安排</p>
+            <h2>赛程管理</h2>
+            <p>展示已发布的赛程、最终比分和个人数据。</p>
+          </div>
+          <button class="button button-primary admin-only" id="new-game-button" type="button">＋ 添加比赛</button>
+        </div>
+
+        <form class="editor-card is-hidden admin-only" id="game-form">
+          <div class="editor-heading">
+            <h3 id="game-form-title">添加比赛</h3>
+            <button class="icon-button" type="button" data-cancel-form="game" aria-label="关闭">×</button>
+          </div>
+          <input type="hidden" name="editId">
+          <div class="form-grid form-grid-4">
+            <label>日期<input name="date" type="date" required></label>
+            <label>时间<input name="time" type="time" required></label>
+            <label>性别<select name="sex" required><option value="男">男</option><option value="女">女</option></select></label>
+            <label>年级<select name="grade" required><option>高一</option><option>高二</option><option>高三</option></select></label>
+            <label>组别<input name="group" placeholder="如 A组"></label>
+            <label>比赛序号<input name="seq" type="number" min="1" step="1"></label>
+            <label>场地<input name="court" placeholder="如 1"></label>
+            <label>A队<input name="teamA" list="team-options" required></label>
+            <label>B队<input name="teamB" list="team-options" required></label>
+            <label>A队最终得分<input name="scoreA" type="number" min="0" step="1" placeholder="可赛后填写"></label>
+            <label>B队最终得分<input name="scoreB" type="number" min="0" step="1" placeholder="可赛后填写"></label>
+            <label class="span-2">备注<input name="note" placeholder="可选"></label>
+          </div>
+          <div class="form-actions">
+            <button class="button button-ghost" type="button" data-cancel-form="game">取消</button>
+            <button class="button button-primary" type="submit">保存比赛</button>
+          </div>
+        </form>
+
+        <datalist id="team-options"></datalist>
+        <article class="card">
+          <div class="toolbar">
+            <input class="search-input" id="game-search" type="search" placeholder="搜索队伍、组别或日期">
+            <select id="game-sex-filter" aria-label="筛选性别"><option value="">全部性别</option><option>男</option><option>女</option></select>
+          </div>
+          <div class="table-wrap"><table id="games-table"></table></div>
+        </article>
+      </section>
+
+      <section class="view" id="view-scoring" data-view="scoring">
+        <div class="page-heading scoring-heading">
+          <div>
+            <p class="eyebrow">技术台数据</p>
+            <h2>比赛数据录入</h2>
+            <p>公开展示各场球员进球数据，并自动核对最终比分。</p>
+          </div>
+          <label class="match-picker">当前比赛<select id="score-game-select"></select></label>
+        </div>
+
+        <div id="score-context"></div>
+
+        <form class="editor-card admin-only" id="entry-form">
+          <div class="editor-heading">
+            <div>
+              <h3 id="entry-form-title">添加球员数据</h3>
+              <p>三分进球每球按2分计入总得分。</p>
+            </div>
+            <button class="text-button is-hidden" id="cancel-entry-edit" type="button">取消编辑</button>
+          </div>
+          <input type="hidden" name="editId">
+          <div class="form-grid score-form-grid">
+            <label>队伍<select name="team" id="entry-team" required></select></label>
+            <label>球员<select name="playerId" id="entry-player" required></select></label>
+            <label>球衣号码<input name="number" type="number" min="0" max="99" required></label>
+            <label>普通进球数（1分）<input name="field" type="number" min="0" value="0" required></label>
+            <label>罚球命中数（1分）<input name="free" type="number" min="0" value="0" required></label>
+            <label>三分进球数（每球2分）<input name="three" type="number" min="0" value="0" required></label>
+            <label class="span-2">备注<input name="note" placeholder="如：第4分为罚球"></label>
+            <div class="live-score"><span>本行得分</span><strong id="entry-live-points">0</strong></div>
+          </div>
+          <div class="form-actions">
+            <button class="button button-primary" type="submit">保存球员数据</button>
+          </div>
+        </form>
+
+        <article class="card">
+          <div class="card-title-row">
+            <div><span class="mini-label">当前比赛</span><h3>球员得分明细</h3></div>
+          </div>
+          <div class="table-wrap"><table id="entries-table"></table></div>
+        </article>
+      </section>
+
+      <section class="view" id="view-roster" data-view="roster">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">基础资料</p>
+            <h2>参赛名单</h2>
+            <p>名单来自报名表，男子、女子分开统计，年级混排。</p>
+          </div>
+          <button class="button button-primary admin-only" id="new-player-button" type="button">＋ 添加球员</button>
+        </div>
+
+        <form class="editor-card is-hidden admin-only" id="player-form">
+          <div class="editor-heading">
+            <h3 id="player-form-title">添加球员</h3>
+            <button class="icon-button" type="button" data-cancel-form="player" aria-label="关闭">×</button>
+          </div>
+          <input type="hidden" name="editId">
+          <div class="form-grid form-grid-4">
+            <label>性别<select name="sex" required><option value="男">男</option><option value="女">女</option></select></label>
+            <label>年级<select name="grade" required><option>高一</option><option>高二</option><option>高三</option></select></label>
+            <label>队伍/班级<input name="team" required></label>
+            <label>球员姓名<input name="name" required></label>
+            <label class="span-2">名单状态<input name="status" value="正常"></label>
+            <label class="span-2">来源<input name="source" value="手动添加"></label>
+          </div>
+          <div class="form-actions">
+            <button class="button button-ghost" type="button" data-cancel-form="player">取消</button>
+            <button class="button button-primary" type="submit">保存球员</button>
+          </div>
+        </form>
+
+        <article class="card">
+          <div class="toolbar">
+            <input class="search-input" id="player-search" type="search" placeholder="搜索姓名或队伍">
+            <select id="player-sex-filter" aria-label="筛选性别"><option value="">全部性别</option><option>男</option><option>女</option></select>
+            <select id="player-grade-filter" aria-label="筛选年级"><option value="">全部年级</option><option>高一</option><option>高二</option><option>高三</option></select>
+          </div>
+          <div class="table-wrap"><table id="players-table"></table></div>
+        </article>
+
+        <div class="danger-zone admin-only">
+          <div><strong>恢复初始示例数据</strong><span>会覆盖当前浏览器中保存的修改，请先备份。</span></div>
+          <button class="button button-danger" id="reset-button" type="button">恢复初始数据</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js"></script>
+</body>
+</html>
